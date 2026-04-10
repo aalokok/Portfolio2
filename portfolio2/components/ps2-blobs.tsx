@@ -162,7 +162,7 @@ export function Ps2Blobs({
   morph = 1,
   glow = 1,
   trailFade = 0.99,
-  grain = 0.15,
+  grain = 0.1
 }: Ps2BlobsProps) {
   const hostRef = useRef<HTMLDivElement>(null);
 
