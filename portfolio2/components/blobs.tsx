@@ -9,7 +9,7 @@ import {
   FRAG_SRC,
   GLOW_COLORS,
   VERT_SRC,
-} from "@/lib/ps2-blobs-shader";
+} from "@/lib/blobs-shader";
 
 export type Ps2BlobsProps = {
   className?: string;
@@ -161,7 +161,7 @@ export function Blobs({
   className,
   morph = 1,
   glow = 1,
-  trailFade = 0.99,
+  trailFade = 0.8,
   grain = 0.1
 }: Ps2BlobsProps) {
   const hostRef = useRef<HTMLDivElement>(null);

@@ -69,7 +69,7 @@ export const FRAG_SRC = `
     // Lower bound must be > 0 so alpha=0 in empty space — avoids eating trails each frame
     float halo = smoothstep(0.02, iso - 0.32, field) * (1.0 - rim - blob);
 
-    vec3 white    = vec3(1.0);
+    vec3 white    = vec3(1.00, 1.00, 1.00);
     vec3 deepBlue = vec3(0.03, 0.05, 0.25);
 
     vec3 col = white * blob
