@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Ps2Blobs } from "@/components/ps2-blobs";
+import { Blobs } from "@/components/blobs";
 import { QuadrantShell } from "@/components/layout/quadrant-shell";
 
 export default function Home() {
@@ -32,7 +32,7 @@ export default function Home() {
         </div>
       }
       topRight={
-        <Ps2Blobs className="h-full w-full" />
+        <Blobs className="h-full w-full" />
       }
       bottomLeft={
         <div className="h-full rounded-md bg-foreground/10 p-[12px]">

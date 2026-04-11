@@ -20,7 +20,7 @@ export type Ps2BlobsProps = {
 };
 
 // ── Physics ────────────────────────────────────────────────────────────────────
-
+console.log("works")
 const N = 7;
 
 interface Blob {
@@ -157,7 +157,7 @@ function deleteFBOs(gl: WebGLRenderingContext, fbos: FBO[]) {
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export function Ps2Blobs({
+export function Blobs({
   className,
   morph = 1,
   glow = 1,
@@ -400,7 +400,7 @@ export function Ps2Blobs({
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
+;
   return (
     <div
       ref={hostRef}
