@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
+import { useCreationsView } from "./view-context";
 
 type ProjectImage = {
   url: string;
@@ -21,32 +21,35 @@ function isGif(img: ProjectImage) {
   return img.mimeType === "image/gif" || img.url.toLowerCase().endsWith(".gif");
 }
 
-function MediaImage({
+function MediaImg({
   img,
   alt,
+  className,
   fill,
   width,
   height,
-  className,
   sizes,
 }: {
   img: ProjectImage;
   alt: string;
+  className?: string;
   fill?: boolean;
   width?: number;
   height?: number;
-  className?: string;
   sizes?: string;
 }) {
   if (isGif(img)) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        key={img.url}
         src={img.url}
         alt={alt}
         className={className}
-        style={fill ? { position: "absolute", inset: 0, width: "100%", height: "100%" } : undefined}
+        style={
+          fill
+            ? { position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain" }
+            : undefined
+        }
       />
     );
   }
@@ -54,7 +57,6 @@ function MediaImage({
   if (fill) {
     return (
       <Image
-        key={img.url}
         src={img.url}
         alt={alt}
         fill
@@ -68,18 +70,62 @@ function MediaImage({
 
   return (
     <Image
-      key={img.url}
       src={img.url}
       alt={alt}
-      width={width}
-      height={height}
+      width={width ?? 400}
+      height={height ?? 300}
       className={className}
+      placeholder={img.lqip ? "blur" : "empty"}
+      blurDataURL={img.lqip ?? undefined}
     />
   );
 }
 
+function ScrollView({ images, title }: Props) {
+  return (
+    <div className="flex h-full flex-row gap-[10px] overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {images.map((img, i) => (
+        <div
+          key={img.url}
+          className="relative h-full flex-shrink-0 overflow-hidden rounded-sm bg-foreground/5"
+          style={{ aspectRatio: img.dimensions ? `${img.dimensions.width}/${img.dimensions.height}` : "4/3" }}
+        >
+          <MediaImg
+            img={img}
+            alt={img.alt ?? `${title} ${i + 1}`}
+            fill
+            className="object-contain"
+            sizes="80vw"
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function GridView({ images, title }: Props) {
+  return (
+    <div className="grid grid-cols-3 gap-[36px]">
+      {images.slice(0, 6).map((img, i) => (
+        <div key={img.url} className="relative aspect-square max-h-[200px] max-w-[200px] overflow-hidden rounded-sm bg-foreground/5">
+          <MediaImg
+            img={img}
+            alt={img.alt ?? `${title} ${i + 1}`}
+            fill
+            className="object-cover"
+            sizes="30vw"
+          />
+        </div>
+      ))}
+      {Array.from({ length: Math.max(0, 6 - images.length) }).map((_, i) => (
+        <div key={`empty-${i}`} className="aspect-square max-h-[200px] max-w-[200px] rounded-sm bg-foreground/5 opacity-40" />
+      ))}
+    </div>
+  );
+}
+
 export function ProjectImages({ images, title }: Props) {
-  const [active, setActive] = useState(0);
+  const { view } = useCreationsView();
 
   if (!images || images.length === 0) {
     return (
@@ -89,47 +135,7 @@ export function ProjectImages({ images, title }: Props) {
     );
   }
 
-  const current = images[active];
-
-  return (
-    <div className="flex h-full flex-col gap-[10px]">
-      <div className="relative min-h-0 flex-1 overflow-hidden rounded-sm bg-foreground/5">
-        <MediaImage
-          img={current}
-          alt={current.alt ?? title}
-          fill
-          className="object-contain"
-          sizes="(max-width: 768px) 100vw, 60vw"
-        />
-      </div>
-
-      {current.caption && (
-        <p className="text-[11px] leading-[16px] text-foreground/40 italic">
-          {current.caption}
-        </p>
-      )}
-
-      {images.length > 1 && (
-        <div className="flex flex-row gap-[6px]">
-          {images.map((img, i) => (
-            <button
-              key={img.url}
-              onClick={() => setActive(i)}
-              className={`h-[40px] w-[40px] flex-shrink-0 overflow-hidden rounded-sm border transition-colors ${
-                i === active ? "border-primary" : "border-transparent opacity-50 hover:opacity-80"
-              }`}
-            >
-              <MediaImage
-                img={img}
-                alt={img.alt ?? `${title} ${i + 1}`}
-                width={40}
-                height={40}
-                className="h-full w-full object-cover"
-              />
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+  return view === "scroll"
+    ? <ScrollView images={images} title={title} />
+    : <GridView images={images} title={title} />;
 }

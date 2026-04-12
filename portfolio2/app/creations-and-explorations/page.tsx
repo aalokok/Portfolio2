@@ -4,6 +4,7 @@ import { SiteShell } from "@/components/layout/site-shell";
 import { ProjectImages } from "@/components/creations/project-images";
 import { ProjectDescription } from "@/components/creations/project-description";
 import { ProjectSpecs } from "@/components/creations/project-specs";
+import { ViewProvider } from "@/components/creations/view-context";
 
 type PageProps = {
   searchParams: Promise<{ project?: string }>;
@@ -21,6 +22,7 @@ export default async function CreationsAndExplorationsPage({ searchParams }: Pag
     : [null, undefined];
 
   return (
+    <ViewProvider>
     <SiteShell
       projectNavItems={projectNavItems ?? undefined}
       columnRatio={[4, 6]}
@@ -69,5 +71,6 @@ export default async function CreationsAndExplorationsPage({ searchParams }: Pag
         )
       }
     />
+    </ViewProvider>
   );
 }

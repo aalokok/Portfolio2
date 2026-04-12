@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { ViewToggle } from "@/components/creations/view-toggle";
 
 const links = [
   { href: "/", label: "Aalok Sud" },
@@ -31,7 +32,7 @@ function NavInner({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
   const isCreations = pathname === "/creations-and-explorations";
 
   return (
-    <nav className="flex flex-row gap-[24px] text-[15px] leading-[24px]">
+    <nav className="flex flex-row items-baseline gap-[24px] text-[15px] leading-[24px]">
       {links.map(({ href, label }) => {
         const active = pathname === href;
         const isName = href === "/";
@@ -107,6 +108,8 @@ function NavInner({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
           </div>
         );
       })}
+
+      {isCreations && <ViewToggle />}
     </nav>
   );
 }
