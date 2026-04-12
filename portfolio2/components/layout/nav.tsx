@@ -86,21 +86,29 @@ function NavInner({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
             )}
 
             {isName && isCreations && (
-              <div className="animate-fade-in absolute top-full left-0 flex flex-row gap-[14px] pt-[4px]">
-                {(projectNavItems ?? fallbackCreationsSubLinks.map((s) => ({ order: s.project, title: s.label }))).map(({ order, title }) => {
-                  const subActive = activeProject === order;
+              <div className="animate-fade-in absolute top-full left-0 flex flex-col gap-[4px] pt-[4px]">
+                {[0, 5].map((start) => {
+                  const items = (projectNavItems ?? fallbackCreationsSubLinks.map((s) => ({ order: s.project, title: s.label }))).slice(start, start + 5);
+                  if (items.length === 0) return null;
                   return (
-                    <Link
-                      key={order}
-                      href={`/creations-and-explorations?project=${order}`}
-                      className={`text-[12px] leading-[18px] transition-colors ${
-                        subActive
-                          ? "text-primary"
-                          : "text-foreground/50 hover:text-foreground/80"
-                      }`}
-                    >
-                      {title}
-                    </Link>
+                    <div key={start} className="flex flex-row gap-[14px]">
+                      {items.map(({ order, title }) => {
+                        const subActive = activeProject === order;
+                        return (
+                          <Link
+                            key={order}
+                            href={`/creations-and-explorations?project=${order}`}
+                            className={`text-[12px] leading-[18px] transition-colors ${
+                              subActive
+                                ? "text-primary"
+                                : "text-foreground/50 hover:text-foreground/80"
+                            }`}
+                          >
+                            {title}
+                          </Link>
+                        );
+                      })}
+                    </div>
                   );
                 })}
               </div>
@@ -109,15 +117,25 @@ function NavInner({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
         );
       })}
 
-      {isCreations && <ViewToggle />}
     </nav>
   );
 }
 
 export function Nav({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
   return (
-    <Suspense fallback={<nav className="flex flex-col gap-[24px] text-[20px] leading-[24px]" />}>
-      <NavInner projectNavItems={projectNavItems} />
-    </Suspense>
+    <div className="flex h-full flex-col justify-between">
+      <Suspense fallback={<nav className="flex flex-col gap-[24px] text-[20px] leading-[24px]" />}>
+        <NavInner projectNavItems={projectNavItems} />
+      </Suspense>
+      <Suspense>
+        <NavViewToggle />
+      </Suspense>
+    </div>
   );
+}
+
+function NavViewToggle() {
+  const pathname = usePathname();
+  if (pathname !== "/creations-and-explorations") return null;
+  return <ViewToggle />;
 }

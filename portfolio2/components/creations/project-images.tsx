@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Image from "next/image";
 import { useCreationsView } from "./view-context";
 
@@ -82,12 +83,26 @@ function MediaImg({
 }
 
 function ScrollView({ images, title }: Props) {
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      if (e.deltaY === 0) return;
+      e.preventDefault();
+      el.scrollLeft += e.deltaY;
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
   return (
-    <div className="flex h-full flex-row gap-[10px] overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div ref={scrollRef} className="flex h-full flex-row gap-[10px] overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {images.map((img, i) => (
         <div
           key={img.url}
-          className="relative h-full flex-shrink-0 overflow-hidden rounded-sm bg-foreground/5"
+          className="relative h-full flex-shrink-0 overflow-hidden bg-foreground/5 grayscale transition-[filter] duration-300 hover:grayscale-0"
           style={{ aspectRatio: img.dimensions ? `${img.dimensions.width}/${img.dimensions.height}` : "4/3" }}
         >
           <MediaImg
@@ -105,9 +120,9 @@ function ScrollView({ images, title }: Props) {
 
 function GridView({ images, title }: Props) {
   return (
-    <div className="grid grid-cols-3 gap-[36px]">
+    <div className="grid grid-cols-3 grid-rows-2 gap-x-[18px] gap-y-[36px]">
       {images.slice(0, 6).map((img, i) => (
-        <div key={img.url} className="relative aspect-square max-h-[200px] max-w-[200px] overflow-hidden rounded-sm bg-foreground/5">
+        <div key={img.url} className="relative aspect-square max-h-[200px] max-w-[200px] overflow-hidden bg-foreground/5 grayscale transition-[filter] duration-300 hover:grayscale-0">
           <MediaImg
             img={img}
             alt={img.alt ?? `${title} ${i + 1}`}
@@ -118,7 +133,7 @@ function GridView({ images, title }: Props) {
         </div>
       ))}
       {Array.from({ length: Math.max(0, 6 - images.length) }).map((_, i) => (
-        <div key={`empty-${i}`} className="aspect-square max-h-[200px] max-w-[200px] rounded-sm bg-foreground/5 opacity-40" />
+        <div key={`empty-${i}`} className="aspect-square max-h-[200px] max-w-[200px]  bg-foreground/5 opacity-40" />
       ))}
     </div>
   );
