@@ -12,7 +12,8 @@
 
 # testing
 /coverage
-
+/pics
+    
 # next.js
 /.next/
 /out/

@@ -1,46 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState } from "react";
+import { sendEmail, type SendEmailState } from "@/app/actions/send-email";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-type Status = "idle" | "sending" | "sent" | "error";
+const initialState: SendEmailState = { status: "idle" };
 
 export function ReachOutForm() {
-  const [status, setStatus] = useState<Status>("idle");
+  const [state, action, isPending] = useActionState(sendEmail, initialState);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setStatus("sending");
-    await new Promise((r) => setTimeout(r, 900));
-    setStatus("sent");
-  }
-
-  if (status === "sent") {
+  if (state.status === "sent") {
     return (
       <div className="flex h-full flex-col justify-center gap-[8px]">
         <p className="text-[20px] font-medium leading-[28px]">Message sent.</p>
         <p className="text-[13px] leading-[20px] text-foreground/60">
           Thanks for reaching out — I&apos;ll get back to you soon.
         </p>
-        <button
-          onClick={() => setStatus("idle")}
-          className="mt-[4px] w-fit text-[12px] text-primary underline-offset-2 hover:underline"
-        >
-          Send another
-        </button>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex h-full flex-col gap-[20px]">
+    <form action={action} className="flex h-full flex-col gap-[20px]">
       <div className="space-y-[4px]">
-        <h1 className="text-[20px] font-medium leading-[28px]">Reach Out</h1>
+        <h1 className="text-[18px] font-inter-sans italic leading-[28px]">Lets Talk</h1>
         <p className="text-[13px] leading-[20px] text-foreground/60">
-          Got a project, collaboration, or idea? Drop me a message.
+          Got a project, collaboration, or idea? Drop me a message.{" "}
+          <a
+            href="https://calendly.com/alksud/30min"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline-offset-2 hover:underline"
+          >
+            Or book a 30-min meeting.
+          </a>
         </p>
       </div>
 
@@ -80,9 +76,13 @@ export function ReachOutForm() {
         </div>
       </div>
 
+      {state.status === "error" && (
+        <p className="text-[12px] text-secondary-1">{state.message}</p>
+      )}
+
       <div>
-        <Button type="submit" disabled={status === "sending"} size="sm">
-          {status === "sending" ? "Sending…" : "Send message"}
+        <Button type="submit" disabled={isPending} size="sm">
+          {isPending ? "Sending…" : "Send message"}
         </Button>
       </div>
     </form>

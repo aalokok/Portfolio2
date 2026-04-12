@@ -15,11 +15,20 @@ const homeSubLinks = [
   { section: "experience", label: "Experience" },
 ];
 
-function NavInner() {
+export type ProjectNavItem = { order: number; title: string };
+
+const fallbackCreationsSubLinks = Array.from({ length: 10 }, (_, i) => ({
+  project: i + 1,
+  label: String(i + 1).padStart(2, "0"),
+}));
+
+function NavInner({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activeSection = searchParams.get("section") ?? "biography";
+  const activeProject = Number(searchParams.get("project") ?? "1");
   const isHome = pathname === "/";
+  const isCreations = pathname === "/creations-and-explorations";
 
   return (
     <nav className="flex flex-row gap-[24px] text-[15px] leading-[24px]">
@@ -74,6 +83,27 @@ function NavInner() {
                 })}
               </div>
             )}
+
+            {isName && isCreations && (
+              <div className="animate-fade-in absolute top-full left-0 flex flex-row gap-[14px] pt-[4px]">
+                {(projectNavItems ?? fallbackCreationsSubLinks.map((s) => ({ order: s.project, title: s.label }))).map(({ order, title }) => {
+                  const subActive = activeProject === order;
+                  return (
+                    <Link
+                      key={order}
+                      href={`/creations-and-explorations?project=${order}`}
+                      className={`text-[12px] leading-[18px] transition-colors ${
+                        subActive
+                          ? "text-primary"
+                          : "text-foreground/50 hover:text-foreground/80"
+                      }`}
+                    >
+                      {title}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </div>
         );
       })}
@@ -81,10 +111,10 @@ function NavInner() {
   );
 }
 
-export function Nav() {
+export function Nav({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
   return (
     <Suspense fallback={<nav className="flex flex-col gap-[24px] text-[20px] leading-[24px]" />}>
-      <NavInner />
+      <NavInner projectNavItems={projectNavItems} />
     </Suspense>
   );
 }

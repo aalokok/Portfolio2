@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Nav } from "./nav";
+import { Nav, type ProjectNavItem } from "./nav";
 import { QuadrantShell } from "./quadrant-shell";
 
 type SiteShellBase = {
@@ -10,6 +10,7 @@ type SiteShellBase = {
   leftRatio?: [number, number];
   rightRatio?: [number, number];
   columnRatio?: [number, number];
+  projectNavItems?: ProjectNavItem[];
 };
 
 type SiteShellSplit = SiteShellBase & {
@@ -44,6 +45,7 @@ export function SiteShell({
   leftRatio,
   rightRatio,
   columnRatio,
+  projectNavItems,
 }: SiteShellProps) {
   if (right !== undefined) {
     return (
@@ -55,7 +57,7 @@ export function SiteShell({
         >
           <section className={baseSection} style={{ flex: leftRatio?.[0] ?? 1 }}>
             <div className={`${innerScroll} ${topLeftClassName ?? ""}`}>
-              <Nav />
+              <Nav projectNavItems={projectNavItems} />
             </div>
           </section>
           <section className={baseSection} style={{ flex: leftRatio?.[1] ?? 1 }}>
@@ -82,7 +84,7 @@ export function SiteShell({
 
   return (
     <QuadrantShell
-      topLeft={<Nav />}
+      topLeft={<Nav projectNavItems={projectNavItems} />}
       topRight={topRight}
       bottomLeft={bottomLeft}
       bottomRight={bottomRight}
