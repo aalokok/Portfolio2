@@ -10,8 +10,18 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Portfolio",
-  description: "My personal portfolio website built with Next.js and Tailwind CSS.",
+  title: "Aalok Sud",
+  description: "Designer and Creative Technologist",
+  icons: {
+    icon: "/favicon.ico",
+  },
+  openGraph: {
+    title: "Aalok Sud",
+    description: "Designer and Creative Technologist",
+    images: [
+      { url: "/favicon.ico" },
+    ],
+  },
 };
 
 export default function RootLayout({
