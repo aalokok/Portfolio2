@@ -17,6 +17,8 @@ export const allProjectsQuery = defineQuery(`
     tags,
     link,
     linkLabel,
+    liveLink,
+    collaborators,
     "images": images[] {
       alt,
       caption,
@@ -40,6 +42,8 @@ export const projectByOrderQuery = defineQuery(`
     tags,
     link,
     linkLabel,
+    liveLink,
+    collaborators,
     "images": images[] {
       alt,
       caption,

@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { useCreationsView } from "./view-context";
 
-type ProjectImage = {
+type ProjectMedia = {
   url: string;
   alt?: string | null;
   caption?: string | null;
@@ -14,16 +14,69 @@ type ProjectImage = {
 };
 
 type Props = {
-  images: ProjectImage[];
+  images: ProjectMedia[];
   title: string;
 };
 
-function isGif(img: ProjectImage) {
-  return img.mimeType === "image/gif" || img.url.toLowerCase().endsWith(".gif");
+function isGif(item: ProjectMedia) {
+  return item.mimeType === "image/gif" || item.url.toLowerCase().endsWith(".gif");
 }
 
-function MediaImg({
-  img,
+function isVideo(item: ProjectMedia) {
+  return (
+    item.mimeType?.startsWith("video/") ||
+    /\.(mp4|webm|ogg|mov)$/i.test(item.url)
+  );
+}
+
+function LazyVideo({
+  src,
+  className,
+  fill,
+}: {
+  src: string;
+  className?: string;
+  fill?: boolean;
+}) {
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const [loaded, setLoaded] = React.useState(false);
+
+  React.useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !loaded) {
+          setLoaded(true);
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loaded]);
+
+  return (
+    <video
+      ref={videoRef}
+      src={loaded ? src : undefined}
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="none"
+      className={className}
+      style={
+        fill
+          ? { position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain" }
+          : undefined
+      }
+    />
+  );
+}
+
+function MediaItem({
+  item,
   alt,
   className,
   fill,
@@ -31,7 +84,7 @@ function MediaImg({
   height,
   sizes,
 }: {
-  img: ProjectImage;
+  item: ProjectMedia;
   alt: string;
   className?: string;
   fill?: boolean;
@@ -39,12 +92,17 @@ function MediaImg({
   height?: number;
   sizes?: string;
 }) {
-  if (isGif(img)) {
+  if (isVideo(item)) {
+    return <LazyVideo src={item.url} className={className} fill={fill} />;
+  }
+
+  if (isGif(item)) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        src={img.url}
+        src={item.url}
         alt={alt}
+        loading="lazy"
         className={className}
         style={
           fill
@@ -58,12 +116,13 @@ function MediaImg({
   if (fill) {
     return (
       <Image
-        src={img.url}
+        src={item.url}
         alt={alt}
         fill
+        loading="lazy"
         className={className}
-        placeholder={img.lqip ? "blur" : "empty"}
-        blurDataURL={img.lqip ?? undefined}
+        placeholder={item.lqip ? "blur" : "empty"}
+        blurDataURL={item.lqip ?? undefined}
         sizes={sizes}
       />
     );
@@ -71,13 +130,14 @@ function MediaImg({
 
   return (
     <Image
-      src={img.url}
+      src={item.url}
       alt={alt}
       width={width ?? 400}
       height={height ?? 300}
+      loading="lazy"
       className={className}
-      placeholder={img.lqip ? "blur" : "empty"}
-      blurDataURL={img.lqip ?? undefined}
+      placeholder={item.lqip ? "blur" : "empty"}
+      blurDataURL={item.lqip ?? undefined}
     />
   );
 }
@@ -99,15 +159,15 @@ function ScrollView({ images, title }: Props) {
 
   return (
     <div ref={scrollRef} className="flex h-full flex-row gap-[10px] overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      {images.map((img, i) => (
+      {images.map((item, i) => (
         <div
-          key={img.url}
+          key={item.url}
           className="relative h-full flex-shrink-0 overflow-hidden bg-foreground/5 grayscale transition-[filter] duration-300 hover:grayscale-0"
-          style={{ aspectRatio: img.dimensions ? `${img.dimensions.width}/${img.dimensions.height}` : "4/3" }}
+          style={{ aspectRatio: item.dimensions ? `${item.dimensions.width}/${item.dimensions.height}` : isVideo(item) ? "1/1" : "4/3" }}
         >
-          <MediaImg
-            img={img}
-            alt={img.alt ?? `${title} ${i + 1}`}
+          <MediaItem
+            item={item}
+            alt={item.alt ?? `${title} ${i + 1}`}
             fill
             className="object-contain"
             sizes="80vw"
@@ -121,11 +181,11 @@ function ScrollView({ images, title }: Props) {
 function GridView({ images, title }: Props) {
   return (
     <div className="grid grid-cols-3 grid-rows-2 gap-x-[18px] gap-y-[36px]">
-      {images.slice(0, 6).map((img, i) => (
-        <div key={img.url} className="relative aspect-square max-h-[200px] max-w-[200px] overflow-hidden bg-foreground/5 grayscale transition-[filter] duration-300 hover:grayscale-0">
-          <MediaImg
-            img={img}
-            alt={img.alt ?? `${title} ${i + 1}`}
+      {images.slice(0, 6).map((item, i) => (
+        <div key={item.url} className="relative aspect-square max-h-[200px] max-w-[200px] overflow-hidden bg-foreground/5 grayscale transition-[filter] duration-300 hover:grayscale-0">
+          <MediaItem
+            item={item}
+            alt={item.alt ?? `${title} ${i + 1}`}
             fill
             className="object-cover"
             sizes="30vw"

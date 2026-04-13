@@ -61,6 +61,8 @@ export default async function CreationsAndExplorationsPage({ searchParams }: Pag
             tags={project.tags}
             link={project.link}
             linkLabel={project.linkLabel}
+            liveLink={project.liveLink}
+            collaborators={project.collaborators}
             specs={project.specs}
           />
         ) : (

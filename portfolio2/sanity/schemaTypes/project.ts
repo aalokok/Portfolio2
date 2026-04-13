@@ -66,12 +66,22 @@ export const projectType = defineType({
     }),
     defineField({
       name: "images",
-      title: "Images",
+      title: "Media",
       type: "array",
       of: [
         {
           type: "image",
+          title: "Image",
           options: { hotspot: true },
+          fields: [
+            defineField({ name: "alt", title: "Alt text", type: "string" }),
+            defineField({ name: "caption", title: "Caption", type: "string" }),
+          ],
+        },
+        {
+          type: "file",
+          title: "Video",
+          options: { accept: "video/*" },
           fields: [
             defineField({ name: "alt", title: "Alt text", type: "string" }),
             defineField({ name: "caption", title: "Caption", type: "string" }),
