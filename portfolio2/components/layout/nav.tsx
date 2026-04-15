@@ -26,7 +26,7 @@ const fallbackCreationsSubLinks = Array.from({ length: 10 }, (_, i) => ({
 function NavInner({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const activeSection = searchParams.get("section") ?? "biography";
+  const activeSection = searchParams.get("section") ?? "";
   const activeProject = Number(searchParams.get("project") ?? "1");
   const isHome = pathname === "/";
   const isCreations = pathname === "/creations-and-explorations";
