@@ -55,7 +55,7 @@ function NavInner({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
                   ? {
                       fontFamily: '"IntraNet_Outline", sans-serif',
                       fontWeight: 500,
-                      fontSize: 15,
+                      fontSize: 30,
                       lineHeight: "24px",
                     }
                   : undefined
