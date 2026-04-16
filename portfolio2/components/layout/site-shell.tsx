@@ -62,7 +62,7 @@ export function SiteShell({
       <>
         <MobileNav projectNavItems={projectNavItems} />
         <MobileSublinks projectNavItems={projectNavItems} />
-        <main className="flex flex-col bg-background md:h-screen md:flex-row md:overflow-hidden">
+        <main className="flex flex-col bg-background pb-[calc(62px+env(safe-area-inset-bottom))] md:h-screen md:flex-row md:overflow-hidden md:pb-0">
           {/* Left column */}
           <div className={`flex flex-col md:min-h-0 ${leftOrder}`} style={{ flex: columnRatio?.[0] ?? 1 }}>
             {/* Nav — hidden on mobile */}

@@ -47,7 +47,7 @@ function MobileSublinksInner({ projectNavItems }: { projectNavItems?: ProjectNav
   };
 
   return (
-    <div className="sticky top-0 z-30 flex h-[56px] items-center bg-background text-foreground md:hidden">
+    <div className="sticky top-0 z-30 flex h-[calc(56px+env(safe-area-inset-top))] items-end bg-background pt-[env(safe-area-inset-top)] text-foreground md:hidden">
       <div className="flex min-w-0 flex-1 items-center justify-start px-[20px]">
         <Link
           href={activeItem.href}
