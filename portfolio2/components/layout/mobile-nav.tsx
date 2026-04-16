@@ -55,17 +55,19 @@ function MobileNavInner({ projectNavItems: _projectNavItems }: { projectNavItems
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? "Close menu" : "Open menu"}
-        className="fixed bottom-0 left-0 right-0 z-50 flex h-[calc(62px+env(safe-area-inset-bottom))] items-start bg-primary pb-[env(safe-area-inset-bottom)] text-accent transition-transform active:scale-[0.99] md:hidden"
+        className="fixed bottom-0 left-0 right-0 z-50 h-[calc(62px+env(safe-area-inset-bottom))] bg-primary pb-[env(safe-area-inset-bottom)] text-accent transition-transform active:scale-[0.99] md:hidden"
       >
-        <span
-          className="flex-1 px-[20px] text-left leading-none"
-          style={{ fontFamily: "\"IntraNet\", sans-serif", fontWeight: 500, fontSize: 24 }}
-        >
-          Aalok Sud
-        </span>
-        <span className="flex h-full w-[68px] items-center justify-center border-l border-accent/60 text-[20px]">
-          {open ? "×" : "≡"}
-        </span>
+        <div className="flex h-[62px] items-center">
+          <span
+            className="flex-1 px-[20px] text-left leading-none"
+            style={{ fontFamily: "\"IntraNet\", sans-serif", fontWeight: 500, fontSize: 24 }}
+          >
+            Aalok Sud
+          </span>
+          <span className="flex h-full w-[68px] items-center justify-center border-l border-accent/60 text-[20px]">
+            {open ? "×" : "≡"}
+          </span>
+        </div>
       </button>
     </>
   );

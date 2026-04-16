@@ -48,33 +48,35 @@ function MobileSublinksInner({ projectNavItems }: { projectNavItems?: ProjectNav
   };
 
   return (
-    <div className="sticky top-0 z-30 flex h-[calc(56px+env(safe-area-inset-top))] items-end bg-background pt-[env(safe-area-inset-top)] text-foreground md:hidden">
-      <div className="flex min-w-0 flex-1 items-center justify-start px-[20px]">
-        <Link
-          href={activeItem.href}
-          className="truncate text-left leading-none opacity-100"
-          style={{ fontFamily: "\"IntraNet_Outline\", sans-serif", fontWeight: 500, fontSize: 12 }}
-        >
-          {activeItem.label}
-        </Link>
-      </div>
-      <div className="flex h-full shrink-0 border-l border-foreground/20">
-        <button
-          onClick={goPrev}
-          aria-label="Previous sublink"
-          className="flex h-full w-[56px] flex-col items-center justify-center border-r border-foreground/20 leading-none transition-opacity hover:opacity-80"
-        >
-          <span className="text-[18px]">←</span>
-          <span className="mt-[2px] text-[9px] uppercase tracking-[0.08em] opacity-80">back</span>
-        </button>
-        <button
-          onClick={goNext}
-          aria-label="Next sublink"
-          className="flex h-full w-[56px] flex-col items-center justify-center leading-none transition-opacity hover:opacity-80"
-        >
-          <span className="text-[18px]">→</span>
-          <span className="mt-[2px] text-[9px] uppercase tracking-[0.08em] opacity-80">next</span>
-        </button>
+    <div className="sticky top-0 z-30 h-[calc(56px+env(safe-area-inset-top))] bg-background pt-[env(safe-area-inset-top)] text-foreground md:hidden">
+      <div className="flex h-[56px] items-center">
+        <div className="flex min-w-0 flex-1 items-center justify-start px-[20px]">
+          <Link
+            href={activeItem.href}
+            className="truncate text-left leading-none opacity-100"
+            style={{ fontFamily: "\"IntraNet\", sans-serif", fontWeight: 500, fontSize: 12 }}
+          >
+            {activeItem.label}
+          </Link>
+        </div>
+        <div className="flex h-full shrink-0 border-l border-foreground/20">
+          <button
+            onClick={goPrev}
+            aria-label="Previous sublink"
+            className="flex h-full w-[56px] flex-col items-center justify-center border-r border-foreground/20 leading-none transition-opacity hover:opacity-80"
+          >
+            <span className="text-[18px]">←</span>
+            <span className="mt-[2px] text-[9px] uppercase tracking-[0.08em] opacity-80">back</span>
+          </button>
+          <button
+            onClick={goNext}
+            aria-label="Next sublink"
+            className="flex h-full w-[56px] flex-col items-center justify-center leading-none transition-opacity hover:opacity-80"
+          >
+            <span className="text-[18px]">→</span>
+            <span className="mt-[2px] text-[9px] uppercase tracking-[0.08em] opacity-80">next</span>
+          </button>
+        </div>
       </div>
     </div>
   );
