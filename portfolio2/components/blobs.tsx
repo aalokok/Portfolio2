@@ -284,12 +284,12 @@ export function Blobs({
           const dx = b.x - x, dy = b.y - y;
           return Math.sqrt(dx*dx + dy*dy) < GRAB_R;
         });
-        host.style.cursor = near ? "grab" : "";
+        document.body.style.cursor = near ? "grab" : "";
       }
     };
     const onMouseLeave = () => {
       mouseRawX = null; mouseRawY = null; mouseSmX = null; mouseSmY = null;
-      if (dragIdx === null) host.style.cursor = "";
+      if (dragIdx === null) document.body.style.cursor = "";
     };
     const onMouseDown = (e: MouseEvent) => {
       if (e.button !== 0) return;
@@ -302,7 +302,7 @@ export function Blobs({
       }
       if (best !== -1) {
         dragIdx = best; dragX = x; dragY = y; dragVx = 0; dragVy = 0;
-        host.style.cursor = "grabbing";
+        document.body.style.cursor = "grabbing";
         e.preventDefault();
       }
     };
@@ -311,14 +311,14 @@ export function Blobs({
         blobs[dragIdx].vx = dragVx * 0.25;
         blobs[dragIdx].vy = dragVy * 0.25;
         dragIdx = null;
-        host.style.cursor = mouseRawX !== null ? "grab" : "";
+        document.body.style.cursor = mouseRawX !== null ? "grab" : "";
       }
     };
 
-    host.addEventListener("mousemove",  onMouseMove);
-    host.addEventListener("mouseleave", onMouseLeave);
-    host.addEventListener("mousedown",  onMouseDown);
-    window.addEventListener("mouseup",  releaseDrag);
+    window.addEventListener("mousemove",               onMouseMove);
+    document.documentElement.addEventListener("mouseleave", onMouseLeave);
+    window.addEventListener("mousedown",               onMouseDown);
+    window.addEventListener("mouseup",                 releaseDrag);
 
     // Render loop
     let rafId = 0, cancelled = false;
@@ -391,10 +391,11 @@ export function Blobs({
       cancelled = true;
       cancelAnimationFrame(rafId);
       ro.disconnect();
-      host.removeEventListener("mousemove",  onMouseMove);
-      host.removeEventListener("mouseleave", onMouseLeave);
-      host.removeEventListener("mousedown",  onMouseDown);
-      window.removeEventListener("mouseup",  releaseDrag);
+      window.removeEventListener("mousemove",               onMouseMove);
+      document.documentElement.removeEventListener("mouseleave", onMouseLeave);
+      window.removeEventListener("mousedown",               onMouseDown);
+      window.removeEventListener("mouseup",                 releaseDrag);
+      document.body.style.cursor = "";
       deleteFBOs(gl, fbos);
       canvas.remove();
     };
