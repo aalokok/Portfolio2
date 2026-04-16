@@ -14,6 +14,7 @@ export default function ReachOutPage() {
     <SiteShell
       columnRatio={[1, 1]}
       leftRatio={[1, 1]}
+      mobileSwapColumns
       bottomLeft={
         <div className="flex flex-col gap-[24px]">
           

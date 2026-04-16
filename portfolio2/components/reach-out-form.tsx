@@ -80,8 +80,13 @@ export function ReachOutForm() {
         <p className="text-[12px] text-secondary-1">{state.message}</p>
       )}
 
-      <div>
-        <Button type="submit" disabled={isPending} size="sm">
+      <div className="flex justify-end">
+        <Button
+          type="submit"
+          disabled={isPending}
+          size="sm"
+          className="bg-primary text-background hover:bg-primary-dark"
+        >
           {isPending ? "Sending…" : "Send message"}
         </Button>
       </div>
