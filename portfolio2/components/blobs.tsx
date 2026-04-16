@@ -15,12 +15,37 @@ export type Ps2BlobsProps = {
   className?: string;
   morph?: number;
   glow?: number;
-  trailFade?: number; // 0–1, higher = longer trails (default 0.93)
-  grain?: number;     // noise intensity (default 0.04)
+  trailFade?: number;   // 0–1, higher = longer trails (default 0.93)
+  grain?: number;       // noise intensity (default 0.04)
+  hueShift?: number;    // 0–360 degrees, rotates the glow colour palette
+  interactive?: boolean; // false = no mouse attraction / drag (default true)
 };
 
+// ── Hue rotation ───────────────────────────────────────────────────────────────
+// Applies a luminance-preserving hue rotation to the glow colour palette.
+function buildGlowColors(colors: [number, number, number][], degrees: number): Float32Array {
+  if (degrees === 0) return new Float32Array(colors.flat());
+  const rad = (degrees * Math.PI) / 180;
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+  const s3  = Math.sqrt(1 / 3);
+  const t   = (1 - cos) / 3;
+  const m   = [
+    cos + t,       t - s3 * sin,  t + s3 * sin,
+    t + s3 * sin,  cos + t,       t - s3 * sin,
+    t - s3 * sin,  t + s3 * sin,  cos + t,
+  ];
+  const out = new Float32Array(colors.length * 3);
+  for (let i = 0; i < colors.length; i++) {
+    const [r, g, b] = colors[i];
+    out[i * 3 + 0] = Math.max(0, Math.min(1, r * m[0] + g * m[1] + b * m[2]));
+    out[i * 3 + 1] = Math.max(0, Math.min(1, r * m[3] + g * m[4] + b * m[5]));
+    out[i * 3 + 2] = Math.max(0, Math.min(1, r * m[6] + g * m[7] + b * m[8]));
+  }
+  return out;
+}
+
 // ── Physics ────────────────────────────────────────────────────────────────────
-console.log("works")
 const N = 7;
 
 interface Blob {
@@ -162,9 +187,15 @@ export function Blobs({
   morph = 1,
   glow = 1,
   trailFade = 0.8,
-  grain = 0.1
+  grain = 0.1,
+  hueShift = 0,
+  interactive = true,
 }: Ps2BlobsProps) {
-  const hostRef = useRef<HTMLDivElement>(null);
+  const hostRef       = useRef<HTMLDivElement>(null);
+  const hueShiftRef   = useRef(hueShift);
+  hueShiftRef.current = hueShift;
+  const interactiveRef = useRef(interactive);
+  interactiveRef.current = interactive;
 
   useEffect(() => {
     const host = hostRef.current;
@@ -201,7 +232,6 @@ export function Blobs({
       gcol: gl.getUniformLocation(blobProg, "gcol[0]")!,
     };
     gl.useProgram(blobProg);
-    gl.uniform3fv(BU.gcol, new Float32Array(GLOW_COLORS.flat()));
     gl.uniform1f(BU.morph, morph);
     gl.uniform1f(BU.glow, glow);
 
@@ -315,10 +345,13 @@ export function Blobs({
       }
     };
 
-    window.addEventListener("mousemove",               onMouseMove);
-    document.documentElement.addEventListener("mouseleave", onMouseLeave);
-    window.addEventListener("mousedown",               onMouseDown);
-    window.addEventListener("mouseup",                 releaseDrag);
+    const isInteractive = interactiveRef.current;
+    if (isInteractive) {
+      window.addEventListener("mousemove",                    onMouseMove);
+      document.documentElement.addEventListener("mouseleave", onMouseLeave);
+      window.addEventListener("mousedown",                    onMouseDown);
+      window.addEventListener("mouseup",                      releaseDrag);
+    }
 
     // Render loop
     let rafId = 0, cancelled = false;
@@ -365,6 +398,7 @@ export function Blobs({
 
       // ── Pass 2: draw blobs on top (SRC_ALPHA blend, empty space transparent)
       gl.useProgram(blobProg);
+      gl.uniform3fv(BU.gcol, buildGlowColors(GLOW_COLORS, hueShiftRef.current));
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
       gl.uniform1f(BU.t, time);
@@ -391,11 +425,13 @@ export function Blobs({
       cancelled = true;
       cancelAnimationFrame(rafId);
       ro.disconnect();
-      window.removeEventListener("mousemove",               onMouseMove);
-      document.documentElement.removeEventListener("mouseleave", onMouseLeave);
-      window.removeEventListener("mousedown",               onMouseDown);
-      window.removeEventListener("mouseup",                 releaseDrag);
-      document.body.style.cursor = "";
+      if (isInteractive) {
+        window.removeEventListener("mousemove",                    onMouseMove);
+        document.documentElement.removeEventListener("mouseleave", onMouseLeave);
+        window.removeEventListener("mousedown",                    onMouseDown);
+        window.removeEventListener("mouseup",                      releaseDrag);
+        document.body.style.cursor = "";
+      }
       deleteFBOs(gl, fbos);
       canvas.remove();
     };

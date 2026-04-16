@@ -11,9 +11,14 @@ const links = [
   { href: "/contact-me", label: "Reach Out" },
 ];
 
-const homeSubLinks = [
-  { section: "biography", label: "Biography" },
-  { section: "experience", label: "Experience" },
+type SubLink =
+  | { kind: "section"; section: string; label: string }
+  | { kind: "page"; href: string; label: string };
+
+const homeSubLinks: SubLink[] = [
+  { kind: "section", section: "biography",  label: "Biography" },
+  { kind: "section", section: "experience", label: "Experience" },
+  { kind: "page",    href: "/wisdom",       label: "Wisdom" },
 ];
 
 export type ProjectNavItem = { order: number; title: string };
@@ -28,7 +33,8 @@ function NavInner({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
   const searchParams = useSearchParams();
   const activeSection = searchParams.get("section") ?? "";
   const activeProject = Number(searchParams.get("project") ?? "1");
-  const isHome = pathname === "/";
+  const isHome      = pathname === "/";
+  const isWisdom    = pathname === "/wisdom";
   const isCreations = pathname === "/creations-and-explorations";
 
   return (
@@ -64,21 +70,24 @@ function NavInner({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
               {label}
             </Link>
 
-            {isName && isHome && (
-              <div className="animate-fade-in absolute top-full left-0 flex flex-row gap-[18px] pt-[4px]">
-                {homeSubLinks.map(({ section, label: subLabel }) => {
-                  const subActive = activeSection === section;
+            {isName && (isHome || isWisdom) && (
+              <div className="animate-fade-in absolute top-full left-0 flex flex-row gap-[18px] pt-[24px]">
+                {homeSubLinks.map((sub) => {
+                  const href      = sub.kind === "section" ? `/?section=${sub.section}` : sub.href;
+                  const subActive = sub.kind === "section"
+                    ? isHome && activeSection === sub.section
+                    : isWisdom;
                   return (
                     <Link
-                      key={section}
-                      href={`/?section=${section}`}
+                      key={href}
+                      href={href}
                       className={`text-[12px] leading-[18px] transition-colors ${
                         subActive
                           ? "text-primary"
                           : "text-foreground/50 hover:text-foreground/80"
                       }`}
                     >
-                      {subLabel}
+                      {sub.label}
                     </Link>
                   );
                 })}
@@ -86,7 +95,7 @@ function NavInner({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
             )}
 
             {isName && isCreations && (
-              <div className="animate-fade-in absolute top-full left-0 flex flex-col gap-[4px] pt-[4px]">
+              <div className="animate-fade-in absolute top-full left-0 flex flex-col gap-[4px] pt-[24px]">
                 {[0, 5].map((start) => {
                   const items = (projectNavItems ?? fallbackCreationsSubLinks.map((s) => ({ order: s.project, title: s.label }))).slice(start, start + 5);
                   if (items.length === 0) return null;
