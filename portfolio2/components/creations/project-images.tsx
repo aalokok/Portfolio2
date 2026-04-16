@@ -162,15 +162,15 @@ function ScrollView({ images, title }: Props) {
       {images.map((item, i) => (
         <div
           key={item.url}
-          className="relative h-full flex-shrink-0 overflow-hidden bg-foreground/5 grayscale transition-[filter] duration-300 hover:grayscale-0"
+          className="relative h-[42vw] max-h-[220px] flex-shrink-0 overflow-hidden bg-foreground/5 transition-[filter] duration-300 md:h-full md:max-h-none md:grayscale md:hover:grayscale-0"
           style={{ aspectRatio: item.dimensions ? `${item.dimensions.width}/${item.dimensions.height}` : isVideo(item) ? "1/1" : "4/3" }}
         >
           <MediaItem
             item={item}
             alt={item.alt ?? `${title} ${i + 1}`}
-            fill
-            className="object-contain"
-            sizes="80vw"
+            width={item.dimensions?.width ?? 1600}
+            height={item.dimensions?.height ?? 1200}
+            className="h-full w-full object-contain"
           />
         </div>
       ))}
@@ -180,20 +180,20 @@ function ScrollView({ images, title }: Props) {
 
 function GridView({ images, title }: Props) {
   return (
-    <div className="grid grid-cols-3 grid-rows-2 gap-x-[18px] gap-y-[36px]">
+    <div className="grid grid-cols-3 grid-rows-2 gap-x-[10px] gap-y-[12px] md:gap-x-[18px] md:gap-y-[36px]">
       {images.slice(0, 6).map((item, i) => (
-        <div key={item.url} className="relative aspect-square max-h-[200px] max-w-[200px] overflow-hidden bg-foreground/5 grayscale transition-[filter] duration-300 hover:grayscale-0">
+        <div key={item.url} className="relative aspect-square max-h-[105px] max-w-[105px] overflow-hidden bg-foreground/5 transition-[filter] duration-300 md:max-h-[200px] md:max-w-[200px] md:grayscale md:hover:grayscale-0">
           <MediaItem
             item={item}
             alt={item.alt ?? `${title} ${i + 1}`}
-            fill
-            className="object-cover"
-            sizes="30vw"
+            width={item.dimensions?.width ?? 800}
+            height={item.dimensions?.height ?? 800}
+            className="h-full w-full object-cover"
           />
         </div>
       ))}
       {Array.from({ length: Math.max(0, 6 - images.length) }).map((_, i) => (
-        <div key={`empty-${i}`} className="aspect-square max-h-[200px] max-w-[200px]  bg-foreground/5 opacity-40" />
+        <div key={`empty-${i}`} className="aspect-square max-h-[105px] max-w-[105px]  bg-foreground/5 opacity-40 md:max-h-[200px] md:max-w-[200px]" />
       ))}
     </div>
   );

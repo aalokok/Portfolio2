@@ -30,6 +30,7 @@ export default async function CreationsAndExplorationsPage({ searchParams }: Pag
       rightRatio={[7, 3]}
       bottomLeftClassName="overflow-y-auto"
       bottomRightClassName="overflow-y-auto"
+      mobileSwapColumns
       topRight={
         project ? (
           <ProjectImages images={project.images ?? []} title={project.title} />

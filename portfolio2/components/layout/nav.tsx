@@ -18,7 +18,7 @@ type SubLink =
 const homeSubLinks: SubLink[] = [
   { kind: "section", section: "biography",  label: "Biography" },
   { kind: "section", section: "experience", label: "Experience" },
-  { kind: "page",    href: "/wisdom",       label: "Wisdom" },
+  { kind: "page",    href: "/wisdom",       label: "Visions" },
 ];
 
 export type ProjectNavItem = { order: number; title: string };
@@ -83,7 +83,7 @@ function NavInner({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
                       href={href}
                       className={`text-[12px] leading-[18px] transition-colors ${
                         subActive
-                          ? "text-primary"
+                          ? "text-primary-light"
                           : "text-foreground/50 hover:text-foreground/80"
                       }`}
                     >
@@ -109,7 +109,7 @@ function NavInner({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
                             href={`/creations-and-explorations?project=${order}`}
                             className={`text-[12px] leading-[18px] transition-colors ${
                               subActive
-                                ? "text-primary"
+                                ? "text-primary-light"
                                 : "text-foreground/50 hover:text-foreground/80"
                             }`}
                           >
@@ -132,7 +132,7 @@ function NavInner({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
 
 export function Nav({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
   return (
-    <div className="flex h-full flex-col justify-between">
+    <div className="hidden h-full flex-col justify-between md:flex">
       <Suspense fallback={<nav className="flex flex-col gap-[24px] text-[20px] leading-[24px]" />}>
         <NavInner projectNavItems={projectNavItems} />
       </Suspense>

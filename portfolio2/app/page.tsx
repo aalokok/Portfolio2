@@ -58,6 +58,7 @@ export default async function Home({ searchParams }: HomeProps) {
         rightRatio={[5, 5]}
         bottomLeftClassName="overflow-y-auto"
         bottomRightClassName="overflow-y-auto"
+        mobileSwapColumns
         topRight={blobs}
         bottomLeft={
           <div className="space-y-[24px]">
@@ -197,6 +198,7 @@ export default async function Home({ searchParams }: HomeProps) {
       columnRatio={[1, 1]}
       leftRatio={[4, 6]}
       bottomLeftClassName="overflow-y-auto"
+      mobileSwapColumns
       right={blobs}
       bottomLeft={section === "biography" ? biographyContent : statementContent}
     />
