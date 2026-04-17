@@ -30,7 +30,7 @@ function MobileSublinksInner({ projectNavItems }: { projectNavItems?: ProjectNav
 
   if (isHome || isWisdom) {
     items = [
-      { href: "/",                   label: "Statement",  active: isHome && activeSection === "" },
+      { href: "/?section=statement", label: "Statement",  active: isHome && activeSection === "statement" },
       { href: "/?section=biography",  label: "Biography",  active: isHome && activeSection === "biography" },
       { href: "/?section=experience", label: "Experience", active: isHome && activeSection === "experience" },
       { href: "/wisdom",              label: "visions",     active: isWisdom },

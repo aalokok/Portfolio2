@@ -144,17 +144,64 @@ function MediaItem({
 
 function ScrollView({ images, title }: Props) {
   const scrollRef = React.useRef<HTMLDivElement>(null);
+  const autoScrollPausedUntilRef = React.useRef(0);
 
   React.useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
+    const pauseAutoScroll = (ms: number) => {
+      autoScrollPausedUntilRef.current = Date.now() + ms;
+    };
     const onWheel = (e: WheelEvent) => {
       if (e.deltaY === 0) return;
       e.preventDefault();
       el.scrollLeft += e.deltaY;
+      pauseAutoScroll(2200);
     };
+    const onTouchStart = () => pauseAutoScroll(3000);
+    const onTouchEnd = () => pauseAutoScroll(1200);
+
+    let rafId = 0;
+    let lastTs = 0;
+    const speedPxPerSec = 8; // very slow ambient drift
+    let fractionalCarry = 0;
+
+    const tick = (ts: number) => {
+      if (!lastTs) lastTs = ts;
+      const dt = ts - lastTs;
+      lastTs = ts;
+
+      if (Date.now() >= autoScrollPausedUntilRef.current) {
+        const maxScroll = el.scrollWidth - el.clientWidth;
+        if (maxScroll > 0) {
+          const delta = (speedPxPerSec * dt) / 1000 + fractionalCarry;
+          const wholePixels = Math.trunc(delta);
+          fractionalCarry = delta - wholePixels;
+
+          if (wholePixels !== 0) {
+            el.scrollLeft += wholePixels;
+          }
+
+          if (el.scrollLeft >= maxScroll - 1) {
+            el.scrollLeft = 0;
+            fractionalCarry = 0;
+          }
+        }
+      }
+      rafId = window.requestAnimationFrame(tick);
+    };
+
+    autoScrollPausedUntilRef.current = Date.now() + 900;
     el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
+    rafId = window.requestAnimationFrame(tick);
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      el.removeEventListener("wheel", onWheel);
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchend", onTouchEnd);
+    };
   }, []);
 
   return (

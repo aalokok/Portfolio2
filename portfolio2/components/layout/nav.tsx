@@ -16,6 +16,7 @@ type SubLink =
   | { kind: "page"; href: string; label: string };
 
 const homeSubLinks: SubLink[] = [
+  { kind: "section", section: "statement",  label: "Statement" },
   { kind: "section", section: "biography",  label: "Biography" },
   { kind: "section", section: "experience", label: "Experience" },
   { kind: "page",    href: "/wisdom",       label: "Visions" },
