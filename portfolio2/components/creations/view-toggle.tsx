@@ -7,7 +7,7 @@ export function ViewToggle() {
   const { view, setView } = useCreationsView();
 
   return (
-    <div className="flex flex-row items-center gap-[6px]">
+    <div className="flex flex-row items-center gap-[clamp(4px,0.2rem+0.35vw,6px)]">
       <button
         onClick={() => setView("scroll")}
         title="Horizontal scroll"
@@ -15,7 +15,7 @@ export function ViewToggle() {
           view === "scroll" ? "text-primary" : "text-foreground/40 hover:text-foreground/70"
         }`}
       >
-        <GalleryHorizontal size={14} />
+        <GalleryHorizontal className="h-[clamp(12px,0.65rem+0.35vw,14px)] w-[clamp(12px,0.65rem+0.35vw,14px)]" />
       </button>
       <button
         onClick={() => setView("grid")}
@@ -24,7 +24,7 @@ export function ViewToggle() {
           view === "grid" ? "text-primary" : "text-foreground/40 hover:text-foreground/70"
         }`}
       >
-        <LayoutGrid size={14} />
+        <LayoutGrid className="h-[clamp(12px,0.65rem+0.35vw,14px)] w-[clamp(12px,0.65rem+0.35vw,14px)]" />
       </button>
     </div>
   );

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import type { ProjectNavItem } from "./nav";
+import { projectNavDisplayTitle, type ProjectNavItem } from "./nav";
 
 function MobileSublinksInner({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
   const router = useRouter();
@@ -40,7 +40,7 @@ function MobileSublinksInner({ projectNavItems }: { projectNavItems?: ProjectNav
       ?? Array.from({ length: 10 }, (_, i) => ({ order: i + 1, title: String(i + 1).padStart(2, "0") }));
     items = navItems.map(({ order, title }) => ({
       href:   `/creations-and-explorations?project=${order}`,
-      label:  title,
+      label:  projectNavDisplayTitle(title),
       active: activeProject === order,
     }));
   }
