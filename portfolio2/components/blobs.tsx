@@ -4,27 +4,27 @@ import { useEffect, useRef } from "react";
 
 import { cn } from "@/lib/utils";
 import {
+  BACKGROUND_RGB,
   BLIT_FRAG_SRC,
   COMPOSITE_FRAG_SRC,
   FRAG_SRC,
-  GLOW_COLORS,
+  PRIMARY_RGB,
   VERT_SRC,
 } from "@/lib/blobs-shader";
 
 export type Ps2BlobsProps = {
   className?: string;
-  morph?: number;
   glow?: number;
-  trailFade?: number;   // 0–1, higher = longer trails (default 0.93)
-  grain?: number;       // noise intensity (default 0.04)
-  hueShift?: number;    // 0–360 degrees, rotates the glow colour palette
+  morph?: number;       // domain-warp strength on blob silhouettes (default 1)
+  trailFade?: number;   // 0–1, higher = longer trails (default 0.8)
+  hueShift?: number;    // 0–360 degrees, rotates the brand-blue glow color
   interactive?: boolean; // false = no mouse attraction / drag (default true)
 };
 
 // ── Hue rotation ───────────────────────────────────────────────────────────────
-// Applies a luminance-preserving hue rotation to the glow colour palette.
-function buildGlowColors(colors: [number, number, number][], degrees: number): Float32Array {
-  if (degrees === 0) return new Float32Array(colors.flat());
+// Luminance-preserving hue rotation matrix applied to a single sRGB color.
+function rotateHue([r, g, b]: [number, number, number], degrees: number): [number, number, number] {
+  if (degrees === 0) return [r, g, b];
   const rad = (degrees * Math.PI) / 180;
   const cos = Math.cos(rad);
   const sin = Math.sin(rad);
@@ -35,14 +35,11 @@ function buildGlowColors(colors: [number, number, number][], degrees: number): F
     t + s3 * sin,  cos + t,       t - s3 * sin,
     t - s3 * sin,  t + s3 * sin,  cos + t,
   ];
-  const out = new Float32Array(colors.length * 3);
-  for (let i = 0; i < colors.length; i++) {
-    const [r, g, b] = colors[i];
-    out[i * 3 + 0] = Math.max(0, Math.min(1, r * m[0] + g * m[1] + b * m[2]));
-    out[i * 3 + 1] = Math.max(0, Math.min(1, r * m[3] + g * m[4] + b * m[5]));
-    out[i * 3 + 2] = Math.max(0, Math.min(1, r * m[6] + g * m[7] + b * m[8]));
-  }
-  return out;
+  return [
+    Math.max(0, Math.min(1, r * m[0] + g * m[1] + b * m[2])),
+    Math.max(0, Math.min(1, r * m[3] + g * m[4] + b * m[5])),
+    Math.max(0, Math.min(1, r * m[6] + g * m[7] + b * m[8])),
+  ];
 }
 
 // ── Physics ────────────────────────────────────────────────────────────────────
@@ -78,7 +75,7 @@ function stepBlobs(
   mouseX: number | null, mouseY: number | null,
   bx: number, by: number, dragIdx: number | null,
 ) {
-  const BLOB_R = 0.28, REP_F = 0.0022, DAMP = 0.982, MAX_V = 0.0012;
+  const BLOB_R = 0.20, REP_F = 0.0022, DAMP = 0.982, MAX_V = 0.0012;
   const BX = bx * 0.90, BY = by * 0.90;
 
   for (let i = 0; i < N; i++) {
@@ -167,7 +164,8 @@ function createFBO(gl: WebGLRenderingContext, w: number, h: number): FBO {
   const fbo = gl.createFramebuffer()!;
   gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
-  gl.clearColor(0, 0, 0, 1);
+  const [br, bg, bb] = BACKGROUND_RGB;
+  gl.clearColor(br, bg, bb, 1);
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   return { tex, fbo };
@@ -184,10 +182,9 @@ function deleteFBOs(gl: WebGLRenderingContext, fbos: FBO[]) {
 
 export function Blobs({
   className,
-  morph = 1,
   glow = 1,
+  morph = 1,
   trailFade = 0.8,
-  grain = 0.1,
   hueShift = 0,
   interactive = true,
 }: Ps2BlobsProps) {
@@ -224,16 +221,18 @@ export function Blobs({
 
     // Blob program uniforms
     const BU = {
-      t:    gl.getUniformLocation(blobProg, "t")!,
-      res:  gl.getUniformLocation(blobProg, "res")!,
-      morph:gl.getUniformLocation(blobProg, "morph")!,
-      glow: gl.getUniformLocation(blobProg, "glow")!,
-      bpos: gl.getUniformLocation(blobProg, "bpos[0]")!,
-      gcol: gl.getUniformLocation(blobProg, "gcol[0]")!,
+      t:       gl.getUniformLocation(blobProg, "t")!,
+      res:     gl.getUniformLocation(blobProg, "res")!,
+      morph:   gl.getUniformLocation(blobProg, "morph")!,
+      glow:    gl.getUniformLocation(blobProg, "glow")!,
+      bpos:    gl.getUniformLocation(blobProg, "bpos[0]")!,
+      primary: gl.getUniformLocation(blobProg, "u_primary")!,
+      bg:      gl.getUniformLocation(blobProg, "u_bg")!,
     };
     gl.useProgram(blobProg);
-    gl.uniform1f(BU.morph, morph);
     gl.uniform1f(BU.glow, glow);
+    gl.uniform1f(BU.morph, morph);
+    gl.uniform3f(BU.bg, BACKGROUND_RGB[0], BACKGROUND_RGB[1], BACKGROUND_RGB[2]);
 
     // Blit program uniforms
     gl.useProgram(blitProg);
@@ -241,20 +240,19 @@ export function Blobs({
       tex:  gl.getUniformLocation(blitProg, "u_tex")!,
       fade: gl.getUniformLocation(blitProg, "u_fade")!,
       res:  gl.getUniformLocation(blitProg, "u_res")!,
+      bg:   gl.getUniformLocation(blitProg, "u_bg")!,
     };
     gl.uniform1i(LU.tex, 0);
     gl.uniform1f(LU.fade, trailFade);
+    gl.uniform3f(LU.bg, BACKGROUND_RGB[0], BACKGROUND_RGB[1], BACKGROUND_RGB[2]);
 
     // Composite program uniforms
     gl.useProgram(compositeProg);
     const CU = {
-      tex:   gl.getUniformLocation(compositeProg, "u_tex")!,
-      time:  gl.getUniformLocation(compositeProg, "u_time")!,
-      grain: gl.getUniformLocation(compositeProg, "u_grain")!,
-      res:   gl.getUniformLocation(compositeProg, "u_res")!,
+      tex: gl.getUniformLocation(compositeProg, "u_tex")!,
+      res: gl.getUniformLocation(compositeProg, "u_res")!,
     };
     gl.uniform1i(CU.tex, 0);
-    gl.uniform1f(CU.grain, grain);
 
     // Ping-pong FBOs
     let fbos: FBO[] = [];
@@ -291,7 +289,7 @@ export function Blobs({
     const blobs = makeBlobs(bx0, by0);
 
     // Mouse / drag
-    const GRAB_R = 0.18;
+    const GRAB_R = 0.13;
     let mouseRawX: number | null = null, mouseRawY: number | null = null;
     let mouseSmX:  number | null = null, mouseSmY:  number | null = null;
     let dragIdx: number | null = null;
@@ -398,7 +396,8 @@ export function Blobs({
 
       // ── Pass 2: draw blobs on top (SRC_ALPHA blend, empty space transparent)
       gl.useProgram(blobProg);
-      gl.uniform3fv(BU.gcol, buildGlowColors(GLOW_COLORS, hueShiftRef.current));
+      const [pr, pg, pb] = rotateHue(PRIMARY_RGB, hueShiftRef.current);
+      gl.uniform3f(BU.primary, pr, pg, pb);
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
       gl.uniform1f(BU.t, time);
@@ -406,13 +405,12 @@ export function Blobs({
       gl.uniform2fv(BU.bpos, draw);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-      // ── Pass 3: composite to canvas + film grain noise ──────────────────────
+      // ── Pass 3: composite to canvas ────────────────────────────────────────
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       gl.viewport(0, 0, w, h);
       gl.disable(gl.BLEND);
       gl.useProgram(compositeProg);
       gl.bindTexture(gl.TEXTURE_2D, fbos[write].tex);
-      gl.uniform1f(CU.time, time);
       gl.uniform2f(CU.res, w, h);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
@@ -437,11 +435,11 @@ export function Blobs({
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-;
+
   return (
     <div
       ref={hostRef}
-      className={cn("relative min-h-0 w-full overflow-hidden bg-black", className)}
+      className={cn("relative min-h-0 w-full overflow-hidden bg-background", className)}
     />
   );
 }
