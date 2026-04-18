@@ -77,10 +77,16 @@ export const FRAG_SRC = `
     float nMix  = smoothstep(0.05, 0.35, field);
     float f     = max(0.0, field * mix(1.0, 0.78 + 0.44 * n, nMix));
 
-    // Continuous color ramp — exponential halo + polynomial bright core.
-    // No discrete bands → no visible ring of intermediate color.
-    float halo = 1.0 - exp(-f * 1.7);
-    float core = pow(clamp(f * 1.35, 0.0, 1.0), 2.6);
+    // Continuous color ramp — exponential halo + bright core.
+    // The halo curve is amplified then clamped so the body saturates to
+    // 1.0 (pure primary) instead of asymptoting to ~0.85 (which reads as
+    // a washed, bg-diluted blue). The soft outer falloff is preserved
+    // because the multiplier only matters once 1 - exp(...) is large.
+    float halo = clamp((1.0 - exp(-f * 1.8)) * 1.25, 0.0, 1.0);
+    // White core onset is delayed until well inside the body, so a
+    // visible band of fully-saturated primary surrounds the white center
+    // instead of white bleeding all the way out.
+    float core = smoothstep(0.55, 1.00, f);
 
     // Soft floor on halo: anything below ~0.04 collapses to 0, then ramps
     // back up smoothly. Keeps the outer edge from leaking sub-pixel alpha
