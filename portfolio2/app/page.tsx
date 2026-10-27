@@ -48,7 +48,6 @@ const biographyContent = (
 function LandingContent() {
   return (
     <div className="space-y-[20px] p-[8px]">
-      <p className="text-[16px] font-inter-sans italic">Aalok Sud</p>
       <p className="max-w-[560px] text-[13px] leading-[20px] text-foreground/80">
         Computation artist and creative technologist working across interactive systems and realtime environments.
       </p>

@@ -227,7 +227,7 @@ function ScrollView({ images, title }: Props) {
 
 function GridView({ images, title }: Props) {
   return (
-    <div className="grid grid-cols-3 grid-rows-2 gap-x-[10px] gap-y-[12px] md:gap-x-[18px] md:gap-y-[36px]">
+    <div className="grid h-full w-full place-content-center place-items-center gap-x-[10px] gap-y-[12px] md:grid-cols-3 md:grid-rows-2 md:gap-x-[18px] md:gap-y-[36px]">
       {images.slice(0, 6).map((item, i) => (
         <div key={item.url} className="relative aspect-square max-h-[105px] max-w-[105px] overflow-hidden bg-foreground/5 transition-[filter] duration-300 md:max-h-[200px] md:max-w-[200px] md:grayscale md:hover:grayscale-0">
           <MediaItem

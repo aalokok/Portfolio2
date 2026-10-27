@@ -44,9 +44,9 @@ export function QuadrantShell({
   return (
     <main className="flex flex-col bg-background pb-[calc(62px+env(safe-area-inset-bottom))] md:h-screen md:flex-row md:overflow-hidden md:pb-0">
       {/* Left column */}
-      <div className={`flex flex-col md:min-h-0 ${leftOrder}`} style={{ flex: columnRatio[0] }}>
+      <div className={`flex flex-col md:min-h-0 md:border-r md:border-foreground/15 ${leftOrder}`} style={{ flex: columnRatio[0] }}>
         {/* Nav — hidden on mobile (MobileSublinks sticky bar replaces it) */}
-        <section className="hidden md:flex md:min-h-0 flex-col bg-background md:p-[30px]" style={{ flex: leftRatio[0] }}>
+        <section className="hidden md:flex md:min-h-0 flex-col bg-background md:border-b md:border-foreground/15 md:p-[30px]" style={{ flex: leftRatio[0] }}>
           <div className={`${innerScroll} ${topLeftClassName}`}>{topLeft}</div>
         </section>
         <section className={sectionBase} style={{ flex: leftRatio[1] }}>
@@ -56,7 +56,7 @@ export function QuadrantShell({
 
       {/* Right column — gets a min-height on mobile so visual content (blobs, images) isn't 0-height */}
       <div className={`flex flex-col md:min-h-0 ${rightOrder}`} style={{ flex: columnRatio[1] }}>
-        <section className={`${sectionBase} h-[55vw] md:h-auto`} style={{ flex: rightRatio[0] }}>
+        <section className={`${sectionBase} h-[55vw] md:h-auto md:border-b md:border-foreground/15`} style={{ flex: rightRatio[0] }}>
           <div className={`${innerScroll} h-full ${topRightClassName}`}>{topRight}</div>
         </section>
         <section className={sectionBase} style={{ flex: rightRatio[1] }}>
