@@ -5,6 +5,8 @@ import { ProjectImages } from "@/components/creations/project-images";
 import { ProjectDescription } from "@/components/creations/project-description";
 import { ProjectSpecs } from "@/components/creations/project-specs";
 import { ViewProvider } from "@/components/creations/view-context";
+import { ZineFlipbook } from "@/components/creations/zine-flipbook";
+import { getZine } from "@/lib/zines";
 
 type PageProps = {
   searchParams: Promise<{ project?: string }>;
@@ -21,6 +23,8 @@ export default async function CreationsAndExplorationsPage({ searchParams }: Pag
       ])
     : [null, undefined];
 
+  const zine = project ? getZine(project.slug?.current, project.title) : null;
+
   return (
     <ViewProvider>
     <SiteShell
@@ -32,7 +36,9 @@ export default async function CreationsAndExplorationsPage({ searchParams }: Pag
       bottomRightClassName="overflow-y-auto"
       mobileSwapColumns
       topRight={
-        project ? (
+        project && zine ? (
+          <ZineFlipbook {...zine} title={project.title} />
+        ) : project ? (
           <ProjectImages images={project.images ?? []} title={project.title} />
         ) : (
           <div className="flex h-full items-center justify-center rounded-sm bg-foreground/5">
