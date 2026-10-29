@@ -439,7 +439,7 @@ export function Blobs({
   return (
     <div
       ref={hostRef}
-      className={cn("relative min-h-0 w-full overflow-hidden bg-background", className)}
+      className={cn("relative min-h-0 w-full overflow-hidden bg-black", className)}
     />
   );
 }
