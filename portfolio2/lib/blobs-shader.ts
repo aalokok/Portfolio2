@@ -5,7 +5,7 @@ export const VERT_SRC = `
 `.trim();
 
 // ── Blob pass ──────────────────────────────────────────────────────────────────
-// Composition tuned for a LIGHT page background (#f5f5f5):
+// Composition tuned for a BLACK canvas background:
 //   bg → primary blue glow → bright white core, as a single continuous ramp.
 // Two layers of fbm noise:
 //   • domain-warp inside `potential` → organic, non-circular blob silhouettes
@@ -132,5 +132,5 @@ export const COMPOSITE_FRAG_SRC = `
 /** Brand primary `#0a33ff` (sRGB) — blob glow color; keep in sync with `globals.css` */
 export const PRIMARY_RGB: [number, number, number] = [10 / 255, 51 / 255, 1];
 
-/** Canvas / trail base `#f5f5f5` — keep in sync with `globals.css` `--background` */
-export const BACKGROUND_RGB: [number, number, number] = [245 / 255, 245 / 255, 245 / 255];
+/** Canvas / trail base — black, independent of the page `--background` */
+export const BACKGROUND_RGB: [number, number, number] = [0, 0, 0];
