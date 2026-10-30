@@ -53,7 +53,6 @@ export default async function CreationsAndExplorationsPage({ searchParams }: Pag
       <ProjectIndexProvider items={items}>
         <SiteShell
           projectNavItems={projectNavItems}
-          columnRatio={[4, 6]}
           leftRatio={[3, 7]}
           rightRatio={[7, 3]}
           bottomLeftClassName="overflow-y-auto"
@@ -79,7 +78,6 @@ export default async function CreationsAndExplorationsPage({ searchParams }: Pag
   return (
     <SiteShell
       projectNavItems={projectNavItems}
-      columnRatio={[4, 6]}
       leftRatio={[3, 7]}
       bottomLeftClassName="overflow-y-auto"
       mobileAutoHeight

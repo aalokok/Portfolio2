@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Suspense, useLayoutEffect, useRef, useState } from "react";
+import { Suspense } from "react";
 
 const links = [
   { href: "/", label: "Aalok Sud" },
@@ -30,7 +30,7 @@ export function projectNavDisplayTitle(title: string): string {
 }
 
 const subLinkBarClass =
-  "flex w-full min-h-[clamp(1.75rem,1.55rem+0.35vw,2rem)] items-stretch bg-accent px-0.5 text-[clamp(0.625rem,0.52rem+0.28vw,0.75rem)] leading-[clamp(1rem,0.9rem+0.25vw,1.125rem)] md:px-1";
+  "flex w-full min-h-[clamp(1.75rem,1.55rem+0.35vw,2rem)] items-stretch bg-accent lowercase px-0.5 text-[clamp(0.625rem,0.52rem+0.28vw,0.75rem)] leading-[clamp(1rem,0.9rem+0.25vw,1.125rem)] md:px-1";
 
 function subLinkItemClass(subActive: boolean) {
   return [
@@ -46,61 +46,9 @@ function NavInner() {
   const isHome      = pathname === "/";
   const isWisdom    = pathname === "/wisdom";
 
-  const navRef = useRef<HTMLElement>(null);
-  const [stackWidth, setStackWidth] = useState<number | null>(null);
-
-  useLayoutEffect(() => {
-    const measure = () => {
-      const node = navRef.current;
-      if (!node) return;
-      /**
-       * When locked, nav is `w-full` inside a fixed-width stack. `max-w-full` on the nav caps
-       * its width to that parent, so `width: max-content` alone still measures no wider than the
-       * old stackWidth — growing the viewport never increases the reading. Override max-width
-       * for the probe, then clear inline styles so Tailwind classes apply again.
-       */
-      node.style.setProperty("width", "max-content", "important");
-      node.style.setProperty("max-width", "none", "important");
-      const w = Math.round(node.getBoundingClientRect().width);
-      node.style.removeProperty("width");
-      node.style.removeProperty("max-width");
-      setStackWidth(w);
-    };
-
-    let rafId = 0;
-    const scheduleMeasure = () => {
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => measure());
-    };
-
-    measure();
-    window.addEventListener("resize", scheduleMeasure);
-    window.visualViewport?.addEventListener("resize", scheduleMeasure);
-    let cancelled = false;
-    void document.fonts.ready.then(() => {
-      if (!cancelled) scheduleMeasure();
-    });
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(rafId);
-      window.removeEventListener("resize", scheduleMeasure);
-      window.visualViewport?.removeEventListener("resize", scheduleMeasure);
-    };
-  }, [pathname]);
-
-  /** Until measured, omit sublinks so they cannot widen the column and stretch the primary bar (`w-full` nav). */
-  const sublinksReady = stackWidth != null;
-  const navWidthLocked = stackWidth != null;
-
   return (
-    <div
-      className="flex max-w-full flex-none flex-col items-stretch"
-      style={navWidthLocked ? { width: stackWidth } : { width: "max-content" }}
-    >
-      <nav
-        ref={navRef}
-        className={`flex h-[clamp(2.75rem,2.35rem+1.1vw,3.5rem)] max-w-full flex-none items-stretch bg-primary px-0.5 text-[clamp(0.6875rem,0.58rem+0.32vw,0.9375rem)] leading-[clamp(1.125rem,1rem+0.35vw,1.5rem)] md:px-1 ${navWidthLocked ? "w-full" : "w-fit"}`}
-      >
+    <div className="flex w-full flex-col items-stretch">
+      <nav className="flex h-[clamp(2.75rem,2.35rem+1.1vw,3.5rem)] w-full flex-none items-stretch justify-between bg-primary lowercase px-0.5 text-[clamp(0.6875rem,0.58rem+0.32vw,0.9375rem)] leading-[clamp(1.125rem,1rem+0.35vw,1.5rem)] md:px-1">
         {links.map(({ href, label }) => {
           const active = pathname === href;
           const isName = href === "/";
@@ -108,7 +56,7 @@ function NavInner() {
           const linkClasses = [
             "flex h-full min-w-0 items-center whitespace-nowrap px-2 transition-colors md:px-3 lg:px-4",
             isName
-              ? `font-medium leading-none text-[clamp(1.125rem,0.82rem+1.05vw,1.875rem)] [font-family:IntraNet,sans-serif] ${active ? "text-accent" : "text-white/75 hover:text-white"}`
+              ? `font-bold italic lowercase leading-none tracking-[-0.06em] text-[clamp(1.125rem,0.82rem+1.05vw,1.875rem)] ${active ? "text-accent" : "text-white/75 hover:text-white"}`
               : active
                 ? "text-accent"
                 : "text-white/75 hover:text-white",
@@ -124,7 +72,7 @@ function NavInner() {
         })}
       </nav>
 
-      {(isHome || isWisdom) && sublinksReady && (
+      {(isHome || isWisdom) && (
         <div className="animate-fade-in pt-[clamp(0.875rem,0.65rem+0.65vw,1.5rem)]">
           <div className={subLinkBarClass}>
             {homeSubLinks.map((sub) => {
@@ -152,7 +100,7 @@ function NavInner() {
 
 export function Nav() {
   return (
-    <div className="hidden h-full w-max max-w-full flex-col items-start justify-between md:flex">
+    <div className="hidden h-full w-full flex-col items-start justify-between md:flex">
       <Suspense fallback={<nav className="flex flex-col gap-[24px] text-[20px] leading-[24px]" />}>
         <NavInner />
       </Suspense>

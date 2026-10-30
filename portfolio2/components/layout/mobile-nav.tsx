@@ -41,7 +41,7 @@ function MobileNavInner({ projectNavItems: _projectNavItems }: { projectNavItems
                 key={href}
                 href={href}
                 onClick={() => setOpen(false)}
-                className="leading-none text-accent transition-opacity hover:opacity-80"
+                className="lowercase leading-none text-accent transition-opacity hover:opacity-80"
                 style={{ fontFamily: '"IntraNet", sans-serif', fontWeight: 500, fontSize: 18 }}
               >
                 {label}
@@ -59,8 +59,8 @@ function MobileNavInner({ projectNavItems: _projectNavItems }: { projectNavItems
       >
         <div className="flex h-[62px] items-center">
           <span
-            className="flex-1 px-[20px] text-left leading-none"
-            style={{ fontFamily: "\"IntraNet\", sans-serif", fontWeight: 500, fontSize: 24 }}
+            className="flex-1 px-[20px] text-left lowercase leading-none"
+            style={{ fontWeight: 700, fontStyle: "italic", letterSpacing: "-0.06em", fontSize: 24 }}
           >
             Aalok Sud
           </span>
