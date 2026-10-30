@@ -14,6 +14,7 @@ export const allProjectsQuery = defineQuery(`
     slug,
     order,
     year,
+    summary,
     tags,
     link,
     linkLabel,
@@ -28,31 +29,15 @@ export const allProjectsQuery = defineQuery(`
       "dimensions": asset->metadata.dimensions,
     },
     specs,
-    description,
+    "description": description[] {
+      ...,
+      _type in ["image", "file"] => {
+        "url": asset->url,
+        "mimeType": asset->mimeType,
+        "lqip": asset->metadata.lqip,
+        "dimensions": asset->metadata.dimensions,
+      },
+    },
   }
 `);
 
-export const projectByOrderQuery = defineQuery(`
-  *[_type == "project" && order == $order][0] {
-    _id,
-    title,
-    slug,
-    order,
-    year,
-    tags,
-    link,
-    linkLabel,
-    liveLink,
-    collaborators,
-    "images": images[] {
-      alt,
-      caption,
-      "url": asset->url,
-      "mimeType": asset->mimeType,
-      "lqip": asset->metadata.lqip,
-      "dimensions": asset->metadata.dimensions,
-    },
-    specs,
-    description,
-  }
-`);

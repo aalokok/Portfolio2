@@ -22,6 +22,9 @@ type SiteShellSplit = SiteShellBase & {
   topRight: ReactNode;
   bottomLeft: ReactNode;
   bottomRight: ReactNode;
+  /** Drop the right column on mobile, for panes that only respond to hover. */
+  hideRightOnMobile?: boolean;
+  mobileAutoHeight?: never;
 };
 
 type SiteShellMerged = SiteShellBase & {
@@ -30,6 +33,9 @@ type SiteShellMerged = SiteShellBase & {
   topRight?: never;
   bottomLeft: ReactNode;
   bottomRight?: never;
+  hideRightOnMobile?: never;
+  /** Let the merged section grow with its content on mobile instead of a fixed height. */
+  mobileAutoHeight?: boolean;
 };
 
 type SiteShellProps = SiteShellSplit | SiteShellMerged;
@@ -53,6 +59,8 @@ export function SiteShell({
   columnRatio,
   projectNavItems,
   mobileSwapColumns = false,
+  hideRightOnMobile = false,
+  mobileAutoHeight = false,
 }: SiteShellProps) {
   const leftOrder  = mobileSwapColumns ? "order-2 md:order-none" : "";
   const rightOrder = mobileSwapColumns ? "order-1 md:order-none" : "";
@@ -68,7 +76,7 @@ export function SiteShell({
             {/* Nav — hidden on mobile */}
             <section className="hidden md:flex md:min-h-0 flex-col bg-background md:border-b md:border-foreground/15 md:p-[30px]" style={{ flex: leftRatio?.[0] ?? 1 }}>
               <div className={`${innerScroll} ${topLeftClassName ?? ""}`}>
-                <Nav projectNavItems={projectNavItems} />
+                <Nav />
               </div>
             </section>
             <section className={sectionBase} style={{ flex: leftRatio?.[1] ?? 1 }}>
@@ -80,7 +88,7 @@ export function SiteShell({
 
           {/* Right column (merged) — min-height on mobile so blobs canvas isn't 0-height */}
           <div className={`flex flex-col md:min-h-0 ${rightOrder}`} style={{ flex: columnRatio?.[1] ?? 1 }}>
-            <section className={`${sectionBase} h-[55vw] md:h-auto`} style={{ flex: 1 }}>
+            <section className={`${sectionBase} ${mobileAutoHeight ? "" : "h-[55vw] md:h-auto"}`} style={{ flex: 1 }}>
               <div className={`${innerScroll} h-full ${topRightClassName ?? ""}`}>
                 {right}
               </div>
@@ -96,7 +104,7 @@ export function SiteShell({
       <MobileNav projectNavItems={projectNavItems} />
       <MobileSublinks projectNavItems={projectNavItems} />
       <QuadrantShell
-        topLeft={<Nav projectNavItems={projectNavItems} />}
+        topLeft={<Nav />}
         topRight={topRight}
         bottomLeft={bottomLeft}
         bottomRight={bottomRight}
@@ -108,6 +116,7 @@ export function SiteShell({
         rightRatio={rightRatio}
         columnRatio={columnRatio}
         mobileSwapColumns={mobileSwapColumns}
+        hideRightOnMobile={hideRightOnMobile}
       />
     </>
   );

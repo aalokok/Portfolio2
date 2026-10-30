@@ -2,16 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { useCreationsView } from "./view-context";
-
-type ProjectMedia = {
-  url: string;
-  alt?: string | null;
-  caption?: string | null;
-  mimeType?: string | null;
-  lqip?: string | null;
-  dimensions?: { width: number; height: number } | null;
-};
+import type { ProjectMedia } from "@/lib/projects";
 
 type Props = {
   images: ProjectMedia[];
@@ -135,6 +126,7 @@ function MediaItem({
       width={width ?? 400}
       height={height ?? 300}
       loading="lazy"
+      sizes={sizes}
       className={className}
       placeholder={item.lqip ? "blur" : "empty"}
       blurDataURL={item.lqip ?? undefined}
@@ -225,30 +217,7 @@ function ScrollView({ images, title }: Props) {
   );
 }
 
-function GridView({ images, title }: Props) {
-  return (
-    <div className="grid h-full w-full place-content-center place-items-center gap-x-[10px] gap-y-[12px] md:grid-cols-3 md:grid-rows-2 md:gap-x-[18px] md:gap-y-[36px]">
-      {images.slice(0, 6).map((item, i) => (
-        <div key={item.url} className="relative aspect-square max-h-[105px] max-w-[105px] overflow-hidden bg-foreground/5 transition-[filter] duration-300 md:max-h-[200px] md:max-w-[200px] md:grayscale md:hover:grayscale-0">
-          <MediaItem
-            item={item}
-            alt={item.alt ?? `${title} ${i + 1}`}
-            width={item.dimensions?.width ?? 800}
-            height={item.dimensions?.height ?? 800}
-            className="h-full w-full object-cover"
-          />
-        </div>
-      ))}
-      {Array.from({ length: Math.max(0, 6 - images.length) }).map((_, i) => (
-        <div key={`empty-${i}`} className="aspect-square max-h-[105px] max-w-[105px]  bg-foreground/5 opacity-40 md:max-h-[200px] md:max-w-[200px]" />
-      ))}
-    </div>
-  );
-}
-
 export function ProjectImages({ images, title }: Props) {
-  const { view } = useCreationsView();
-
   if (!images || images.length === 0) {
     return (
       <div className="flex h-full items-center justify-center rounded-sm bg-foreground/5">
@@ -257,7 +226,37 @@ export function ProjectImages({ images, title }: Props) {
     );
   }
 
-  return view === "scroll"
-    ? <ScrollView images={images} title={title} />
-    : <GridView images={images} title={title} />;
+  return <ScrollView images={images} title={title} />;
+}
+
+/** One image or video at full size with its caption. Used by the gallery and inside the description. */
+export function MediaFigure({ item, alt, className = "" }: { item: ProjectMedia; alt: string; className?: string }) {
+  return (
+    <figure className={`flex flex-col items-start gap-[8px] ${className}`}>
+      <MediaItem
+        item={item}
+        alt={alt}
+        width={item.dimensions?.width ?? 1600}
+        height={item.dimensions?.height ?? 1200}
+        sizes="(max-width: 768px) 100vw, 640px"
+        className="h-auto max-h-[70vh] w-auto max-w-full object-contain md:max-w-[640px]"
+      />
+      {item.caption && (
+        <figcaption className="text-[11px] leading-[16px] text-foreground/50">
+          {item.caption}
+        </figcaption>
+      )}
+    </figure>
+  );
+}
+
+/** Every piece of media at full size, in order, for the documentation pane. */
+export function ProjectGallery({ images, title }: Props) {
+  return (
+    <div className="flex flex-col gap-[32px]">
+      {images.map((item, i) => (
+        <MediaFigure key={item.url} item={item} alt={item.alt ?? `${title} ${i + 1}`} />
+      ))}
+    </div>
+  );
 }

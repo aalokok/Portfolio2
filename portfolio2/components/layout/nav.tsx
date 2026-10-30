@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useLayoutEffect, useRef, useState } from "react";
-import { ViewToggle } from "@/components/creations/view-toggle";
 
 const links = [
   { href: "/", label: "Aalok Sud" },
@@ -30,11 +29,6 @@ export function projectNavDisplayTitle(title: string): string {
   return title;
 }
 
-const fallbackCreationsSubLinks = Array.from({ length: 10 }, (_, i) => ({
-  project: i + 1,
-  label: String(i + 1).padStart(2, "0"),
-}));
-
 const subLinkBarClass =
   "flex w-full min-h-[clamp(1.75rem,1.55rem+0.35vw,2rem)] items-stretch bg-accent px-0.5 text-[clamp(0.625rem,0.52rem+0.28vw,0.75rem)] leading-[clamp(1rem,0.9rem+0.25vw,1.125rem)] md:px-1";
 
@@ -45,21 +39,12 @@ function subLinkItemClass(subActive: boolean) {
   ].join(" ");
 }
 
-function creationsGridLinkClass(subActive: boolean) {
-  return [
-    "flex min-h-[clamp(1.75rem,1.55rem+0.35vw,2rem)] min-w-0 items-center justify-center whitespace-normal px-0.5 py-0.5 text-center text-[clamp(0.5625rem,0.48rem+0.22vw,0.75rem)] leading-snug transition-colors [overflow-wrap:anywhere] md:py-1",
-    subActive ? "text-primary" : "text-foreground/65 hover:text-foreground",
-  ].join(" ");
-}
-
-function NavInner({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
+function NavInner() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activeSection = searchParams.get("section") ?? "";
-  const activeProject = Number(searchParams.get("project") ?? "1");
   const isHome      = pathname === "/";
   const isWisdom    = pathname === "/wisdom";
-  const isCreations = pathname === "/creations-and-explorations";
 
   const navRef = useRef<HTMLElement>(null);
   const [stackWidth, setStackWidth] = useState<number | null>(null);
@@ -161,47 +146,17 @@ function NavInner({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
         </div>
       )}
 
-      {isCreations && sublinksReady && (
-        <div className="animate-fade-in pt-[clamp(0.875rem,0.65rem+0.65vw,1.5rem)]">
-          <div className="grid w-full min-w-0 grid-cols-4 gap-x-[clamp(0.125rem,0.08rem+0.2vw,0.25rem)] gap-y-[clamp(0.125rem,0.08rem+0.15vw,0.25rem)] bg-accent p-[clamp(0.25rem,0.15rem+0.25vw,0.375rem)]">
-            {(projectNavItems ?? fallbackCreationsSubLinks.map((s) => ({ order: s.project, title: s.label }))).map(
-              ({ order, title }) => {
-                const subActive = activeProject === order;
-                const label = projectNavDisplayTitle(title);
-                return (
-                  <Link
-                    key={order}
-                    href={`/creations-and-explorations?project=${order}`}
-                    className={creationsGridLinkClass(subActive)}
-                    title={title !== label ? title : undefined}
-                  >
-                    {label}
-                  </Link>
-                );
-              },
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
-export function Nav({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
+export function Nav() {
   return (
     <div className="hidden h-full w-max max-w-full flex-col items-start justify-between md:flex">
       <Suspense fallback={<nav className="flex flex-col gap-[24px] text-[20px] leading-[24px]" />}>
-        <NavInner projectNavItems={projectNavItems} />
-      </Suspense>
-      <Suspense>
-        <NavViewToggle />
+        <NavInner />
       </Suspense>
     </div>
   );
 }
 
-function NavViewToggle() {
-  const pathname = usePathname();
-  if (pathname !== "/creations-and-explorations") return null;
-  return <ViewToggle />;
-}

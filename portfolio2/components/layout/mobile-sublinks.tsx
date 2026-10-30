@@ -11,7 +11,7 @@ function MobileSublinksInner({ projectNavItems }: { projectNavItems?: ProjectNav
   const searchParams = useSearchParams();
   const [menuOpen, setMenuOpen] = useState(false);
   const activeSection = searchParams.get("section") ?? "";
-  const activeProject = Number(searchParams.get("project") ?? "1");
+  const activeProject = Number(searchParams.get("project"));
   const isHome      = pathname === "/";
   const isWisdom    = pathname === "/wisdom";
   const isCreations = pathname === "/creations-and-explorations";
@@ -38,11 +38,14 @@ function MobileSublinksInner({ projectNavItems }: { projectNavItems?: ProjectNav
   } else if (isCreations) {
     const navItems = projectNavItems
       ?? Array.from({ length: 10 }, (_, i) => ({ order: i + 1, title: String(i + 1).padStart(2, "0") }));
-    items = navItems.map(({ order, title }) => ({
-      href:   `/creations-and-explorations?project=${order}`,
-      label:  projectNavDisplayTitle(title),
-      active: activeProject === order,
-    }));
+    items = [
+      { href: "/creations-and-explorations", label: "All projects", active: !navItems.some(({ order }) => order === activeProject) },
+      ...navItems.map(({ order, title }) => ({
+        href:   `/creations-and-explorations?project=${order}`,
+        label:  projectNavDisplayTitle(title),
+        active: activeProject === order,
+      })),
+    ];
   }
 
   if (!items.length) return null;
