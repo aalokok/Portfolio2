@@ -13,13 +13,15 @@ type QuadrantShellProps = {
   leftRatio?: [number, number];
   /** Flex grow ratios for the right column [top, bottom]. Default [1, 1]. */
   rightRatio?: [number, number];
-  /** Flex grow ratio for left vs right columns. Default [1, 1]. */
-  columnRatio?: [number, number];
   /** On mobile, render the right column (visual content) above the left column (text). */
   mobileSwapColumns?: boolean;
   /** Drop the right column on mobile, for panes that only respond to hover. */
   hideRightOnMobile?: boolean;
 };
+
+/** Column widths shared by every page, so the nav keeps one width across the site. */
+export const LEFT_COLUMN = 4;
+export const RIGHT_COLUMN = 6;
 
 // On desktop: fixed h-screen grid with per-section scroll.
 // On mobile: natural-height stacking; the page (body) scrolls.
@@ -37,7 +39,6 @@ export function QuadrantShell({
   bottomRightClassName = "",
   leftRatio    = [1, 1],
   rightRatio   = [1, 1],
-  columnRatio  = [1, 1],
   mobileSwapColumns = false,
   hideRightOnMobile = false,
 }: QuadrantShellProps) {
@@ -47,7 +48,7 @@ export function QuadrantShell({
   return (
     <main className="flex flex-col bg-background pb-[calc(62px+env(safe-area-inset-bottom))] md:h-screen md:flex-row md:overflow-hidden md:pb-0">
       {/* Left column */}
-      <div className={`flex flex-col md:min-h-0 ${leftOrder}`} style={{ flex: columnRatio[0] }}>
+      <div className={`flex flex-col md:min-h-0 ${leftOrder}`} style={{ flex: LEFT_COLUMN }}>
         {/* Nav — hidden on mobile (MobileSublinks sticky bar replaces it) */}
         <section className="hidden md:flex md:min-h-0 flex-col bg-background md:p-[30px]" style={{ flex: leftRatio[0] }}>
           <div className={`${innerScroll} ${topLeftClassName}`}>{topLeft}</div>
@@ -58,7 +59,7 @@ export function QuadrantShell({
       </div>
 
       {/* Right column — gets a min-height on mobile so visual content (blobs, images) isn't 0-height */}
-      <div className={`${hideRightOnMobile ? "hidden md:flex" : "flex"} flex-col md:min-h-0 ${rightOrder}`} style={{ flex: columnRatio[1] }}>
+      <div className={`${hideRightOnMobile ? "hidden md:flex" : "flex"} flex-col md:min-h-0 ${rightOrder}`} style={{ flex: RIGHT_COLUMN }}>
         <section className={`${sectionBase} h-[55vw] md:h-auto`} style={{ flex: rightRatio[0] }}>
           <div className={`${innerScroll} h-full ${topRightClassName}`}>{topRight}</div>
         </section>

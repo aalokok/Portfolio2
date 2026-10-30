@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Nav, type ProjectNavItem } from "./nav";
 import { MobileNav } from "./mobile-nav";
 import { MobileSublinks } from "./mobile-sublinks";
-import { QuadrantShell } from "./quadrant-shell";
+import { LEFT_COLUMN, QuadrantShell, RIGHT_COLUMN } from "./quadrant-shell";
 
 type SiteShellBase = {
   topLeftClassName?: string;
@@ -11,7 +11,6 @@ type SiteShellBase = {
   bottomRightClassName?: string;
   leftRatio?: [number, number];
   rightRatio?: [number, number];
-  columnRatio?: [number, number];
   projectNavItems?: ProjectNavItem[];
   /** On mobile, render the right column (visual content) above the left column (text). */
   mobileSwapColumns?: boolean;
@@ -56,7 +55,6 @@ export function SiteShell({
   bottomRightClassName,
   leftRatio,
   rightRatio,
-  columnRatio,
   projectNavItems,
   mobileSwapColumns = false,
   hideRightOnMobile = false,
@@ -72,7 +70,7 @@ export function SiteShell({
         <MobileSublinks projectNavItems={projectNavItems} />
         <main className="flex flex-col bg-background pb-[calc(62px+env(safe-area-inset-bottom))] md:h-screen md:flex-row md:overflow-hidden md:pb-0">
           {/* Left column */}
-          <div className={`flex flex-col md:min-h-0 ${leftOrder}`} style={{ flex: columnRatio?.[0] ?? 1 }}>
+          <div className={`flex flex-col md:min-h-0 ${leftOrder}`} style={{ flex: LEFT_COLUMN }}>
             {/* Nav — hidden on mobile */}
             <section className="hidden md:flex md:min-h-0 flex-col bg-background md:p-[30px]" style={{ flex: leftRatio?.[0] ?? 1 }}>
               <div className={`${innerScroll} ${topLeftClassName ?? ""}`}>
@@ -87,7 +85,7 @@ export function SiteShell({
           </div>
 
           {/* Right column (merged) — min-height on mobile so blobs canvas isn't 0-height */}
-          <div className={`flex flex-col md:min-h-0 ${rightOrder}`} style={{ flex: columnRatio?.[1] ?? 1 }}>
+          <div className={`flex flex-col md:min-h-0 ${rightOrder}`} style={{ flex: RIGHT_COLUMN }}>
             <section className={`${sectionBase} ${mobileAutoHeight ? "" : "h-[55vw] md:h-auto"}`} style={{ flex: 1 }}>
               <div className={`${innerScroll} h-full ${topRightClassName ?? ""}`}>
                 {right}
@@ -114,7 +112,6 @@ export function SiteShell({
         bottomRightClassName={bottomRightClassName}
         leftRatio={leftRatio}
         rightRatio={rightRatio}
-        columnRatio={columnRatio}
         mobileSwapColumns={mobileSwapColumns}
         hideRightOnMobile={hideRightOnMobile}
       />

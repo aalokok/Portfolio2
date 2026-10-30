@@ -89,7 +89,7 @@ function MobileSublinksInner({ projectNavItems }: { projectNavItems?: ProjectNav
               key={item.href}
               href={item.href}
               onClick={() => setMenuOpen(false)}
-              className={`leading-none transition-opacity hover:opacity-80 ${item.active ? "text-foreground" : "text-foreground/70"}`}
+              className={`lowercase leading-none transition-opacity hover:opacity-80 ${item.active ? "text-foreground" : "text-foreground/70"}`}
               style={{ fontFamily: "\"IntraNet\", sans-serif", fontWeight: 500, fontSize: 18 }}
             >
               {item.label}
@@ -104,7 +104,7 @@ function MobileSublinksInner({ projectNavItems }: { projectNavItems?: ProjectNav
             <button
               type="button"
               onClick={() => setMenuOpen(true)}
-              className="truncate text-left leading-none opacity-100"
+              className="truncate text-left lowercase leading-none opacity-100"
               style={{ fontFamily: "\"IntraNet\", sans-serif", fontWeight: 500, fontSize: 12 }}
             >
               {activeItem.label}

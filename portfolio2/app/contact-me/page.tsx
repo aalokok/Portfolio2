@@ -13,7 +13,6 @@ const socials = [
 export default function ReachOutPage() {
   return (
     <SiteShell
-      columnRatio={[1, 1]}
       leftRatio={[1, 1]}
       mobileSwapColumns
       bottomLeft={

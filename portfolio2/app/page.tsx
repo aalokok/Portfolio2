@@ -63,7 +63,6 @@ export default async function Home({ searchParams }: HomeProps) {
   if (section === "experience") {
     return (
       <SiteShell
-        columnRatio={[1, 1]}
         leftRatio={[4, 6]}
         rightRatio={[5, 5]}
         bottomLeftClassName="overflow-y-auto"
@@ -205,7 +204,6 @@ export default async function Home({ searchParams }: HomeProps) {
   // Default (no section) and biography: blobs span full right column
   return (
     <SiteShell
-      columnRatio={[1, 1]}
       leftRatio={[4, 6]}
       bottomLeftClassName="overflow-y-auto"
       mobileSwapColumns
