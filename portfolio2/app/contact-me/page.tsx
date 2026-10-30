@@ -22,7 +22,7 @@ export default function ReachOutPage() {
           <div className="flex flex-col gap-[14px]">
             {socials.map(({ label, href, display, download }) => (
               <div key={label} className="flex flex-col gap-[2px]">
-                <p className="text-[11px] font-inter-sans italic tracking-[0.08em] text-foreground/40">{label}</p>
+                <p className="text-[11px] font-areal italic tracking-[0.08em] text-foreground/40">{label}</p>
                 <a
                   href={href}
                   target={download ? undefined : "_blank"}

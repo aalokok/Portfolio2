@@ -198,7 +198,7 @@ export function GenerativePoem() {
               transitionDelay: `${i * 140}ms`,
               opacity: visible ? 1 : 0,
               transform: visible ? "translateY(0)" : "translateY(6px)",
-              fontFamily: "var(--font-inter-sans), Inter, sans-serif",
+              fontFamily: "var(--font-areal-face), sans-serif",
               fontStyle: "italic",
             }}
           >

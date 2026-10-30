@@ -41,6 +41,12 @@ export const projectType = defineType({
       type: "number",
     }),
     defineField({
+      name: "summary",
+      title: "One-line Summary",
+      type: "string",
+      description: "Shown when hovering the project in the list. Falls back to the description's first sentence.",
+    }),
+    defineField({
       name: "tags",
       title: "Tags",
       type: "array",
@@ -111,7 +117,29 @@ export const projectType = defineType({
       name: "description",
       title: "Description",
       type: "array",
-      of: [{ type: "block" }],
+      description:
+        "The project write-up. Use the + / Insert button to drop images or videos between paragraphs.",
+      of: [
+        { type: "block" },
+        {
+          type: "image",
+          title: "Image",
+          options: { hotspot: true },
+          fields: [
+            defineField({ name: "alt", title: "Alt text", type: "string" }),
+            defineField({ name: "caption", title: "Caption", type: "string" }),
+          ],
+        },
+        {
+          type: "file",
+          title: "Video",
+          options: { accept: "video/*" },
+          fields: [
+            defineField({ name: "alt", title: "Alt text", type: "string" }),
+            defineField({ name: "caption", title: "Caption", type: "string" }),
+          ],
+        },
+      ],
     }),
   ],
   orderings: [

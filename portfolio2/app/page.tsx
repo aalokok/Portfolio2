@@ -7,7 +7,7 @@ type HomeProps = {
 
 const statementContent = (
   <div className="space-y-[12px]">
-    <p className="text-[16px] font-inter-sans italic">Statement</p>
+    <p className="text-[16px] font-areal italic">Statement</p>
     <p className="text-[13px] leading-[20px] text-foreground/80">
       My work focuses on what it means to create digital immersion. I am interested in how most systems translate gestures into simplified, readable inputs, often removing jargon and unneeded technical detail in the process. I use this as a starting point to explore how interaction can be simplified but still introduce awe and wonder. By using these abstractions, I want to demystify and democratize access to these experiences. At the same time make tech fun again.
     </p>
@@ -29,7 +29,7 @@ const statementContent = (
 
 const biographyContent = (
   <div className="space-y-[12px]">
-    <p className="text-[16px] font-inter-sans italic">Biography</p>
+    <p className="text-[16px] font-areal italic">Biography</p>
     <p className="text-[13px] leading-[20px] text-foreground/80">
       Aalok Sud (b. 2002) is a Montreal-based creative technologist and computation artist. Originally from Manali, India, his practice operates at the intersection of computer science, wearable technology, and interactive media.
     </p>

@@ -17,6 +17,8 @@ type QuadrantShellProps = {
   columnRatio?: [number, number];
   /** On mobile, render the right column (visual content) above the left column (text). */
   mobileSwapColumns?: boolean;
+  /** Drop the right column on mobile, for panes that only respond to hover. */
+  hideRightOnMobile?: boolean;
 };
 
 // On desktop: fixed h-screen grid with per-section scroll.
@@ -37,6 +39,7 @@ export function QuadrantShell({
   rightRatio   = [1, 1],
   columnRatio  = [1, 1],
   mobileSwapColumns = false,
+  hideRightOnMobile = false,
 }: QuadrantShellProps) {
   const leftOrder  = mobileSwapColumns ? "order-2 md:order-none" : "";
   const rightOrder = mobileSwapColumns ? "order-1 md:order-none" : "";
@@ -55,7 +58,7 @@ export function QuadrantShell({
       </div>
 
       {/* Right column — gets a min-height on mobile so visual content (blobs, images) isn't 0-height */}
-      <div className={`flex flex-col md:min-h-0 ${rightOrder}`} style={{ flex: columnRatio[1] }}>
+      <div className={`${hideRightOnMobile ? "hidden md:flex" : "flex"} flex-col md:min-h-0 ${rightOrder}`} style={{ flex: columnRatio[1] }}>
         <section className={`${sectionBase} h-[55vw] md:h-auto md:border-b md:border-foreground/15`} style={{ flex: rightRatio[0] }}>
           <div className={`${innerScroll} h-full ${topRightClassName}`}>{topRight}</div>
         </section>

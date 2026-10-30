@@ -4,8 +4,6 @@ type Spec = { label: string; value: string };
 type Collaborator = { name?: string | null; role?: string | null; link?: string | null };
 
 type Props = {
-  year?: number | null;
-  tags?: string[] | null;
   link?: string | null;
   linkLabel?: string | null;
   liveLink?: string | null;
@@ -22,15 +20,9 @@ function SpecItem({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-export function ProjectSpecs({ year, tags, link, linkLabel, liveLink, collaborators, specs }: Props) {
+export function ProjectSpecs({ link, linkLabel, liveLink, collaborators, specs }: Props) {
   return (
     <div className="grid grid-cols-2 gap-x-[24px] gap-y-[16px] content-start">
-      {year && (
-        <SpecItem label="Year">
-          {year}
-        </SpecItem>
-      )}
-
       {specs?.map(({ label, value }) => (
         <SpecItem key={label} label={label}>
           {value}
@@ -58,21 +50,6 @@ export function ProjectSpecs({ year, tags, link, linkLabel, liveLink, collaborat
                   <span className="text-[11px] text-foreground/40">{c.role}</span>
                 )}
               </div>
-            ))}
-          </div>
-        </SpecItem>
-      )}
-
-      {tags && tags.length > 0 && (
-        <SpecItem label="Tags">
-          <div className="flex flex-wrap gap-[6px]">
-            {tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-sm border border-foreground/15 px-[8px] py-[2px] text-[11px] text-foreground/70"
-              >
-                {tag}
-              </span>
             ))}
           </div>
         </SpecItem>

@@ -26,7 +26,7 @@ export function ReachOutForm() {
   return (
     <form action={action} className="flex h-full flex-col gap-[20px]">
       <div className="space-y-[4px]">
-        <h1 className="text-[18px] font-inter-sans italic leading-[28px]">Lets Talk</h1>
+        <h1 className="text-[18px] font-areal italic leading-[28px]">Lets Talk</h1>
         <p className="text-[13px] leading-[20px] text-foreground/60">
           Got a project, collaboration, or idea? Drop me a message.{" "}
           <a
