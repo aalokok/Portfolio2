@@ -57,7 +57,7 @@ export default async function CreationsAndExplorationsPage({ searchParams }: Pag
           leftRatio={[3, 7]}
           rightRatio={[7, 3]}
           bottomLeftClassName="overflow-y-auto"
-          bottomRightClassName="overflow-y-auto"
+          bottomRightClassName="overflow-y-auto md:-mt-[42px]"
           hideRightOnMobile
           topRight={<ProjectPreviewImages />}
           bottomLeft={

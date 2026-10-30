@@ -72,9 +72,9 @@ export function SiteShell({
         <MobileSublinks projectNavItems={projectNavItems} />
         <main className="flex flex-col bg-background pb-[calc(62px+env(safe-area-inset-bottom))] md:h-screen md:flex-row md:overflow-hidden md:pb-0">
           {/* Left column */}
-          <div className={`flex flex-col md:min-h-0 md:border-r md:border-foreground/15 ${leftOrder}`} style={{ flex: columnRatio?.[0] ?? 1 }}>
+          <div className={`flex flex-col md:min-h-0 ${leftOrder}`} style={{ flex: columnRatio?.[0] ?? 1 }}>
             {/* Nav — hidden on mobile */}
-            <section className="hidden md:flex md:min-h-0 flex-col bg-background md:border-b md:border-foreground/15 md:p-[30px]" style={{ flex: leftRatio?.[0] ?? 1 }}>
+            <section className="hidden md:flex md:min-h-0 flex-col bg-background md:p-[30px]" style={{ flex: leftRatio?.[0] ?? 1 }}>
               <div className={`${innerScroll} ${topLeftClassName ?? ""}`}>
                 <Nav />
               </div>
