@@ -140,7 +140,7 @@ function MediaItem({
   );
 }
 
-function ScrollView({ images, title }: Props) {
+function ScrollView({ images, title, reverse = false }: Props & { reverse?: boolean }) {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const autoScrollPausedUntilRef = React.useRef(0);
 
@@ -177,11 +177,11 @@ function ScrollView({ images, title }: Props) {
           fractionalCarry = delta - wholePixels;
 
           if (wholePixels !== 0) {
-            el.scrollLeft += wholePixels;
+            el.scrollLeft += reverse ? -wholePixels : wholePixels;
           }
 
-          if (el.scrollLeft >= maxScroll - 1) {
-            el.scrollLeft = 0;
+          if (reverse ? el.scrollLeft <= 1 : el.scrollLeft >= maxScroll - 1) {
+            el.scrollLeft = reverse ? maxScroll : 0;
             fractionalCarry = 0;
           }
         }
@@ -189,6 +189,7 @@ function ScrollView({ images, title }: Props) {
       rafId = window.requestAnimationFrame(tick);
     };
 
+    if (reverse) el.scrollLeft = el.scrollWidth - el.clientWidth;
     autoScrollPausedUntilRef.current = Date.now() + 900;
     el.addEventListener("wheel", onWheel, { passive: false });
     el.addEventListener("touchstart", onTouchStart, { passive: true });
@@ -200,7 +201,7 @@ function ScrollView({ images, title }: Props) {
       el.removeEventListener("touchstart", onTouchStart);
       el.removeEventListener("touchend", onTouchEnd);
     };
-  }, []);
+  }, [reverse]);
 
   return (
     <div ref={scrollRef} className="flex h-full flex-row gap-[10px] overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -223,7 +224,7 @@ function ScrollView({ images, title }: Props) {
   );
 }
 
-export function ProjectImages({ images, title }: Props) {
+export function ProjectImages({ images, title, reverse }: Props & { reverse?: boolean }) {
   if (!images || images.length === 0) {
     return (
       <div className="flex h-full items-center justify-center rounded-sm bg-foreground/5">
@@ -232,7 +233,7 @@ export function ProjectImages({ images, title }: Props) {
     );
   }
 
-  return <ScrollView images={images} title={title} />;
+  return <ScrollView images={images} title={title} reverse={reverse} />;
 }
 
 const aspectClass = {

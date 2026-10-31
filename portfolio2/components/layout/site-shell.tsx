@@ -17,6 +17,8 @@ type SiteShellBase = {
   activeCategory?: ProjectCategory;
   /** On mobile, render the right column (visual content) above the left column (text). */
   mobileSwapColumns?: boolean;
+  /** Drop the right column on mobile, for panes that only respond to hover. */
+  hideRightOnMobile?: boolean;
 };
 
 type SiteShellSplit = SiteShellBase & {
@@ -24,8 +26,6 @@ type SiteShellSplit = SiteShellBase & {
   topRight: ReactNode;
   bottomLeft: ReactNode;
   bottomRight: ReactNode;
-  /** Drop the right column on mobile, for panes that only respond to hover. */
-  hideRightOnMobile?: boolean;
   mobileAutoHeight?: never;
 };
 
@@ -35,7 +35,6 @@ type SiteShellMerged = SiteShellBase & {
   topRight?: never;
   bottomLeft: ReactNode;
   bottomRight?: never;
-  hideRightOnMobile?: never;
   /** Let the merged section grow with its content on mobile instead of a fixed height. */
   mobileAutoHeight?: boolean;
 };
@@ -74,7 +73,7 @@ export function SiteShell({
         <MobileSublinks projectNavItems={projectNavItems} activeCategory={activeCategory} />
         <main className="flex flex-col bg-background pb-[calc(62px+env(safe-area-inset-bottom))] md:h-screen md:flex-row md:overflow-hidden md:pb-0">
           {/* Left column */}
-          <div className={`flex flex-col md:min-h-0 ${leftOrder}`} style={{ flex: LEFT_COLUMN }}>
+          <div className={`flex flex-col md:min-h-0 md:min-w-0 ${leftOrder}`} style={{ flex: LEFT_COLUMN }}>
             {/* Nav — hidden on mobile */}
             <section className="hidden md:flex md:min-h-0 flex-col bg-background md:p-[30px]" style={{ flex: leftRatio?.[0] ?? 1 }}>
               <div className={`${innerScroll} ${topLeftClassName ?? ""}`}>
@@ -89,7 +88,7 @@ export function SiteShell({
           </div>
 
           {/* Right column (merged) — min-height on mobile so blobs canvas isn't 0-height */}
-          <div className={`flex flex-col md:min-h-0 ${rightOrder}`} style={{ flex: RIGHT_COLUMN }}>
+          <div className={`${hideRightOnMobile ? "hidden md:flex" : "flex"} flex-col md:min-h-0 md:min-w-0 ${rightOrder}`} style={{ flex: RIGHT_COLUMN }}>
             <section className={`${sectionBase} ${mobileAutoHeight ? "" : "h-[55vw] md:h-auto"}`} style={{ flex: 1 }}>
               <div className={`${innerScroll} h-full ${topRightClassName ?? ""}`}>
                 {right}
