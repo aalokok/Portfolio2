@@ -27,7 +27,6 @@ function MobileSublinksInner({
   const activeSection = searchParams.get("section") ?? "";
   const activeProject = Number(searchParams.get("project"));
   const isHome      = pathname === "/";
-  const isWisdom    = pathname === "/wisdom";
   const isCreations = pathname.startsWith("/creations-and-explorations");
   const isInspiration = pathname === INSPIRATION_HREF;
 
@@ -43,12 +42,12 @@ function MobileSublinksInner({
   type Item = { href: string; label: string; active: boolean };
   let items: Item[] = [];
 
-  if (isHome || isWisdom) {
+  if (isHome) {
     items = [
-      { href: "/?section=statement", label: "Statement",  active: isHome && activeSection === "statement" },
-      { href: "/?section=biography",  label: "Biography",  active: isHome && activeSection === "biography" },
-      { href: "/?section=experience", label: "Experience", active: isHome && activeSection === "experience" },
-      { href: "/wisdom",              label: "visions",     active: isWisdom },
+      { href: "/",                    label: "Intro",      active: activeSection === "" },
+      { href: "/?section=statement",  label: "Statement",  active: activeSection === "statement" },
+      { href: "/?section=biography",  label: "Biography",  active: activeSection === "biography" },
+      { href: "/?section=experience", label: "Experience", active: activeSection === "experience" },
     ];
   } else if (isCreations) {
     // The categories and Inspiration, then the projects in the current category.

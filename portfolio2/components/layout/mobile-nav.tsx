@@ -15,7 +15,6 @@ function MobileNavInner({ projectNavItems: _projectNavItems }: { projectNavItems
   const [open, setOpen] = useState(false);
   const pathname     = usePathname();
   const searchParams = useSearchParams();
-  const isWisdom = pathname === "/wisdom";
 
   // Lock body scroll while open
   useEffect(() => {
