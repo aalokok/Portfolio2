@@ -95,7 +95,20 @@ export function ProjectPreviewSummary() {
 }
 
 /** Name, one-liner, tags and year. Sits bottom right on the index, bottom left on a project. */
-export function ProjectSummary({ item, backLink = false }: { item: ProjectIndexItem; backLink?: boolean }) {
+export function ProjectSummary({
+  item,
+  backLink = false,
+  backHref = "/creations-and-explorations",
+  backLabel = "All projects",
+  children,
+}: {
+  item: ProjectIndexItem;
+  backLink?: boolean;
+  backHref?: string;
+  backLabel?: string;
+  /** Extra details shown under the tags. */
+  children?: React.ReactNode;
+}) {
   return (
     <div className="@container flex animate-fade-in-fast flex-col gap-[12px]">
       <h2 className="text-[length:min(12.5cqw,120px)] font-bold leading-[0.95] tracking-[-0.06em] text-foreground lowercase italic [overflow-wrap:anywhere]">
@@ -117,13 +130,14 @@ export function ProjectSummary({ item, backLink = false }: { item: ProjectIndexI
         </div>
         {item.year && <span className="text-[13px] text-foreground/60">{item.year}</span>}
       </div>
+      {children && <div className="mt-[12px]">{children}</div>}
       {backLink && (
         <Link
-          href="/creations-and-explorations"
+          href={backHref}
           className="mt-[4px] flex w-fit items-center gap-[6px] text-[13px] leading-[20px] text-foreground/65 transition-colors hover:text-primary"
         >
           <ArrowLeft className="h-[14px] w-[14px]" />
-          All projects
+          {backLabel}
         </Link>
       )}
     </div>

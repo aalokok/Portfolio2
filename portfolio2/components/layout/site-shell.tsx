@@ -3,6 +3,7 @@ import { Nav, type ProjectNavItem } from "./nav";
 import { MobileNav } from "./mobile-nav";
 import { MobileSublinks } from "./mobile-sublinks";
 import { LEFT_COLUMN, QuadrantShell, RIGHT_COLUMN } from "./quadrant-shell";
+import type { ProjectCategory } from "@/lib/projects";
 
 type SiteShellBase = {
   topLeftClassName?: string;
@@ -12,6 +13,8 @@ type SiteShellBase = {
   leftRatio?: [number, number];
   rightRatio?: [number, number];
   projectNavItems?: ProjectNavItem[];
+  /** Which Creations and Explorations tab is highlighted in the sub-nav (project pages pass their own). */
+  activeCategory?: ProjectCategory;
   /** On mobile, render the right column (visual content) above the left column (text). */
   mobileSwapColumns?: boolean;
 };
@@ -56,6 +59,7 @@ export function SiteShell({
   leftRatio,
   rightRatio,
   projectNavItems,
+  activeCategory,
   mobileSwapColumns = false,
   hideRightOnMobile = false,
   mobileAutoHeight = false,
@@ -67,14 +71,14 @@ export function SiteShell({
     return (
       <>
         <MobileNav projectNavItems={projectNavItems} />
-        <MobileSublinks projectNavItems={projectNavItems} />
+        <MobileSublinks projectNavItems={projectNavItems} activeCategory={activeCategory} />
         <main className="flex flex-col bg-background pb-[calc(62px+env(safe-area-inset-bottom))] md:h-screen md:flex-row md:overflow-hidden md:pb-0">
           {/* Left column */}
           <div className={`flex flex-col md:min-h-0 ${leftOrder}`} style={{ flex: LEFT_COLUMN }}>
             {/* Nav — hidden on mobile */}
             <section className="hidden md:flex md:min-h-0 flex-col bg-background md:p-[30px]" style={{ flex: leftRatio?.[0] ?? 1 }}>
               <div className={`${innerScroll} ${topLeftClassName ?? ""}`}>
-                <Nav />
+                <Nav activeCategory={activeCategory} />
               </div>
             </section>
             <section className={sectionBase} style={{ flex: leftRatio?.[1] ?? 1 }}>
@@ -100,9 +104,9 @@ export function SiteShell({
   return (
     <>
       <MobileNav projectNavItems={projectNavItems} />
-      <MobileSublinks projectNavItems={projectNavItems} />
+      <MobileSublinks projectNavItems={projectNavItems} activeCategory={activeCategory} />
       <QuadrantShell
-        topLeft={<Nav />}
+        topLeft={<Nav activeCategory={activeCategory} />}
         topRight={topRight}
         bottomLeft={bottomLeft}
         bottomRight={bottomRight}

@@ -12,4 +12,7 @@ export const client = createClient({
   apiVersion: "2024-01-01",
   useCdn: false,
   token: process.env.SANITY_API_READ_TOKEN,
+  // With a token and this API version the default would be "raw", which also
+  // returns unpublished drafts. Only ever show published content on the site.
+  perspective: "published",
 });

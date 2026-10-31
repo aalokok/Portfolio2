@@ -1,8 +1,11 @@
+import Link from "next/link";
+import { LandingSwitch } from "@/components/landing-switch";
+import { DEFAULT_CATEGORY, isProjectCategory, type ProjectCategory } from "@/lib/projects";
 import { Blobs } from "@/components/blobs";
 import { SiteShell } from "@/components/layout/site-shell";
 
 type HomeProps = {
-  searchParams: Promise<{ section?: string }>;
+  searchParams: Promise<{ section?: string; view?: string }>;
 };
 
 const statementContent = (
@@ -31,7 +34,7 @@ const biographyContent = (
   <div className="space-y-[12px]">
     <p className="text-[16px] font-areal italic">Biography</p>
     <p className="text-[13px] leading-[20px] text-foreground/80">
-      Aalok Sud (b. 2002) is a Montreal-based creative technologist and computation artist. Originally from Manali, India, his practice operates at the intersection of computer science, wearable technology, and interactive media.
+      Aalok Sud (b. 2002) is a Toronto-based designer, creative technologist and computation artist. Originally from Manali, India, his practice operates at the intersection of computer science, wearable technology, and interactive media.
     </p>
     <p className="text-[13px] leading-[20px] text-foreground/80">
       Since 2024, his work and research-creation projects have been featured in several Montreal-based institutions and festivals.
@@ -40,23 +43,92 @@ const biographyContent = (
       He has served as the Outreach Officer for the Computation Arts Student Society (CASS), contributing to the development of the school&apos;s computation arts community. Outside of his primary practice, he has worked as a creative intern for hims &amp; hers, focusing on performance creatives. His technical experience includes a software development contract at the Innovation Lab at Concordia University, where he developed mobile interfaces and sensor-integrated modules for agricultural monitoring systems.
     </p>
     <p className="text-[13px] leading-[20px] text-foreground/80">
-      He is currently completing a BCompSci Joint Major in Computation Arts and Computer Science at Concordia University (Montreal, CAN), and holds a Professional Certificate in UX Design from Google. His work continues to explore the friction between biological motion and digital interfaces through the use of machine learning, spatial audio, and procedural environments.
+      He holds a BCompSci Joint Major in Computation Arts and Computer Science from Concordia University (Montreal, 2026) and a Professional Certificate in UX Design from Google. His work continues to explore the friction between biological motion and digital interfaces through the use of machine learning, spatial audio, and procedural environments.
     </p>
   </div>
 );
 
-function LandingContent() {
+const designServices = [
+  { name: "UI/UX design", detail: "User flows, wireframes and prototypes in Figma (Google UX Design Certificate)." },
+  { name: "Brand identity and design systems", detail: "A system I built for The Bhag Club helped it grow from 500 to 50k followers." },
+  { name: "Web design and front-end", detail: "Responsive sites built in React and Next.js." },
+  { name: "Marketing creative", detail: "Ads for Meta and Google, and email campaigns; my campaign at hims & hers raised customer acquisition by 5% in its first month." },
+];
+
+const techSkills = [
+  { name: "Interactive installations and wearables", detail: "Sensors, Arduino and machine learning." },
+  { name: "Real-time and audio-reactive visuals", detail: "TouchDesigner, GLSL, Three.js." },
+  { name: "Sound and live performance", detail: "Max/MSP, live coding and VJ sets (JenniCam@30 at Milieux, Droplets Collective)." },
+  { name: "Game and 3D environments", detail: "Unreal Engine, Blender." },
+];
+
+// Same type as the Statement and Biography pages: 16px italic headings, 13px body.
+const linkClass = "text-primary underline underline-offset-[3px] hover:no-underline";
+
+function SkillList({ items }: { items: { name: string; detail: string }[] }) {
   return (
-    <div className="space-y-[20px] p-[8px]">
-      <p className="max-w-[560px] text-[13px] leading-[20px] text-foreground/80">
-        Computation artist and creative technologist working across interactive systems and realtime environments.
-      </p>
+    <ul className="space-y-[6px]">
+      {items.map(({ name, detail }) => (
+        <li key={name} className="text-[13px] leading-[20px] text-foreground/80">
+          <span className="italic text-foreground">{name}</span> — {detail}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Cta({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <p className="text-[13px] leading-[20px]">
+      <Link href={href} className={linkClass}>
+        {children}
+      </Link>
+    </p>
+  );
+}
+
+function LandingContent({ view }: { view: ProjectCategory }) {
+  return (
+    <div className="max-w-[560px] p-[8px]">
+      <LandingSwitch
+        initial={view}
+        intro={
+          <p className="text-[13px] leading-[20px] text-foreground/80">
+            Designer and creative technologist in Toronto,{" "}
+            <Link href="/contact-me" className={linkClass}>
+              open to work
+            </Link>
+            . I design clear digital products and build interactive work that people remember.
+          </p>
+        }
+        panels={{
+          "creative-technology": (
+            <section className="space-y-[10px]">
+              <p className="text-[13px] leading-[20px] text-foreground/80">
+                I build interactive installations, real-time visuals and sound, combining code, hardware and performance. My work has been exhibited at Ludodrome 2026 and Concordia&apos;s Artefacts exhibition.
+              </p>
+              <SkillList items={techSkills} />
+              <Cta href="/creations-and-explorations?category=creative-technology">See creative technology work</Cta>
+            </section>
+          ),
+          design: (
+            <section className="space-y-[10px]">
+              <p className="text-[13px] leading-[20px] text-foreground/80">
+                I design interfaces, brands and systems that are easy to use and hold together at scale, from first sketch to working code.
+              </p>
+              <SkillList items={designServices} />
+              <Cta href="/creations-and-explorations?category=design">See design case studies</Cta>
+            </section>
+          ),
+        }}
+      />
     </div>
   );
 }
 
 export default async function Home({ searchParams }: HomeProps) {
-  const { section } = await searchParams;
+  const { section, view } = await searchParams;
+  const landingView: ProjectCategory = isProjectCategory(view) ? view : DEFAULT_CATEGORY;
 
   const blobs = <Blobs className="h-full w-full" />;
 
@@ -213,7 +285,7 @@ export default async function Home({ searchParams }: HomeProps) {
           ? statementContent
           : section === "biography"
             ? biographyContent
-            : <LandingContent />
+            : <LandingContent view={landingView} />
       }
     />
   );
