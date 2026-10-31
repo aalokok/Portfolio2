@@ -256,14 +256,13 @@ export function LandingSwitch({
             ))}
           </span>
         </span>
-        {/* Carousel-style dots below the headline: there are two sides. The current one is
-            filled; once both have been seen, both stay filled. */}
+        {/* Carousel-style dots below the headline: the filled one is the word showing now. */}
         <span aria-hidden className="mt-[8px] flex items-center gap-[4px]">
           {(Object.keys(WORDS) as ProjectCategory[]).map((key) => (
             <span
               key={key}
               className={`h-[6px] w-[6px] rounded-full border border-primary transition-colors duration-500 ${
-                key === view || metBoth ? "bg-primary" : "bg-transparent"
+                key === view ? "bg-primary" : "bg-transparent"
               }`}
             />
           ))}
