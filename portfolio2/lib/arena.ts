@@ -48,9 +48,39 @@ type RawBlock = {
   attachment?: { url?: string | null } | null;
 };
 
+const namedEntities: Record<string, string> = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  nbsp: " ",
+  ndash: "–",
+  mdash: "—",
+  hellip: "…",
+  lsquo: "‘",
+  rsquo: "’",
+  ldquo: "“",
+  rdquo: "”",
+};
+
+/** Are.na sends text with HTML entities (`&gt;`, `&nbsp;`, `&#39;`...) and markdown quote markers. */
+function plainText(content: string): string {
+  return content
+    .replace(/&(?:#(d+)|#x([da-f]+)|([a-z]+));/gi, (match, dec, hex, name) => {
+      if (dec) return String.fromCodePoint(Number(dec));
+      if (hex) return String.fromCodePoint(parseInt(hex, 16));
+      return namedEntities[name.toLowerCase()] ?? match;
+    })
+    .replace(/ /g, " ")
+    .replace(/^> ?/gm, "")
+    .trim();
+}
+
 function toBlock(b: RawBlock): ArenaBlock | null {
   const onArena = `https://www.are.na/block/${b.id}`;
-  const title = (b.title || b.generated_title || "").trim();
+  const rawTitle = plainText(b.title || b.generated_title || "");
+  const title = rawTitle === "Untitled" ? "" : rawTitle;
   const image = b.image?.display?.url;
   const largeImage = b.image?.large?.url ?? image;
   switch (b.class) {
@@ -63,7 +93,7 @@ function toBlock(b: RawBlock): ArenaBlock | null {
     case "Attachment":
       return { id: b.id, kind: "attachment", title, image, largeImage, href: b.attachment?.url || onArena };
     case "Text":
-      return b.content ? { id: b.id, kind: "text", title, text: b.content, href: onArena } : null;
+      return b.content ? { id: b.id, kind: "text", title, text: plainText(b.content), href: onArena } : null;
     case "Channel":
       return {
         id: b.id,
@@ -94,7 +124,7 @@ const fetchBlocks = unstable_cache(
     const data = (await res.json()) as { contents?: RawBlock[] };
     return (data.contents ?? []).map(toBlock).filter((b): b is ArenaBlock => b !== null);
   },
-  ["arena-channel"],
+  ["arena-channel-v3"],
   { revalidate: 3600 },
 );
 

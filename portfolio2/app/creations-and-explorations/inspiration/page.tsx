@@ -16,6 +16,15 @@ export const metadata: Metadata = {
 
 type Board = { _id: string; title?: string | null; url: string; note?: string | null };
 
+// Always shown first. Any boards added in Sanity follow these.
+const codeBoards: Board[] = [
+  {
+    _id: "talktalktalk",
+    title: "talktalktalk",
+    url: "https://www.are.na/aalok-sud/talktalktalk-wsz5avxtbce",
+  },
+];
+
 const heading = "text-[16px] font-areal italic";
 const body = "text-[13px] leading-[20px] text-foreground/80";
 const linkClass = "text-primary underline underline-offset-[3px] hover:no-underline";
@@ -99,7 +108,8 @@ function Block({ block }: { block: ArenaBlock }) {
 }
 
 export default async function InspirationPage() {
-  const boards: Board[] = isSanityConfigured ? await client.fetch(inspirationBoardsQuery) : [];
+  const sanityBoards: Board[] = isSanityConfigured ? await client.fetch(inspirationBoardsQuery) : [];
+  const boards = [...codeBoards, ...sanityBoards];
   const loaded = await Promise.all(boards.map((b) => getArenaBoard(b.url)));
 
   return (
