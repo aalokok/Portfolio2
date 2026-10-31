@@ -271,28 +271,32 @@ export function LandingSwitch({
 
       {intro}
 
-      {(Object.keys(WORDS) as ProjectCategory[]).map((value) => (
-        <div
-          key={value}
-          role="region"
-          aria-live="polite"
-          aria-label={value === "design" ? "Design" : "Creative Technology"}
-          hidden={view !== value}
-          className="animate-fade-in-fast"
-        >
-          {panels[value]}
-        </div>
-      ))}
+      {/* Both panels share one cell sized to the taller, so the headline stays put when switching. */}
+      <div className="grid">
+        {(Object.keys(WORDS) as ProjectCategory[]).map((value) => (
+          <div
+            key={value}
+            role="region"
+            aria-live="polite"
+            aria-label={value === "design" ? "Design" : "Creative Technology"}
+            aria-hidden={view !== value}
+            className={`col-start-1 row-start-1 ${view === value ? "animate-fade-in-fast" : "invisible"}`}
+          >
+            {panels[value]}
+          </div>
+        ))}
+      </div>
 
-      {/* The payoff: appears once the visitor has seen both sides, then stays put. */}
-      {metBoth && (
-        <p className="animate-fade-in text-[13px] leading-[20px] text-foreground/60">
-          you&apos;ve met both of me.{" "}
-          <Link href="/contact-me" className="text-primary underline underline-offset-[3px] hover:no-underline">
-            let&apos;s talk
-          </Link>
-        </p>
-      )}
+      {/* The payoff: its line is always reserved, so appearing never moves the text around it. */}
+      <p
+        aria-hidden={!metBoth}
+        className={`text-[13px] leading-[20px] text-foreground/60 ${metBoth ? "animate-fade-in" : "invisible"}`}
+      >
+        you&apos;ve met both of me.{" "}
+        <Link href="/contact-me" className="text-primary underline underline-offset-[3px] hover:no-underline">
+          let&apos;s talk
+        </Link>
+      </p>
     </div>
   );
 }

@@ -27,6 +27,7 @@ type SiteShellSplit = SiteShellBase & {
   bottomLeft: ReactNode;
   bottomRight: ReactNode;
   mobileAutoHeight?: never;
+  compactNav?: never;
 };
 
 type SiteShellMerged = SiteShellBase & {
@@ -35,6 +36,8 @@ type SiteShellMerged = SiteShellBase & {
   topRight?: never;
   bottomLeft: ReactNode;
   bottomRight?: never;
+  /** Shrink the nav's section to the nav itself, leaving the rest of the column to the text below. */
+  compactNav?: boolean;
   /** Let the merged section grow with its content on mobile instead of a fixed height. */
   mobileAutoHeight?: boolean;
 };
@@ -62,6 +65,7 @@ export function SiteShell({
   mobileSwapColumns = false,
   hideRightOnMobile = false,
   mobileAutoHeight = false,
+  compactNav = false,
 }: SiteShellProps) {
   const leftOrder  = mobileSwapColumns ? "order-2 md:order-none" : "";
   const rightOrder = mobileSwapColumns ? "order-1 md:order-none" : "";
@@ -75,7 +79,7 @@ export function SiteShell({
           {/* Left column */}
           <div className={`flex flex-col md:min-h-0 md:min-w-0 ${leftOrder}`} style={{ flex: LEFT_COLUMN }}>
             {/* Nav — hidden on mobile */}
-            <section className="hidden md:flex md:min-h-0 flex-col bg-background md:p-[30px]" style={{ flex: leftRatio?.[0] ?? 1 }}>
+            <section className="hidden md:flex md:min-h-0 flex-col bg-background md:p-[30px]" style={{ flex: compactNav ? "none" : leftRatio?.[0] ?? 1 }}>
               <div className={`${innerScroll} ${topLeftClassName ?? ""}`}>
                 <Nav activeCategory={activeCategory} />
               </div>

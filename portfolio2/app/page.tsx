@@ -89,7 +89,7 @@ function Cta({ href, children }: { href: string; children: React.ReactNode }) {
 
 function LandingContent({ view }: { view: ProjectCategory }) {
   return (
-    <div className="max-w-[560px] p-[8px]">
+    <div className="max-w-[560px]">
       <LandingSwitch
         initial={view}
         intro={
@@ -277,15 +277,19 @@ export default async function Home({ searchParams }: HomeProps) {
   return (
     <SiteShell
       leftRatio={[4, 6]}
+      compactNav
       bottomLeftClassName="overflow-y-auto"
       mobileSwapColumns
       right={blobs}
       bottomLeft={
-        section === "statement"
-          ? statementContent
-          : section === "biography"
-            ? biographyContent
-            : <LandingContent view={landingView} />
+        // Vertically centered on desktop. Taller text still starts at the top and scrolls.
+        <div className="md:flex md:min-h-full md:flex-col md:justify-center">
+          {section === "statement"
+            ? statementContent
+            : section === "biography"
+              ? biographyContent
+              : <LandingContent view={landingView} />}
+        </div>
       }
     />
   );
