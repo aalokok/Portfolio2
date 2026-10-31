@@ -18,15 +18,12 @@ const links = [
   { href: "/contact-me", label: "Reach Out" },
 ];
 
-type SubLink =
-  | { kind: "section"; section: string; label: string }
-  | { kind: "page"; href: string; label: string };
-
-const homeSubLinks: SubLink[] = [
-  { kind: "section", section: "statement",  label: "Statement" },
-  { kind: "section", section: "biography",  label: "Biography" },
-  { kind: "section", section: "experience", label: "Experience" },
-  { kind: "page",    href: "/wisdom",       label: "Visions" },
+// "" is the landing page itself, which has no section in its URL.
+const homeSubLinks = [
+  { section: "", label: "Intro" },
+  { section: "statement", label: "Statement" },
+  { section: "biography", label: "Biography" },
+  { section: "experience", label: "Experience" },
 ];
 
 export type ProjectNavItem = { order: number; title: string };
@@ -52,7 +49,6 @@ function NavInner({ activeCategory }: { activeCategory?: ProjectCategory }) {
   const searchParams = useSearchParams();
   const activeSection = searchParams.get("section") ?? "";
   const isHome      = pathname === "/";
-  const isWisdom    = pathname === "/wisdom";
   const isCreations   = pathname.startsWith("/creations-and-explorations");
   const isInspiration = pathname === INSPIRATION_HREF;
   // A project page passes its own category; otherwise the URL decides.
@@ -86,24 +82,18 @@ function NavInner({ activeCategory }: { activeCategory?: ProjectCategory }) {
         })}
       </nav>
 
-      {(isHome || isWisdom) && (
+      {isHome && (
         <div className="animate-fade-in pt-[clamp(0.875rem,0.65rem+0.65vw,1.5rem)]">
           <div className={subLinkBarClass}>
-            {homeSubLinks.map((sub) => {
-              const subHref   = sub.kind === "section" ? `/?section=${sub.section}` : sub.href;
-              const subActive = sub.kind === "section"
-                ? isHome && activeSection === sub.section
-                : isWisdom;
-              return (
-                <Link
-                  key={subHref}
-                  href={subHref}
-                  className={subLinkItemClass(subActive)}
-                >
-                  {sub.label}
-                </Link>
-              );
-            })}
+            {homeSubLinks.map(({ section, label }) => (
+              <Link
+                key={label}
+                href={section ? `/?section=${section}` : "/"}
+                className={subLinkItemClass(activeSection === section)}
+              >
+                {label}
+              </Link>
+            ))}
           </div>
         </div>
       )}
