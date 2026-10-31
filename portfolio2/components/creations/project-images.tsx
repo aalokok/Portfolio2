@@ -24,10 +24,13 @@ function LazyVideo({
   src,
   className,
   fill,
+  controls = false,
 }: {
   src: string;
   className?: string;
   fill?: boolean;
+  /** Player mode: controls and sound, no autoplay. Default is a silent ambient loop. */
+  controls?: boolean;
 }) {
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const [loaded, setLoaded] = React.useState(false);
@@ -51,11 +54,12 @@ function LazyVideo({
     <video
       ref={videoRef}
       src={loaded ? src : undefined}
-      autoPlay
-      muted
-      loop
+      autoPlay={!controls}
+      muted={!controls}
+      loop={!controls}
+      controls={controls}
       playsInline
-      preload="none"
+      preload={controls ? "metadata" : "none"}
       className={className}
       style={
         fill
@@ -74,6 +78,7 @@ function MediaItem({
   width,
   height,
   sizes,
+  videoControls,
 }: {
   item: ProjectMedia;
   alt: string;
@@ -82,9 +87,10 @@ function MediaItem({
   width?: number;
   height?: number;
   sizes?: string;
+  videoControls?: boolean;
 }) {
   if (isVideo(item)) {
-    return <LazyVideo src={item.url} className={className} fill={fill} />;
+    return <LazyVideo src={item.url} className={className} fill={fill} controls={videoControls} />;
   }
 
   if (isGif(item)) {
@@ -229,19 +235,70 @@ export function ProjectImages({ images, title }: Props) {
   return <ScrollView images={images} title={title} />;
 }
 
-/** One image or video at full size with its caption. Used by the gallery and inside the description. */
-export function MediaFigure({ item, alt, className = "" }: { item: ProjectMedia; alt: string; className?: string }) {
+const aspectClass = {
+  square: "aspect-square",
+  landscape: "aspect-[4/3]",
+  portrait: "aspect-[3/4]",
+  wide: "aspect-video",
+} as const;
+
+/** One image or video with its caption. Used by the gallery and every media block in the story.
+ *  Images carry data-zoom-* attributes so a surrounding <Lightbox> can enlarge them on click. */
+export function MediaFigure({
+  item,
+  alt,
+  className = "",
+  fill = false,
+  aspect,
+  sizes = "(max-width: 768px) 100vw, 640px",
+  videoControls = false,
+  showCaption = true,
+}: {
+  item: ProjectMedia;
+  alt: string;
+  className?: string;
+  /** Stretch the media to the figure's width (wide, floated, grid and side-by-side layouts). */
+  fill?: boolean;
+  /** Crop to a fixed shape. */
+  aspect?: keyof typeof aspectClass | null;
+  sizes?: string;
+  videoControls?: boolean;
+  showCaption?: boolean;
+}) {
+  const video = isVideo(item);
+  const mediaClass = aspect
+    ? `${aspectClass[aspect]} h-auto w-full object-cover`
+    : fill
+      ? "h-auto w-full object-contain"
+      : "h-auto max-h-[70vh] w-auto max-w-full object-contain md:max-w-[640px]";
+  const media = (
+    <MediaItem
+      item={item}
+      alt={alt}
+      width={item.dimensions?.width ?? 1600}
+      height={item.dimensions?.height ?? 1200}
+      sizes={sizes}
+      className={mediaClass}
+      videoControls={videoControls}
+    />
+  );
   return (
     <figure className={`flex flex-col items-start gap-[8px] ${className}`}>
-      <MediaItem
-        item={item}
-        alt={alt}
-        width={item.dimensions?.width ?? 1600}
-        height={item.dimensions?.height ?? 1200}
-        sizes="(max-width: 768px) 100vw, 640px"
-        className="h-auto max-h-[70vh] w-auto max-w-full object-contain md:max-w-[640px]"
-      />
-      {item.caption && (
+      {video ? (
+        media
+      ) : (
+        <button
+          type="button"
+          className={`block cursor-zoom-in ${fill || aspect ? "w-full" : "max-w-full"}`}
+          aria-label={`Enlarge image: ${alt}`}
+          data-zoom-src={item.url}
+          data-zoom-alt={alt}
+          data-zoom-caption={item.caption ?? ""}
+        >
+          {media}
+        </button>
+      )}
+      {showCaption && item.caption && (
         <figcaption className="text-[11px] leading-[16px] text-foreground/50">
           {item.caption}
         </figcaption>
@@ -250,12 +307,24 @@ export function MediaFigure({ item, alt, className = "" }: { item: ProjectMedia;
   );
 }
 
-/** Every piece of media at full size, in order, for the documentation pane. */
-export function ProjectGallery({ images, title }: Props) {
+const galleryCols: Record<number, string> = {
+  2: "grid grid-cols-1 items-start gap-[24px] md:grid-cols-2",
+  3: "grid grid-cols-2 items-start gap-[16px] md:grid-cols-3",
+};
+
+/** Every piece of media in the Gallery field, after the story. */
+export function ProjectGallery({ images, title, columns }: Props & { columns?: number | null }) {
+  const grid = columns ? galleryCols[columns] : undefined;
   return (
-    <div className="flex flex-col gap-[32px]">
+    <div className={grid ?? "flex flex-col gap-[32px]"}>
       {images.map((item, i) => (
-        <MediaFigure key={item.url} item={item} alt={item.alt ?? `${title} ${i + 1}`} />
+        <MediaFigure
+          key={item.url}
+          item={item}
+          alt={item.alt ?? `${title} ${i + 1}`}
+          fill={!!grid}
+          sizes={grid ? "(max-width: 768px) 100vw, 35vw" : undefined}
+        />
       ))}
     </div>
   );

@@ -16,6 +16,8 @@ const areal = localFont({
 });
 
 export const metadata: Metadata = {
+  // Lets link previews turn relative image paths into full aalok.space URLs.
+  metadataBase: new URL("https://www.aalok.space"),
   title: "Aalok Sud",
   description: "Designer and Creative Technologist",
   icons: {

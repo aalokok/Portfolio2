@@ -3,9 +3,23 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import {
+  DEFAULT_CATEGORY,
+  INSPIRATION_HREF,
+  PROJECT_CATEGORIES,
+  categoryHref,
+  isProjectCategory,
+  type ProjectCategory,
+} from "@/lib/projects";
 import { projectNavDisplayTitle, type ProjectNavItem } from "./nav";
 
-function MobileSublinksInner({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
+function MobileSublinksInner({
+  projectNavItems,
+  activeCategory,
+}: {
+  projectNavItems?: ProjectNavItem[];
+  activeCategory?: ProjectCategory;
+}) {
   const router = useRouter();
   const pathname     = usePathname();
   const searchParams = useSearchParams();
@@ -14,7 +28,8 @@ function MobileSublinksInner({ projectNavItems }: { projectNavItems?: ProjectNav
   const activeProject = Number(searchParams.get("project"));
   const isHome      = pathname === "/";
   const isWisdom    = pathname === "/wisdom";
-  const isCreations = pathname === "/creations-and-explorations";
+  const isCreations = pathname.startsWith("/creations-and-explorations");
+  const isInspiration = pathname === INSPIRATION_HREF;
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
@@ -36,10 +51,19 @@ function MobileSublinksInner({ projectNavItems }: { projectNavItems?: ProjectNav
       { href: "/wisdom",              label: "visions",     active: isWisdom },
     ];
   } else if (isCreations) {
-    const navItems = projectNavItems
-      ?? Array.from({ length: 10 }, (_, i) => ({ order: i + 1, title: String(i + 1).padStart(2, "0") }));
+    // The categories and Inspiration, then the projects in the current category.
+    const navItems = isInspiration ? [] : (projectNavItems ?? []);
+    const categoryParam = searchParams.get("category");
+    const currentCategory: ProjectCategory =
+      activeCategory ?? (isProjectCategory(categoryParam) ? categoryParam : DEFAULT_CATEGORY);
+    const onProject = navItems.some(({ order }) => order === activeProject);
     items = [
-      { href: "/creations-and-explorations", label: "All projects", active: !navItems.some(({ order }) => order === activeProject) },
+      ...PROJECT_CATEGORIES.map(({ value, label }) => ({
+        href: categoryHref(value),
+        label,
+        active: !isInspiration && !onProject && value === currentCategory,
+      })),
+      { href: INSPIRATION_HREF, label: "Inspiration", active: isInspiration },
       ...navItems.map(({ order, title }) => ({
         href:   `/creations-and-explorations?project=${order}`,
         label:  projectNavDisplayTitle(title),
@@ -134,10 +158,16 @@ function MobileSublinksInner({ projectNavItems }: { projectNavItems?: ProjectNav
   );
 }
 
-export function MobileSublinks({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
+export function MobileSublinks({
+  projectNavItems,
+  activeCategory,
+}: {
+  projectNavItems?: ProjectNavItem[];
+  activeCategory?: ProjectCategory;
+}) {
   return (
     <Suspense fallback={null}>
-      <MobileSublinksInner projectNavItems={projectNavItems} />
+      <MobileSublinksInner projectNavItems={projectNavItems} activeCategory={activeCategory} />
     </Suspense>
   );
 }
