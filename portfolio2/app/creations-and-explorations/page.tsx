@@ -8,8 +8,7 @@ import { ProjectDescription } from "@/components/creations/project-description";
 import {
   ProjectIndexProvider,
   ProjectList,
-  ProjectPreviewImages,
-  ProjectPreviewSummary,
+  ProjectPreview,
   ProjectSummary,
   type ProjectIndexItem,
 } from "@/components/creations/project-index";
@@ -100,11 +99,9 @@ export default async function CreationsAndExplorationsPage({ searchParams }: Pag
           projectNavItems={projectNavItems}
           activeCategory={navCategory}
           leftRatio={[3, 7]}
-          rightRatio={[7, 3]}
           bottomLeftClassName="overflow-y-auto"
-          bottomRightClassName="overflow-y-auto md:-mt-[42px]"
           hideRightOnMobile
-          topRight={<ProjectPreviewImages />}
+          right={<ProjectPreview />}
           bottomLeft={
             items.length > 0 ? (
               <ProjectList items={items} />
@@ -112,7 +109,6 @@ export default async function CreationsAndExplorationsPage({ searchParams }: Pag
               <p className="text-[12px] text-foreground/30 italic">No projects in this category yet.</p>
             )
           }
-          bottomRight={<ProjectPreviewSummary />}
         />
       </ProjectIndexProvider>
     );
