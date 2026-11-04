@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useRef, useState } from "react";
 import { projectNavDisplayTitle } from "@/components/layout/nav";
+import { MeltText, type MeltTextHandle } from "@/components/melt-text";
 import type { ProjectMedia } from "@/lib/projects";
 import { isSanityImage, sanityImageUrl } from "@/lib/sanity-image";
 import { ProjectImages } from "./project-images";
@@ -68,6 +69,9 @@ function MobileGrid({ item }: { item: ProjectIndexItem }) {
 
 export function ProjectList({ items }: { items: ProjectIndexItem[] }) {
   const { previewed, setPreviewed } = useContext(IndexContext);
+  // Each name melts a little under the cursor and further when clicked.
+  const melts = useRef(new Map<number, MeltTextHandle>());
+  const peek = (order: number, target: number, ms: number) => melts.current.get(order)?.peek(target, ms);
 
   return (
     <ul className="flex flex-col">
@@ -77,6 +81,9 @@ export function ProjectList({ items }: { items: ProjectIndexItem[] }) {
             href={`/works?project=${item.order}`}
             onMouseEnter={() => setPreviewed(item)}
             onFocus={() => setPreviewed(item)}
+            onPointerEnter={(e) => e.pointerType === "mouse" && peek(item.order, 0.12, 250)}
+            onPointerLeave={(e) => e.pointerType === "mouse" && peek(item.order, 0, 300)}
+            onClick={() => peek(item.order, 0.6, 300)}
             title={projectNavDisplayTitle(item.title) !== item.title ? item.title : undefined}
             className={`block pb-[120px] transition-colors [overflow-wrap:anywhere] md:py-[10px] ${
               item.order === previewed?.order ? "md:text-primary" : "md:text-foreground/65 md:hover:text-foreground"
@@ -86,7 +93,13 @@ export function ProjectList({ items }: { items: ProjectIndexItem[] }) {
             <MobileGrid item={item} />
             <span className="flex items-baseline gap-[8px]">
               <span className="text-[22px] font-medium leading-[1] text-foreground font-display-outline md:text-[16px] md:font-normal md:lowercase md:leading-[22px] md:text-inherit md:[font-family:inherit]">
-                {projectNavDisplayTitle(item.title)}
+                <MeltText
+                  ref={(handle) => {
+                    if (handle) melts.current.set(item.order, handle);
+                    else melts.current.delete(item.order);
+                  }}
+                  text={projectNavDisplayTitle(item.title)}
+                />
               </span>
               {item.year && <span className="text-[11px] opacity-60">{item.year}</span>}
               {/* One clipped line, so showing tags never moves the rows under the cursor. */}
@@ -135,13 +148,14 @@ export function ProjectPreview() {
   const { previewed } = useContext(IndexContext);
   if (!previewed) return null;
   return (
-    <div key={previewed.order} className="flex h-full animate-fade-in-fast flex-col gap-[32px]">
-      {/* The galleries split the height left by the text, so they fill the pane edge to edge. */}
-      <div className="min-h-0 flex-1">
+    <div className="flex h-full flex-col gap-[32px]">
+      {/* The galleries split the height left by the text, so they fill the pane edge to edge.
+          They swap per project; the text stays put so the name can melt from one to the next. */}
+      <div key={`top-${previewed.order}`} className="min-h-0 flex-1 animate-fade-in-fast">
         <ProjectImages images={previewed.previewImages} title={previewed.title} />
       </div>
       <ProjectSummary item={previewed} hideTags />
-      <div className="min-h-0 flex-1">
+      <div key={`bottom-${previewed.order}`} className="min-h-0 flex-1 animate-fade-in-fast">
         <ProjectImages images={previewed.previewImages} title={previewed.title} reverse />
       </div>
     </div>
@@ -169,7 +183,8 @@ export function ProjectSummary({
   return (
     <div className="@container flex animate-fade-in-fast flex-col gap-[18px]">
       <h2 data-project-title className="py-[0.2em] text-[length:min(6cqw,64px)] font-medium leading-[1.1] text-foreground font-display-outline [overflow-wrap:anywhere]">
-        {projectNavDisplayTitle(item.title)}
+        {/* Melts from project to project in the hover view, and in on a project page. */}
+        <MeltText text={projectNavDisplayTitle(item.title)} appear={backLink} strength={0.4} />
       </h2>
       {/* Two lines reserved in the hover view, so gallery size holds steady between projects. */}
       <div className={`flex items-baseline justify-between gap-[16px] ${hideTags ? "min-h-[40px]" : ""}`}>
