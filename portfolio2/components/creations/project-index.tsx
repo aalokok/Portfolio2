@@ -165,7 +165,7 @@ export function ProjectSummary({
 }) {
   return (
     <div className="@container flex animate-fade-in-fast flex-col gap-[18px]">
-      <h2 className="text-[length:min(6cqw,64px)] font-medium leading-[1] text-foreground font-display-outline [overflow-wrap:anywhere]">
+      <h2 className="pt-[0.08em] text-[length:min(6cqw,64px)] font-medium leading-[1] text-foreground font-display-outline [overflow-wrap:anywhere]">
         {projectNavDisplayTitle(item.title)}
       </h2>
       {/* Two lines reserved in the hover view, so gallery size holds steady between projects. */}

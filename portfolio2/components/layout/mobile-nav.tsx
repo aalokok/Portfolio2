@@ -3,16 +3,22 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useState, useEffect } from "react";
+import { INSPIRATION_HREF } from "@/lib/projects";
 import type { ProjectNavItem } from "./nav";
 
 const mainLinks = [
   { href: "/", label: "about" },
   { href: "/creations-and-explorations", label: "works" },
+  { href: INSPIRATION_HREF, label: "inspiration" },
   { href: "/contact-me", label: "reach out" },
 ];
 
 const isActive = (pathname: string, href: string) =>
-  href === "/" ? pathname === "/" : pathname.startsWith(href);
+  href === "/"
+    ? pathname === "/"
+    : href === INSPIRATION_HREF
+      ? pathname === href
+      : pathname.startsWith(href) && pathname !== INSPIRATION_HREF;
 
 // Pills in the site background colour; the hairline edge keeps them visible on the page.
 const pill = "border border-foreground/15 bg-background";
@@ -80,7 +86,8 @@ function MobileNavInner() {
             href="/"
             className={`${pill} inline-flex h-[30px] items-center rounded-[6px] px-[12px] text-[17px] font-medium leading-none text-foreground [font-family:IntraNet,sans-serif] transition-transform active:scale-95`}
           >
-            Aalok Sud
+            {/* Trimmed to the capitals, so the name sits dead center in the pill. */}
+            <span className="block [text-box:trim-both_cap_alphabetic]">Aalok Sud</span>
           </Link>
           <button
             type="button"

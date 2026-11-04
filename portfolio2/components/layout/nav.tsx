@@ -15,6 +15,7 @@ import {
 const links = [
   { href: "/", label: "Aalok Sud" },
   { href: "/creations-and-explorations", label: "Works" },
+  { href: INSPIRATION_HREF, label: "Inspiration" },
   { href: "/contact-me", label: "Reach Out" },
 ];
 
@@ -61,12 +62,17 @@ function NavInner({ activeCategory }: { activeCategory?: ProjectCategory }) {
       <nav className="@container flex h-[clamp(2.75rem,2.35rem+1.1vw,3.5rem)] w-full flex-none items-stretch justify-between bg-primary lowercase px-0.5 text-[clamp(0.6875rem,0.58rem+0.32vw,0.9375rem)] leading-[clamp(1.125rem,1rem+0.35vw,1.5rem)] md:px-1">
         {links.map(({ href, label }) => {
           const isName = href === "/";
-          const active = isName ? pathname === href : pathname.startsWith(href);
+          // Inspiration lives under the works URL but is its own link.
+          const active = isName
+            ? pathname === href
+            : href === INSPIRATION_HREF
+              ? isInspiration
+              : pathname.startsWith(href) && !isInspiration;
 
           const linkClasses = [
-            "flex h-full min-w-0 items-center whitespace-nowrap px-2 transition-colors md:px-3 lg:px-4",
+            "flex h-full min-w-0 items-center whitespace-nowrap px-1 transition-colors lg:px-2 xl:px-3 2xl:px-4",
             isName
-              ? `font-medium normal-case leading-none text-[clamp(14px,calc(13cqw-26px),30px)] [font-family:IntraNet,sans-serif] ${active ? "text-accent" : "text-white/75 hover:text-white"}`
+              ? `font-medium normal-case leading-none text-[clamp(10px,calc(7.5cqw-10px),30px)] [font-family:IntraNet,sans-serif] ${active ? "text-accent" : "text-white/75 hover:text-white"}`
               : active
                 ? "text-accent"
                 : "text-white/75 hover:text-white",
@@ -99,11 +105,11 @@ function NavInner({ activeCategory }: { activeCategory?: ProjectCategory }) {
         </div>
       )}
 
-      {isCreations && (
+      {isCreations && !isInspiration && (
         <div className="animate-fade-in pt-[clamp(0.875rem,0.65rem+0.65vw,1.5rem)]">
           <div className={subLinkBarClass}>
             {PROJECT_CATEGORIES.map(({ value, label }) => {
-              const subActive = !isInspiration && value === currentCategory;
+              const subActive = value === currentCategory;
               return (
                 <Link
                   key={value}
@@ -115,13 +121,6 @@ function NavInner({ activeCategory }: { activeCategory?: ProjectCategory }) {
                 </Link>
               );
             })}
-            <Link
-              href={INSPIRATION_HREF}
-              aria-current={isInspiration ? "page" : undefined}
-              className={subLinkItemClass(isInspiration)}
-            >
-              Inspiration
-            </Link>
           </div>
         </div>
       )}

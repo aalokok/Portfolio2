@@ -3,6 +3,12 @@
 @font-face {
   font-family: "IntraNet";
   src: url("/fonts/IntraNet.woff2") format("woff2");
+  /* The font files disagree with themselves on height (Windows reads a much taller box than
+     Mac, iOS and Android, where the capitals stick out the top and get cut off). These set one
+     box everywhere: the capitals, the only letters these fonts have, centered in it. */
+  ascent-override: 93.75%;
+  descent-override: 6.25%;
+  line-gap-override: 0%;
   font-style: normal;
   font-weight: 500;
   font-display: swap;
@@ -11,6 +17,10 @@
 @font-face {
   font-family: "IntraNet_Outline";
   src: url("/fonts/IntraNet_Outline.woff2") format("woff2");
+  /* Same as above; this one's capitals are a little taller. */
+  ascent-override: 96%;
+  descent-override: 4%;
+  line-gap-override: 0%;
   font-style: normal;
   font-weight: 500;
   font-display: swap;
