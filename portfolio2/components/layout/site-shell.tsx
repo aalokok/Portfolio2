@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Nav, type ProjectNavItem } from "./nav";
 import { MobileNav } from "./mobile-nav";
 import { MobileSublinks } from "./mobile-sublinks";
+import { WheelAnywhere } from "./wheel-anywhere";
 import { LEFT_COLUMN, QuadrantShell, RIGHT_COLUMN } from "./quadrant-shell";
 import type { ProjectCategory } from "@/lib/projects";
 
@@ -76,6 +77,7 @@ export function SiteShell({
   if (right !== undefined) {
     return (
       <>
+        <WheelAnywhere />
         <MobileNav projectNavItems={projectNavItems} />
         <MobileSublinks projectNavItems={projectNavItems} activeCategory={activeCategory} />
         {mobileBody !== undefined && <div className="md:hidden">{mobileBody}</div>}
@@ -112,6 +114,7 @@ export function SiteShell({
 
   return (
     <>
+      <WheelAnywhere />
       <MobileNav projectNavItems={projectNavItems} />
       <MobileSublinks projectNavItems={projectNavItems} activeCategory={activeCategory} />
       {mobileBody !== undefined && <div className="md:hidden">{mobileBody}</div>}

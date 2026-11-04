@@ -82,7 +82,7 @@ export function ProjectList({ items }: { items: ProjectIndexItem[] }) {
             {/* Phones get a card: cover image first, since there is no hover preview there. */}
             <MobileCover item={item} />
             <span className="flex items-baseline gap-[8px]">
-              <span className="text-[32px] font-bold italic leading-[1] tracking-[-0.06em] text-foreground lowercase md:text-[16px] md:font-normal md:not-italic md:leading-[22px] md:tracking-normal md:text-inherit">
+              <span className="text-[22px] font-medium leading-[1] text-foreground font-display-outline md:text-[16px] md:font-normal md:lowercase md:leading-[22px] md:text-inherit md:[font-family:inherit]">
                 {projectNavDisplayTitle(item.title)}
               </span>
               {item.year && <span className="text-[11px] opacity-60">{item.year}</span>}
@@ -104,7 +104,7 @@ export function ProjectList({ items }: { items: ProjectIndexItem[] }) {
             </span>
             {/* No hover on touch screens, so the one-liner and tags sit in the card there. */}
             {item.oneLiner && (
-              <span className="mt-[10px] block text-[15px] leading-[22px] text-foreground/80 md:hidden">
+              <span className="mt-[10px] block text-[13px] leading-[20px] text-foreground/80 md:hidden">
                 {item.oneLiner}
               </span>
             )}
@@ -165,13 +165,13 @@ export function ProjectSummary({
 }) {
   return (
     <div className="@container flex animate-fade-in-fast flex-col gap-[18px]">
-      <h2 className="text-[length:min(12.5cqw,120px)] font-bold leading-[0.95] tracking-[-0.06em] text-foreground lowercase italic [overflow-wrap:anywhere]">
+      <h2 className="text-[length:min(6cqw,64px)] font-medium leading-[1] text-foreground font-display-outline [overflow-wrap:anywhere]">
         {projectNavDisplayTitle(item.title)}
       </h2>
       {/* Two lines reserved in the hover view, so gallery size holds steady between projects. */}
-      <div className={`flex items-baseline justify-between gap-[16px] ${hideTags ? "min-h-[48px]" : ""}`}>
+      <div className={`flex items-baseline justify-between gap-[16px] ${hideTags ? "min-h-[40px]" : ""}`}>
         {item.oneLiner && (
-          <p className="text-[16px] leading-[24px] text-foreground/80">{item.oneLiner}</p>
+          <p className="text-[13px] leading-[20px] text-foreground/80">{item.oneLiner}</p>
         )}
         {hideTags && item.year && <span className="text-[13px] text-foreground/60">{item.year}</span>}
       </div>

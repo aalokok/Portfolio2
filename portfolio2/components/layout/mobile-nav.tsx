@@ -7,7 +7,7 @@ import type { ProjectNavItem } from "./nav";
 
 const mainLinks = [
   { href: "/", label: "about" },
-  { href: "/creations-and-explorations", label: "creations and explorations" },
+  { href: "/creations-and-explorations", label: "works" },
   { href: "/contact-me", label: "reach out" },
 ];
 
@@ -78,9 +78,9 @@ function MobileNavInner() {
         <div className="flex w-full items-center justify-between">
           <Link
             href="/"
-            className={`${pill} inline-flex h-[30px] items-center rounded-[6px] px-[12px] text-[17px] font-bold italic leading-none tracking-[-0.04em] text-foreground transition-transform active:scale-95`}
+            className={`${pill} inline-flex h-[30px] items-center rounded-[6px] px-[12px] text-[17px] font-medium leading-none text-foreground [font-family:IntraNet,sans-serif] transition-transform active:scale-95`}
           >
-            aalok sud
+            Aalok Sud
           </Link>
           <button
             type="button"
