@@ -1,6 +1,5 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { createContext, useContext, useState } from "react";
 import { projectNavDisplayTitle } from "@/components/layout/nav";
@@ -44,22 +43,26 @@ export function ProjectIndexProvider({
   );
 }
 
-/** Phone cover: the project's first image, or a still of its first video. Light either way. */
-function MobileCover({ item }: { item: ProjectIndexItem }) {
-  const cover =
-    item.previewImages.find((m) => m.playbackId || isSanityImage(m.url)) ?? null;
-  if (!cover) return null;
-  const src = cover.playbackId
-    ? `https://image.mux.com/${cover.playbackId}/thumbnail.webp?width=750&time=0`
-    : sanityImageUrl(cover.url, 750);
+/** A small still for a phone tile: the image itself, or a frame of a streamed video. */
+function stillUrl(media: ProjectMedia) {
+  if (media.playbackId) return `https://image.mux.com/${media.playbackId}/thumbnail.webp?width=300&time=0`;
+  if (isSanityImage(media.url)) return sanityImageUrl(media.url, 300);
+  return null; // a video with no streaming copy: no cheap still to show
+}
+
+/** Phone preview: up to six of the project's pieces in a grid of three, since there is no hover there. */
+function MobileGrid({ item }: { item: ProjectIndexItem }) {
+  const stills = item.previewImages.map(stillUrl).filter((src): src is string => !!src);
+  // Whole rows only, so the grid never ends with a gap.
+  const shown = stills.slice(0, stills.length >= 6 ? 6 : stills.length >= 3 ? 3 : stills.length);
+  if (!shown.length) return null;
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt=""
-      loading="lazy"
-      className="mb-[16px] block aspect-[4/3] w-full bg-foreground/5 object-cover md:hidden"
-    />
+    <span className="mb-[16px] grid grid-cols-3 gap-[8px] md:hidden">
+      {shown.map((src, i) => (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img key={i} src={src} alt="" loading="lazy" className="block aspect-square w-full bg-foreground/5 object-cover grayscale" />
+      ))}
+    </span>
   );
 }
 
@@ -75,12 +78,12 @@ export function ProjectList({ items }: { items: ProjectIndexItem[] }) {
             onMouseEnter={() => setPreviewed(item)}
             onFocus={() => setPreviewed(item)}
             title={projectNavDisplayTitle(item.title) !== item.title ? item.title : undefined}
-            className={`block pb-[40px] transition-colors [overflow-wrap:anywhere] md:py-[10px] ${
+            className={`block pb-[120px] transition-colors [overflow-wrap:anywhere] md:py-[10px] ${
               item.order === previewed?.order ? "md:text-primary" : "md:text-foreground/65 md:hover:text-foreground"
             }`}
           >
-            {/* Phones get a card: cover image first, since there is no hover preview there. */}
-            <MobileCover item={item} />
+            {/* Phones get a card: a grid of the work first, since there is no hover preview there. */}
+            <MobileGrid item={item} />
             <span className="flex items-baseline gap-[8px]">
               <span className="text-[22px] font-medium leading-[1] text-foreground font-display-outline md:text-[16px] md:font-normal md:lowercase md:leading-[22px] md:text-inherit md:[font-family:inherit]">
                 {projectNavDisplayTitle(item.title)}
@@ -150,7 +153,7 @@ export function ProjectSummary({
   item,
   backLink = false,
   backHref = "/works",
-  backLabel = "All projects",
+  backLabel = "all projects",
   hideTags = false,
   children,
 }: {
@@ -165,7 +168,7 @@ export function ProjectSummary({
 }) {
   return (
     <div className="@container flex animate-fade-in-fast flex-col gap-[18px]">
-      <h2 className="py-[0.2em] text-[length:min(6cqw,64px)] font-medium leading-[1.1] text-foreground font-display-outline [overflow-wrap:anywhere]">
+      <h2 data-project-title className="py-[0.2em] text-[length:min(6cqw,64px)] font-medium leading-[1.1] text-foreground font-display-outline [overflow-wrap:anywhere]">
         {projectNavDisplayTitle(item.title)}
       </h2>
       {/* Two lines reserved in the hover view, so gallery size holds steady between projects. */}
@@ -191,12 +194,12 @@ export function ProjectSummary({
         </div>
       )}
       {children && <div className="mt-[12px]">{children}</div>}
+      {/* Desktop only: phones pin it under the top bar instead (see mobile-sublinks.tsx). */}
       {backLink && (
         <Link
           href={backHref}
-          className="mt-[4px] flex w-fit items-center gap-[6px] text-[13px] leading-[20px] text-foreground/65 transition-colors hover:text-primary"
+          className="mt-[4px] hidden w-fit text-[13px] leading-[20px] text-foreground/80 transition-opacity hover:opacity-70 md:block"
         >
-          <ArrowLeft className="h-[14px] w-[14px]" />
           {backLabel}
         </Link>
       )}

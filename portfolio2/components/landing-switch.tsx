@@ -208,7 +208,7 @@ export function LandingSwitch({
   const other = view === "design" ? "creative technologist" : "creative designer";
 
   return (
-    <div className="space-y-[20px]">
+    <div className="space-y-[14px] md:space-y-[20px]">
       {/* Threshold filter: turns the blurry overlap of the two words into a liquid morph. */}
       <svg aria-hidden className="absolute h-0 w-0">
         <defs>
@@ -289,10 +289,11 @@ export function LandingSwitch({
         ))}
       </div>
 
-      {/* The payoff: its line is always reserved, so appearing never moves the text around it. */}
+      {/* The payoff: on desktop its line is always reserved, so appearing never moves the text around
+          it. Phones skip the reserved line to leave the orbs more room; the frame eases to make space. */}
       <p
         aria-hidden={!metBoth}
-        className={`text-[13px] leading-[20px] text-foreground/60 ${metBoth ? "animate-fade-in" : "invisible"}`}
+        className={`text-[13px] leading-[20px] text-foreground/60 ${metBoth ? "animate-fade-in" : "invisible max-md:hidden"}`}
       >
         you&apos;ve met both of me.{" "}
         <Link href="/reach-out" className="text-primary underline underline-offset-[3px] hover:no-underline">

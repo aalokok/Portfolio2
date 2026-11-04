@@ -3,6 +3,7 @@ import { LandingSwitch } from "@/components/landing-switch";
 import { DEFAULT_CATEGORY, isProjectCategory, type ProjectCategory } from "@/lib/projects";
 import { Blobs } from "@/components/blobs";
 import { SiteShell } from "@/components/layout/site-shell";
+import { HomeFrameFit } from "@/components/layout/home-frame-fit";
 import { MobileOnly } from "@/components/layout/mobile-only";
 
 type HomeProps = {
@@ -71,7 +72,9 @@ function SkillList({ items }: { items: { name: string; detail: string }[] }) {
     <ul className="space-y-[6px]">
       {items.map(({ name, detail }) => (
         <li key={name} className="text-[13px] leading-[20px] text-foreground/80">
-          <span className="italic text-foreground">{name}</span> — {detail}
+          <span className="italic text-foreground">{name}</span>
+          {/* Phones show the names only, so the whole intro fits on one screen. */}
+          <span className="hidden md:inline"> — {detail}</span>
         </li>
       ))}
     </ul>
@@ -278,11 +281,17 @@ function homeSections(view: ProjectCategory) {
 
 // Phones: the orb frame stays put under the section bar while every section scrolls
 // past beneath it; the bar follows along (see home-scroll.ts).
+// The orb frame takes the room the first screen has left once the intro and the fixed top bar
+// and bottom pills are counted, so the intro fits without scrolling. Between 150px and 46vw. --home-intro-h is the intro's measured height (see home-frame-fit.tsx).
+const phoneFrameHeight =
+  "clamp(150px, calc(100svh - var(--home-intro-h, 350px) - 144px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 46vw)";
+
 function MobileHome({ view }: { view: ProjectCategory }) {
   return (
     <div data-home-root="phone" className="pb-[calc(56px+env(safe-area-inset-bottom))]">
+      <HomeFrameFit />
       <div data-home-frame className="sticky top-[calc(58px+env(safe-area-inset-top))] z-20 bg-background px-[24px] pb-[16px]">
-        <div className="h-[55vw] overflow-hidden bg-black">
+        <div className="overflow-hidden bg-black transition-[height] duration-500" style={{ height: phoneFrameHeight }}>
           <MobileOnly>
             <Blobs className="h-full w-full" />
           </MobileOnly>
@@ -294,7 +303,13 @@ function MobileHome({ view }: { view: ProjectCategory }) {
             key={id}
             id={`home-${id}`}
             data-home-section={id}
-            className="scroll-mt-[calc(58px+55vw+16px+env(safe-area-inset-top))]"
+            // The intro sits centered in the space between the orbs and the bottom pills.
+            className={id === "intro" ? "flex flex-col justify-center pb-[calc(46px+env(safe-area-inset-bottom))]" : undefined}
+            style={{
+              scrollMarginTop: `calc(74px + ${phoneFrameHeight} + env(safe-area-inset-top))`,
+              // The intro fills the rest of the first screen, so the statement only starts once you scroll.
+              minHeight: id === "intro" ? `calc(100svh - 82px - ${phoneFrameHeight} - env(safe-area-inset-top))` : undefined,
+            }}
           >
             {content}
           </section>
