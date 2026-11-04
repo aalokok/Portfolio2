@@ -40,7 +40,7 @@ function MobileSublinksInner({ activeCategory }: { activeCategory?: ProjectCateg
       { section: "biography", href: "/?section=biography", label: "Biography" },
       { section: "experience", href: "/?section=experience", label: "Experience" },
     ].map((item) => ({ ...item, active: item.section === inView }));
-  } else if (isCreations) {
+  } else if (isCreations && !isInspiration) {
     // A project page passes its own category; otherwise the URL decides.
     const categoryParam = searchParams.get("category");
     const currentCategory: ProjectCategory =
@@ -49,9 +49,8 @@ function MobileSublinksInner({ activeCategory }: { activeCategory?: ProjectCateg
       ...PROJECT_CATEGORIES.map(({ value, label }) => ({
         href: categoryHref(value),
         label,
-        active: !isInspiration && value === currentCategory,
+        active: value === currentCategory,
       })),
-      { href: INSPIRATION_HREF, label: "Inspiration", active: isInspiration },
     ];
   }
 
