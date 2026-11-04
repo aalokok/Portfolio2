@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import type { ProjectCategory } from "@/lib/projects";
 
 const WORDS: Record<ProjectCategory, string> = {
@@ -33,7 +33,7 @@ function setMelt(matrix: SVGFEColorMatrixElement | null, word: HTMLElement | nul
   );
   if (word) {
     word.style.filter =
-      amount <= 0 ? "none" : `url(#landing-morph-threshold) blur(${(REST_BLUR * amount).toFixed(3)}px)`;
+      amount <= 0 ? "none" : `url(#${matrix?.closest("filter")?.id}) blur(${(REST_BLUR * amount).toFixed(3)}px)`;
   }
 }
 
@@ -79,6 +79,8 @@ export function LandingSwitch({
   intro?: ReactNode;
   panels: Record<ProjectCategory, ReactNode>;
 }) {
+  // Unique per copy: the page can hold two (phone and desktop layouts).
+  const filterId = `landing-morph-${useId().replace(/[^a-zA-Z0-9-]/g, "")}`;
   const [view, setView] = useState<ProjectCategory>(initial);
   // Which words the visitor has seen; seeing both fills both dots and shows the payoff line.
   const [seen, setSeen] = useState<ProjectCategory[]>([initial]);
@@ -210,7 +212,7 @@ export function LandingSwitch({
       {/* Threshold filter: turns the blurry overlap of the two words into a liquid morph. */}
       <svg aria-hidden className="absolute h-0 w-0">
         <defs>
-          <filter id="landing-morph-threshold">
+          <filter id={filterId}>
             <feColorMatrix
               ref={matrixRef}
               in="SourceGraphic"

@@ -19,6 +19,8 @@ type SiteShellBase = {
   mobileSwapColumns?: boolean;
   /** Drop the right column on mobile, for panes that only respond to hover. */
   hideRightOnMobile?: boolean;
+  /** A separate page body for phones. The grid below is then desktop only. */
+  mobileBody?: ReactNode;
 };
 
 type SiteShellSplit = SiteShellBase & {
@@ -66,6 +68,7 @@ export function SiteShell({
   hideRightOnMobile = false,
   mobileAutoHeight = false,
   compactNav = false,
+  mobileBody,
 }: SiteShellProps) {
   const leftOrder  = mobileSwapColumns ? "order-2 md:order-none" : "";
   const rightOrder = mobileSwapColumns ? "order-1 md:order-none" : "";
@@ -75,7 +78,9 @@ export function SiteShell({
       <>
         <MobileNav projectNavItems={projectNavItems} />
         <MobileSublinks projectNavItems={projectNavItems} activeCategory={activeCategory} />
-        <main className="flex flex-col bg-background pb-[calc(62px+env(safe-area-inset-bottom))] md:h-screen md:flex-row md:overflow-hidden md:pb-0">
+        {mobileBody !== undefined && <div className="md:hidden">{mobileBody}</div>}
+        <div className={mobileBody !== undefined ? "hidden md:contents" : "contents"}>
+        <main className="flex flex-col bg-background pb-[calc(56px+env(safe-area-inset-bottom))] md:h-screen md:flex-row md:overflow-hidden md:pb-0">
           {/* Left column */}
           <div className={`flex flex-col md:min-h-0 md:min-w-0 ${leftOrder}`} style={{ flex: LEFT_COLUMN }}>
             {/* Nav — hidden on mobile */}
@@ -100,6 +105,7 @@ export function SiteShell({
             </section>
           </div>
         </main>
+        </div>
       </>
     );
   }
@@ -108,6 +114,8 @@ export function SiteShell({
     <>
       <MobileNav projectNavItems={projectNavItems} />
       <MobileSublinks projectNavItems={projectNavItems} activeCategory={activeCategory} />
+      {mobileBody !== undefined && <div className="md:hidden">{mobileBody}</div>}
+      <div className={mobileBody !== undefined ? "hidden md:contents" : "contents"}>
       <QuadrantShell
         topLeft={<Nav activeCategory={activeCategory} />}
         topRight={topRight}
@@ -122,6 +130,7 @@ export function SiteShell({
         mobileSwapColumns={mobileSwapColumns}
         hideRightOnMobile={hideRightOnMobile}
       />
+      </div>
     </>
   );
 }

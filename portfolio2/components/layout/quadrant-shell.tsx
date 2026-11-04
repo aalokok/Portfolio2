@@ -46,7 +46,7 @@ export function QuadrantShell({
   const rightOrder = mobileSwapColumns ? "order-1 md:order-none" : "";
 
   return (
-    <main className="flex flex-col bg-background pb-[calc(62px+env(safe-area-inset-bottom))] md:h-screen md:flex-row md:overflow-hidden md:pb-0">
+    <main className="flex flex-col bg-background pb-[calc(56px+env(safe-area-inset-bottom))] md:h-screen md:flex-row md:overflow-hidden md:pb-0">
       {/* Left column */}
       <div className={`flex flex-col md:min-h-0 md:min-w-0 ${leftOrder}`} style={{ flex: LEFT_COLUMN }}>
         {/* Nav — hidden on mobile (MobileSublinks sticky bar replaces it) */}
