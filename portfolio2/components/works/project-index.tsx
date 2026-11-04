@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { createContext, useContext, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { projectNavDisplayTitle } from "@/components/layout/nav";
 import { MeltText, type MeltTextHandle } from "@/components/melt-text";
 import type { ProjectMedia } from "@/lib/projects";
@@ -67,11 +67,22 @@ function MobileGrid({ item }: { item: ProjectIndexItem }) {
   );
 }
 
+const HOVER_DELAY = 200; // ms the cursor has to rest on a row before the preview switches
+
 export function ProjectList({ items }: { items: ProjectIndexItem[] }) {
   const { previewed, setPreviewed } = useContext(IndexContext);
   // Each name melts a little under the cursor and further when clicked.
   const melts = useRef(new Map<number, MeltTextHandle>());
   const peek = (order: number, target: number, ms: number) => melts.current.get(order)?.peek(target, ms);
+  // The preview follows a row only once the cursor rests on it, so sweeping across other rows on
+  // the way to the preview pane doesn't swap the project you were looking at.
+  const hoverTimer = useRef(0);
+  const previewSoon = (item: ProjectIndexItem) => {
+    window.clearTimeout(hoverTimer.current);
+    hoverTimer.current = window.setTimeout(() => setPreviewed(item), HOVER_DELAY);
+  };
+  const cancelPreview = () => window.clearTimeout(hoverTimer.current);
+  useEffect(() => cancelPreview, []);
 
   return (
     <ul className="flex flex-col">
@@ -79,7 +90,8 @@ export function ProjectList({ items }: { items: ProjectIndexItem[] }) {
         <li key={item.order}>
           <Link
             href={`/works?project=${item.order}`}
-            onMouseEnter={() => setPreviewed(item)}
+            onMouseEnter={() => previewSoon(item)}
+            onMouseLeave={cancelPreview}
             onFocus={() => setPreviewed(item)}
             onPointerEnter={(e) => e.pointerType === "mouse" && peek(item.order, 0.12, 250)}
             onPointerLeave={(e) => e.pointerType === "mouse" && peek(item.order, 0, 300)}
@@ -143,22 +155,33 @@ export function ProjectList({ items }: { items: ProjectIndexItem[] }) {
   );
 }
 
-/** The hovered project: gallery, text, then the same gallery drifting the other way. */
+// The hover galleries dissolve at their sides and at the edge away from the text, so they read
+// as a glimpse of the project rather than the whole thing.
+const sideFade = "linear-gradient(to right, transparent, #000 14%, #000 86%, transparent)";
+const dissolve = (towards: "top" | "bottom"): React.CSSProperties => {
+  const mask = `${sideFade}, linear-gradient(to ${towards === "top" ? "bottom" : "top"}, transparent, #000 60%)`;
+  return { maskImage: mask, WebkitMaskImage: mask, maskComposite: "intersect", WebkitMaskComposite: "source-in" };
+};
+
+/** The hovered project: gallery, text, then the same gallery drifting the other way. The whole pane opens it. */
 export function ProjectPreview() {
   const { previewed } = useContext(IndexContext);
   if (!previewed) return null;
+  const gallery = "h-[clamp(120px,24vh,240px)] flex-none animate-fade-in-fast opacity-80 transition-opacity duration-300 group-hover:opacity-100";
   return (
-    <div className="flex h-full flex-col gap-[32px]">
-      {/* The galleries split the height left by the text, so they fill the pane edge to edge.
-          They swap per project; the text stays put so the name can melt from one to the next. */}
-      <div key={`top-${previewed.order}`} className="min-h-0 flex-1 animate-fade-in-fast">
+    <Link
+      href={`/works?project=${previewed.order}`}
+      className="group flex h-full flex-col justify-center gap-[28px] outline-none focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-primary"
+    >
+      {/* The galleries swap per project; the text stays put so the name can melt from one to the next. */}
+      <div key={`top-${previewed.order}`} className={gallery} style={dissolve("top")}>
         <ProjectImages images={previewed.previewImages} title={previewed.title} />
       </div>
       <ProjectSummary item={previewed} hideTags />
-      <div key={`bottom-${previewed.order}`} className="min-h-0 flex-1 animate-fade-in-fast">
+      <div key={`bottom-${previewed.order}`} className={gallery} style={dissolve("bottom")}>
         <ProjectImages images={previewed.previewImages} title={previewed.title} reverse />
       </div>
-    </div>
+    </Link>
   );
 }
 
