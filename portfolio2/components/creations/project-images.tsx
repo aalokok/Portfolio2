@@ -2,12 +2,22 @@
 
 import React from "react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import type { ProjectMedia } from "@/lib/projects";
+import { isSanityImage, sanityImageUrl, sanityLoader } from "@/lib/sanity-image";
 
 type Props = {
   images: ProjectMedia[];
   title: string;
 };
+
+// The streaming player (with its HLS engine) only downloads where a Mux video is shown.
+const MuxVideo = dynamic(() => import("@mux/mux-video-react"), { ssr: false });
+
+/** A still from the Mux video, shown at once while the stream starts. */
+function muxPoster(playbackId: string) {
+  return `https://image.mux.com/${playbackId}/thumbnail.webp?width=640&time=0`;
+}
 
 function isGif(item: ProjectMedia) {
   return item.mimeType === "image/gif" || item.url.toLowerCase().endsWith(".gif");
@@ -15,6 +25,7 @@ function isGif(item: ProjectMedia) {
 
 function isVideo(item: ProjectMedia) {
   return (
+    !!item.playbackId ||
     item.mimeType?.startsWith("video/") ||
     /\.(mp4|webm|ogg|mov)$/i.test(item.url)
   );
@@ -22,16 +33,20 @@ function isVideo(item: ProjectMedia) {
 
 function LazyVideo({
   src,
+  playbackId,
   className,
   fill,
   controls = false,
 }: {
   src: string;
+  /** Streams from Mux instead of downloading the whole file. */
+  playbackId?: string | null;
   className?: string;
   fill?: boolean;
   /** Player mode: controls and sound, no autoplay. Default is a silent ambient loop. */
   controls?: boolean;
 }) {
+  // Watches the <video>, or the poster while a Mux stream waits to come into view.
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const [loaded, setLoaded] = React.useState(false);
 
@@ -50,6 +65,35 @@ function LazyVideo({
     return () => observer.disconnect();
   }, [loaded]);
 
+  const style: React.CSSProperties | undefined = fill
+    ? { position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain" }
+    : undefined;
+
+  if (playbackId) {
+    const poster = muxPoster(playbackId);
+    // Until it scrolls into view, only the still is fetched.
+    return loaded ? (
+      <MuxVideo
+        playbackId={playbackId}
+        poster={poster}
+        autoPlay={!controls}
+        muted={!controls}
+        loop={!controls}
+        controls={controls}
+        playsInline
+        preload={controls ? "metadata" : "auto"}
+        // Ambient tiles are small, so never pull more than 720p for them.
+        maxResolution={controls ? undefined : "720p"}
+        capRenditionToPlayerSize
+        className={className}
+        style={style}
+      />
+    ) : (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img ref={videoRef as unknown as React.Ref<HTMLImageElement>} src={poster} alt="" className={className} style={style} />
+    );
+  }
+
   return (
     <video
       ref={videoRef}
@@ -61,11 +105,7 @@ function LazyVideo({
       playsInline
       preload={controls ? "metadata" : "none"}
       className={className}
-      style={
-        fill
-          ? { position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain" }
-          : undefined
-      }
+      style={style}
     />
   );
 }
@@ -90,7 +130,7 @@ function MediaItem({
   videoControls?: boolean;
 }) {
   if (isVideo(item)) {
-    return <LazyVideo src={item.url} className={className} fill={fill} controls={videoControls} />;
+    return <LazyVideo src={item.url} playbackId={item.playbackId} className={className} fill={fill} controls={videoControls} />;
   }
 
   if (isGif(item)) {
@@ -114,6 +154,7 @@ function MediaItem({
     return (
       <Image
         src={item.url}
+        loader={isSanityImage(item.url) ? sanityLoader : undefined}
         alt={alt}
         fill
         loading="lazy"
@@ -128,6 +169,7 @@ function MediaItem({
   return (
     <Image
       src={item.url}
+      loader={isSanityImage(item.url) ? sanityLoader : undefined}
       alt={alt}
       width={width ?? 400}
       height={height ?? 300}
@@ -205,7 +247,9 @@ function ScrollView({ images, title, reverse = false }: Props & { reverse?: bool
 
   return (
     <div ref={scrollRef} className="flex h-full flex-row gap-[10px] overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      {images.map((item, i) => (
+      {images.map((item, i) => {
+        const ratio = item.dimensions ? item.dimensions.width / item.dimensions.height : 4 / 3;
+        return (
         <div
           key={item.url}
           className="relative h-[42vw] max-h-[220px] flex-shrink-0 overflow-hidden bg-foreground/5 transition-[filter] duration-300 md:h-full md:max-h-none md:grayscale md:hover:grayscale-0"
@@ -216,10 +260,12 @@ function ScrollView({ images, title, reverse = false }: Props & { reverse?: bool
             alt={item.alt ?? `${title} ${i + 1}`}
             width={item.dimensions?.width ?? 1600}
             height={item.dimensions?.height ?? 1200}
+            sizes={`(max-width: 768px) ${Math.ceil(42 * ratio)}vw, ${Math.ceil(35 * ratio)}vh`}
             className="h-full w-full object-contain"
           />
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -292,7 +338,7 @@ export function MediaFigure({
           type="button"
           className={`block cursor-zoom-in ${fill || aspect ? "w-full" : "max-w-full"}`}
           aria-label={`Enlarge image: ${alt}`}
-          data-zoom-src={item.url}
+          data-zoom-src={isSanityImage(item.url) ? sanityImageUrl(item.url, 2400, 85) : item.url}
           data-zoom-alt={alt}
           data-zoom-caption={item.caption ?? ""}
         >

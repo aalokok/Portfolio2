@@ -28,6 +28,15 @@ const altField = defineField({
 
 const captionField = defineField({ name: "caption", title: "Caption", type: "string" });
 
+/** Optional streaming copy of a video. Mux sends each screen a right-sized version, so
+ *  big clips start fast. The site falls back to the uploaded file while this is empty. */
+export const muxStreamField = defineField({
+  name: "mux",
+  title: "Streaming copy (Mux)",
+  type: "mux.video",
+  description: "Upload the same video here to have it stream at the right size. Leave empty to play the file above.",
+});
+
 const positionField = defineField({
   name: "position",
   title: "Position",
@@ -145,6 +154,7 @@ export const storyVideo = defineArrayMember({
   icon: Video,
   options: { accept: "video/*" },
   fields: [
+    muxStreamField,
     altField,
     captionField,
     positionField,
