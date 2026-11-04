@@ -183,8 +183,8 @@ export function ProjectSummary({
   return (
     <div className="@container flex animate-fade-in-fast flex-col gap-[18px]">
       <h2 data-project-title className="py-[0.2em] text-[length:min(6cqw,64px)] font-medium leading-[1.1] text-foreground font-display-outline [overflow-wrap:anywhere]">
-        {/* Melts from project to project in the hover view, and in on a project page. */}
-        <MeltText text={projectNavDisplayTitle(item.title)} appear={backLink} strength={0.4} />
+        {/* Melts from project to project in the hover view; plain on a project page. */}
+        {backLink ? projectNavDisplayTitle(item.title) : <MeltText text={projectNavDisplayTitle(item.title)} strength={0.4} />}
       </h2>
       {/* Two lines reserved in the hover view, so gallery size holds steady between projects. */}
       <div className={`flex items-baseline justify-between gap-[16px] ${hideTags ? "min-h-[40px]" : ""}`}>
