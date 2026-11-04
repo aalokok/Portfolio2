@@ -11,7 +11,7 @@ type HomeProps = {
 
 const statementContent = (
   <div className="space-y-[12px]">
-    <p className="text-[16px] font-areal italic">Statement</p>
+    <p className="text-[16px] font-areal italic">statement</p>
     <p className="text-[13px] leading-[20px] text-foreground/80">
       My work focuses on what it means to create digital immersion. I am interested in how most systems translate gestures into simplified, readable inputs, often removing jargon and unneeded technical detail in the process. I use this as a starting point to explore how interaction can be simplified but still introduce awe and wonder. By using these abstractions, I want to demystify and democratize access to these experiences. At the same time make tech fun again.
     </p>
@@ -33,7 +33,7 @@ const statementContent = (
 
 const biographyContent = (
   <div className="space-y-[12px]">
-    <p className="text-[16px] font-areal italic">Biography</p>
+    <p className="text-[16px] font-areal italic">biography</p>
     <p className="text-[13px] leading-[20px] text-foreground/80">
       Aalok Sud (b. 2002) is a Toronto-based designer, creative technologist and computation artist. Originally from Manali, India, his practice operates at the intersection of computer science, wearable technology, and interactive media.
     </p>
@@ -93,7 +93,7 @@ const experienceWork = (
     <div className="space-y-[24px]">
       {/* Work Experience */}
       <div className="space-y-[16px]">
-        <p className="text-[11px] uppercase tracking-[0.1em] text-foreground/40">Work Experience</p>
+        <p className="text-[11px] italic tracking-[0.1em] lowercase text-foreground/40">Work Experience</p>
 
         <div className="space-y-[4px]">
           <div className="flex items-baseline justify-between gap-[8px]">
@@ -135,7 +135,7 @@ const experienceWork = (
 
       {/* Education */}
       <div className="space-y-[16px]">
-        <p className="text-[11px] uppercase tracking-[0.1em] text-foreground/40">Education</p>
+        <p className="text-[11px] italic tracking-[0.1em] lowercase text-foreground/40">Education</p>
 
         <div className="space-y-[4px]">
           <div className="flex items-baseline justify-between gap-[8px]">
@@ -160,7 +160,7 @@ const experienceSkills = (
     <div className="space-y-[24px]">
       {/* Tools */}
       <div className="space-y-[12px]">
-        <p className="text-[11px] uppercase tracking-[0.1em] text-foreground/40">Tools</p>
+        <p className="text-[11px] italic tracking-[0.1em] lowercase text-foreground/40">Tools</p>
         <div className="flex flex-wrap gap-[6px]">
           {["TouchDesigner", "Max/MSP", "Blender", "Unreal Engine", "Three.js / WebGL", "React / Next.js", "Python", "Java", "C", "Adobe Suite"].map((tool) => (
             <span key={tool} className="rounded-sm border border-foreground/15 px-[8px] py-[3px] text-[11px] text-foreground/70">
@@ -172,7 +172,7 @@ const experienceSkills = (
 
       {/* Practices */}
       <div className="space-y-[12px]">
-        <p className="text-[11px] uppercase tracking-[0.1em] text-foreground/40">Practices</p>
+        <p className="text-[11px] italic tracking-[0.1em] lowercase text-foreground/40">Practices</p>
         <div className="flex flex-wrap gap-[6px]">
           {["Creative Coding", "Live Visuals", "Environment Art", "UI/UX Design", "ML / Agentic AI", "Web Development", "Branding & Identity", "Art Direction", "Typography", "Motion Graphics"].map((practice) => (
             <span key={practice} className="rounded-sm border border-foreground/15 px-[8px] py-[3px] text-[11px] text-foreground/70">
@@ -184,7 +184,7 @@ const experienceSkills = (
 
       {/* Recognition */}
       <div className="space-y-[12px]">
-        <p className="text-[11px] uppercase tracking-[0.1em] text-foreground/40">Recognition</p>
+          <p className="text-[11px] italic tracking-[0.1em] lowercase text-foreground/40">Recognition</p>
         <div className="space-y-[8px]">
           <div>
             <p className="text-[12px] font-semibold leading-[18px]">Concordia International Tuition Entrance Scholarship</p>
