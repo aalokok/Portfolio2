@@ -116,22 +116,23 @@ export default async function WorksPage({ searchParams }: PageProps) {
 
   // Project: the right column merges into one scrollable documentation pane.
   const zine = getZine(project.slug?.current, project.title);
+  const backLabel = "all projects";
 
   return (
     <SiteShell
       projectNavItems={projectNavItems}
       activeCategory={navCategory}
       leftRatio={[3, 7]}
-      bottomLeftClassName="md:overflow-y-auto"
+      // On phones the pinned back link above already gives the info room, so it starts a little higher.
+      bottomLeftClassName="-mt-[22px] md:mt-0 md:overflow-y-auto"
       mobileAutoHeight
+      mobileBackLink={{ href: categoryHref(projectCategory(project)), label: backLabel, title: project.title }}
       bottomLeft={
         <ProjectSummary
           item={toIndexItem(project)}
           backLink
           backHref={categoryHref(projectCategory(project))}
-          backLabel={
-            projectCategory(project) === "design" ? "All design projects" : "All creative technology"
-          }
+          backLabel={backLabel}
         >
           <ProjectSpecs
             link={project.link}

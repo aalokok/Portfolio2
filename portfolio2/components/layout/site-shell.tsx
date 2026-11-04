@@ -22,6 +22,8 @@ type SiteShellBase = {
   hideRightOnMobile?: boolean;
   /** A separate page body for phones. The grid below is then desktop only. */
   mobileBody?: ReactNode;
+  /** On phones, a back link pinned under the top bar; the project name joins it once its heading scrolls away. */
+  mobileBackLink?: { href: string; label: string; title?: string };
 };
 
 type SiteShellSplit = SiteShellBase & {
@@ -70,6 +72,7 @@ export function SiteShell({
   mobileAutoHeight = false,
   compactNav = false,
   mobileBody,
+  mobileBackLink,
 }: SiteShellProps) {
   const leftOrder  = mobileSwapColumns ? "order-2 md:order-none" : "";
   const rightOrder = mobileSwapColumns ? "order-1 md:order-none" : "";
@@ -79,7 +82,7 @@ export function SiteShell({
       <>
         <WheelAnywhere />
         <MobileNav projectNavItems={projectNavItems} />
-        <MobileSublinks projectNavItems={projectNavItems} activeCategory={activeCategory} />
+        <MobileSublinks projectNavItems={projectNavItems} activeCategory={activeCategory} backLink={mobileBackLink} />
         {mobileBody !== undefined && <div className="md:hidden">{mobileBody}</div>}
         <div className={mobileBody !== undefined ? "hidden md:contents" : "contents"}>
         <main className="flex flex-col bg-background pb-[calc(56px+env(safe-area-inset-bottom))] md:h-screen md:flex-row md:overflow-hidden md:pb-0">
@@ -116,7 +119,7 @@ export function SiteShell({
     <>
       <WheelAnywhere />
       <MobileNav projectNavItems={projectNavItems} />
-      <MobileSublinks projectNavItems={projectNavItems} activeCategory={activeCategory} />
+      <MobileSublinks projectNavItems={projectNavItems} activeCategory={activeCategory} backLink={mobileBackLink} />
       {mobileBody !== undefined && <div className="md:hidden">{mobileBody}</div>}
       <div className={mobileBody !== undefined ? "hidden md:contents" : "contents"}>
       <QuadrantShell
