@@ -227,7 +227,7 @@ function LandingContent({ view }: { view: ProjectCategory }) {
         intro={
           <p className="text-[13px] leading-[20px] text-foreground/80">
             Designer and creative technologist in Toronto,{" "}
-            <Link href="/contact-me" className={linkClass}>
+            <Link href="/reach-out" className={linkClass}>
               open to work
             </Link>
             . I design clear digital products and build interactive work that people remember.
@@ -240,7 +240,7 @@ function LandingContent({ view }: { view: ProjectCategory }) {
                 I build interactive installations, real-time visuals and sound, combining code, hardware and performance. My work has been exhibited at Ludodrome 2026 and Concordia&apos;s Artefacts exhibition.
               </p>
               <SkillList items={techSkills} />
-              <Cta href="/creations-and-explorations?category=creative-technology">See creative technology work</Cta>
+              <Cta href="/works?category=creative-technology">See creative technology work</Cta>
             </section>
           ),
           design: (
@@ -249,7 +249,7 @@ function LandingContent({ view }: { view: ProjectCategory }) {
                 I design interfaces, brands and systems that are easy to use and hold together at scale, from first sketch to working code.
               </p>
               <SkillList items={designServices} />
-              <Cta href="/creations-and-explorations?category=design">See design case studies</Cta>
+              <Cta href="/works?category=design">See design case studies</Cta>
             </section>
           ),
         }}

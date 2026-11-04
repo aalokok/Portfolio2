@@ -71,7 +71,7 @@ export function ProjectList({ items }: { items: ProjectIndexItem[] }) {
       {items.map((item) => (
         <li key={item.order}>
           <Link
-            href={`/creations-and-explorations?project=${item.order}`}
+            href={`/works?project=${item.order}`}
             onMouseEnter={() => setPreviewed(item)}
             onFocus={() => setPreviewed(item)}
             title={projectNavDisplayTitle(item.title) !== item.title ? item.title : undefined}
@@ -149,7 +149,7 @@ export function ProjectPreview() {
 export function ProjectSummary({
   item,
   backLink = false,
-  backHref = "/creations-and-explorations",
+  backHref = "/works",
   backLabel = "All projects",
   hideTags = false,
   children,

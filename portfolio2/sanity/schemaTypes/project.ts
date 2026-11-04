@@ -59,7 +59,7 @@ export const projectType = defineType({
       title: "Category",
       type: "string",
       group: "basics",
-      description: "Which tab the project appears under on Creations and Explorations.",
+      description: "Which tab the project appears under on the works page.",
       initialValue: "creative-technology",
       options: {
         list: [

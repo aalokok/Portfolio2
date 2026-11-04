@@ -295,7 +295,7 @@ export function LandingSwitch({
         className={`text-[13px] leading-[20px] text-foreground/60 ${metBoth ? "animate-fade-in" : "invisible"}`}
       >
         you&apos;ve met both of me.{" "}
-        <Link href="/contact-me" className="text-primary underline underline-offset-[3px] hover:no-underline">
+        <Link href="/reach-out" className="text-primary underline underline-offset-[3px] hover:no-underline">
           let&apos;s talk
         </Link>
       </p>

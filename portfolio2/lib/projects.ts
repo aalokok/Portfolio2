@@ -116,7 +116,7 @@ export type DescriptionBlock =
   | DescriptionButtons
   | DescriptionDivider;
 
-/** The two tabs on Creations and Explorations. */
+/** The two tabs on the works page. */
 export const PROJECT_CATEGORIES = [
   { value: "creative-technology", label: "Creative Technology" },
   { value: "design", label: "Design" },
@@ -128,7 +128,7 @@ export type ProjectCategory = (typeof PROJECT_CATEGORIES)[number]["value"];
 export const DEFAULT_CATEGORY: ProjectCategory = PROJECT_CATEGORIES[0].value;
 
 /** The Are.na boards page, listed after the categories in the sub-nav. */
-export const INSPIRATION_HREF = "/creations-and-explorations/inspiration";
+export const INSPIRATION_HREF = "/inspiration";
 
 export function isProjectCategory(value: unknown): value is ProjectCategory {
   return PROJECT_CATEGORIES.some((c) => c.value === value);
@@ -140,7 +140,7 @@ export function projectCategory(project: { category?: string | null }): ProjectC
 }
 
 export function categoryHref(category: ProjectCategory) {
-  return `/creations-and-explorations?category=${category}`;
+  return `/works?category=${category}`;
 }
 
 export type Project = {

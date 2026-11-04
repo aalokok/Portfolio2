@@ -8,17 +8,13 @@ import type { ProjectNavItem } from "./nav";
 
 const mainLinks = [
   { href: "/", label: "about" },
-  { href: "/creations-and-explorations", label: "works" },
+  { href: "/works", label: "works" },
   { href: INSPIRATION_HREF, label: "inspiration" },
-  { href: "/contact-me", label: "reach out" },
+  { href: "/reach-out", label: "reach out" },
 ];
 
 const isActive = (pathname: string, href: string) =>
-  href === "/"
-    ? pathname === "/"
-    : href === INSPIRATION_HREF
-      ? pathname === href
-      : pathname.startsWith(href) && pathname !== INSPIRATION_HREF;
+  href === "/" ? pathname === "/" : pathname.startsWith(href);
 
 // Pills in the site background colour; the hairline edge keeps them visible on the page.
 const pill = "border border-foreground/15 bg-background";

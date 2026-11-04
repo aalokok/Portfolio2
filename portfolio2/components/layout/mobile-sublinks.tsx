@@ -5,7 +5,6 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import {
   DEFAULT_CATEGORY,
-  INSPIRATION_HREF,
   PROJECT_CATEGORIES,
   categoryHref,
   isProjectCategory,
@@ -24,8 +23,7 @@ function MobileSublinksInner({ activeCategory }: { activeCategory?: ProjectCateg
   const barRef = useRef<HTMLDivElement>(null);
   const activeSection = searchParams.get("section") ?? "";
   const isHome = pathname === "/";
-  const isCreations = pathname.startsWith("/creations-and-explorations");
-  const isInspiration = pathname === INSPIRATION_HREF;
+  const isWorks = pathname.startsWith("/works");
   // On the phone home page every section is on one long page; this is the one in view.
   const [inView, setInView] = useState(activeSection || "intro");
   useHomeScrollSpy("phone", isHome, activeSection, setInView);
@@ -40,7 +38,7 @@ function MobileSublinksInner({ activeCategory }: { activeCategory?: ProjectCateg
       { section: "biography", href: "/?section=biography", label: "Biography" },
       { section: "experience", href: "/?section=experience", label: "Experience" },
     ].map((item) => ({ ...item, active: item.section === inView }));
-  } else if (isCreations && !isInspiration) {
+  } else if (isWorks) {
     // A project page passes its own category; otherwise the URL decides.
     const categoryParam = searchParams.get("category");
     const currentCategory: ProjectCategory =
