@@ -9,7 +9,8 @@ const media = `
   "url": asset->url,
   "mimeType": asset->mimeType,
   "lqip": asset->metadata.lqip,
-  "dimensions": asset->metadata.dimensions
+  "dimensions": asset->metadata.dimensions,
+  "playbackId": mux.asset->playbackId
 `;
 
 // Links to other projects resolve to that project's position in the list.

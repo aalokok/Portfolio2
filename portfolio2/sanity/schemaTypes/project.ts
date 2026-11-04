@@ -8,6 +8,7 @@ import {
   embedType,
   imageRowType,
   mediaTextType,
+  muxStreamField,
   pullQuoteType,
   statsType,
   storyBlock,
@@ -147,6 +148,7 @@ export const projectType = defineType({
           title: "Video",
           options: { accept: "video/*" },
           fields: [
+            muxStreamField,
             defineField({ name: "alt", title: "Alt text", type: "string" }),
             defineField({ name: "caption", title: "Caption", type: "string" }),
           ],

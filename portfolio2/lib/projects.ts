@@ -7,6 +7,8 @@ export type ProjectMedia = {
   mimeType?: string | null;
   lqip?: string | null;
   dimensions?: { width: number; height: number } | null;
+  /** Videos with a Mux streaming copy. */
+  playbackId?: string | null;
 };
 
 /** An image or video placed inside the description. */
