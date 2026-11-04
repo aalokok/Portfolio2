@@ -6,76 +6,102 @@ import { Suspense, useState, useEffect } from "react";
 import type { ProjectNavItem } from "./nav";
 
 const mainLinks = [
-  { href: "/",                           label: "About" },
-  { href: "/creations-and-explorations", label: "Creations and Explorations" },
-  { href: "/contact-me",                 label: "Reach Out" },
+  { href: "/", label: "about" },
+  { href: "/creations-and-explorations", label: "creations and explorations" },
+  { href: "/contact-me", label: "reach out" },
 ];
 
-function MobileNavInner({ projectNavItems: _projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
+const isActive = (pathname: string, href: string) =>
+  href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+// Pills in the site background colour; the hairline edge keeps them visible on the page.
+const pill = "border border-foreground/15 bg-background";
+
+function MobileNavInner() {
   const [open, setOpen] = useState(false);
   const pathname     = usePathname();
   const searchParams = useSearchParams();
 
-  // Lock body scroll while open
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [open]);
-
   // Close on navigation
   useEffect(() => { setOpen(false); }, [pathname, searchParams]);
 
+  // Close with Escape
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
   return (
-    <>
-      {/* Full-page overlay — main links only */}
+    <div className="md:hidden">
+      {/* Tapping anywhere outside the menu closes it. */}
       <div
-        className={`fixed inset-0 z-40 flex flex-col bg-primary p-[24px] pb-[100px] transition-opacity duration-200 md:hidden ${
+        aria-hidden
+        onClick={() => setOpen(false)}
+        className={`fixed inset-0 z-40 bg-foreground/10 transition-opacity duration-300 ${
           open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
+      />
+
+      <nav
+        aria-label="Main"
+        className="fixed inset-x-[16px] bottom-[calc(16px+env(safe-area-inset-bottom))] z-50 flex flex-col items-end gap-[8px]"
       >
-        <div className="flex flex-1 flex-col items-center justify-center gap-[28px] text-center">
-          {mainLinks.map(({ href, label }) => {
+        {/* The menu: one pill per page, rising out of the button below. */}
+        <ul id="mobile-menu" className="flex flex-col items-end gap-[8px]" hidden={!open}>
+          {mainLinks.map(({ href, label }, i) => {
+            const active = isActive(pathname, href);
             return (
-              <Link
+              <li
                 key={href}
-                href={href}
-                onClick={() => setOpen(false)}
-                className="lowercase leading-none text-accent transition-opacity hover:opacity-80"
-                style={{ fontFamily: '"IntraNet", sans-serif', fontWeight: 500, fontSize: 18 }}
+                className="animate-pill-in"
+                // Bottom pill first, so the menu unfolds upward from the button.
+                style={{ animationDelay: `${(mainLinks.length - 1 - i) * 40}ms` }}
               >
-                {label}
-              </Link>
+                <Link
+                  href={href}
+                  onClick={() => setOpen(false)}
+                  aria-current={active ? "page" : undefined}
+                  className={`${pill} block rounded-[6px] px-[14px] py-[6px] text-[13px] leading-none ${
+                    active ? "text-primary" : "text-foreground"
+                  }`}
+                >
+                  {label}
+                </Link>
+              </li>
             );
           })}
-        </div>
-      </div>
+        </ul>
 
-      {/* Circular toggle button — fixed bottom centre, mobile only */}
-      <button
-        onClick={() => setOpen((o) => !o)}
-        aria-label={open ? "Close menu" : "Open menu"}
-        className="fixed bottom-0 left-0 right-0 z-50 h-[calc(62px+env(safe-area-inset-bottom))] bg-primary pb-[env(safe-area-inset-bottom)] text-accent transition-transform active:scale-[0.99] md:hidden"
-      >
-        <div className="flex h-[62px] items-center">
-          <span
-            className="flex-1 px-[20px] text-left lowercase leading-none"
-            style={{ fontWeight: 700, fontStyle: "italic", letterSpacing: "-0.06em", fontSize: 24 }}
+        {/* Name on the left (goes home), menu button on the right. */}
+        <div className="flex w-full items-center justify-between">
+          <Link
+            href="/"
+            className={`${pill} inline-flex h-[30px] items-center rounded-[6px] px-[12px] text-[17px] font-bold italic leading-none tracking-[-0.04em] text-foreground transition-transform active:scale-95`}
           >
-            Aalok Sud
-          </span>
-          <span className="flex h-full w-[68px] items-center justify-center border-l border-accent/60 text-[20px]">
-            {open ? "×" : "≡"}
-          </span>
+            aalok sud
+          </Link>
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            aria-controls="mobile-menu"
+            className={`${pill} inline-flex h-[24px] items-center rounded-[6px] px-[10px] text-[11px] leading-none text-foreground/80 transition-transform active:scale-95`}
+          >
+            {open ? "close" : "menu"}
+          </button>
         </div>
-      </button>
-    </>
+      </nav>
+    </div>
   );
 }
 
-export function MobileNav({ projectNavItems }: { projectNavItems?: ProjectNavItem[] }) {
+export function MobileNav(_props: { projectNavItems?: ProjectNavItem[] }) {
   return (
     <Suspense fallback={null}>
-      <MobileNavInner projectNavItems={projectNavItems} />
+      <MobileNavInner />
     </Suspense>
   );
 }

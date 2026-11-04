@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createContext, useContext, useState } from "react";
 import { projectNavDisplayTitle } from "@/components/layout/nav";
 import type { ProjectMedia } from "@/lib/projects";
+import { isSanityImage, sanityImageUrl } from "@/lib/sanity-image";
 import { ProjectImages } from "./project-images";
 
 export type ProjectIndexItem = {
@@ -43,6 +44,25 @@ export function ProjectIndexProvider({
   );
 }
 
+/** Phone cover: the project's first image, or a still of its first video. Light either way. */
+function MobileCover({ item }: { item: ProjectIndexItem }) {
+  const cover =
+    item.previewImages.find((m) => m.playbackId || isSanityImage(m.url)) ?? null;
+  if (!cover) return null;
+  const src = cover.playbackId
+    ? `https://image.mux.com/${cover.playbackId}/thumbnail.webp?width=750&time=0`
+    : sanityImageUrl(cover.url, 750);
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt=""
+      loading="lazy"
+      className="mb-[16px] block aspect-[4/3] w-full bg-foreground/5 object-cover md:hidden"
+    />
+  );
+}
+
 export function ProjectList({ items }: { items: ProjectIndexItem[] }) {
   const { previewed, setPreviewed } = useContext(IndexContext);
 
@@ -55,12 +75,14 @@ export function ProjectList({ items }: { items: ProjectIndexItem[] }) {
             onMouseEnter={() => setPreviewed(item)}
             onFocus={() => setPreviewed(item)}
             title={projectNavDisplayTitle(item.title) !== item.title ? item.title : undefined}
-            className={`block py-[10px] transition-colors [overflow-wrap:anywhere] ${
-              item.order === previewed?.order ? "text-primary" : "text-foreground/65 hover:text-foreground"
+            className={`block pb-[40px] transition-colors [overflow-wrap:anywhere] md:py-[10px] ${
+              item.order === previewed?.order ? "md:text-primary" : "md:text-foreground/65 md:hover:text-foreground"
             }`}
           >
+            {/* Phones get a card: cover image first, since there is no hover preview there. */}
+            <MobileCover item={item} />
             <span className="flex items-baseline gap-[8px]">
-              <span className="text-[16px] leading-[22px] lowercase">
+              <span className="text-[32px] font-bold italic leading-[1] tracking-[-0.06em] text-foreground lowercase md:text-[16px] md:font-normal md:not-italic md:leading-[22px] md:tracking-normal md:text-inherit">
                 {projectNavDisplayTitle(item.title)}
               </span>
               {item.year && <span className="text-[11px] opacity-60">{item.year}</span>}
@@ -80,10 +102,22 @@ export function ProjectList({ items }: { items: ProjectIndexItem[] }) {
                 ))}
               </span>
             </span>
-            {/* No hover on touch screens, so the one-liner sits in the row there. */}
+            {/* No hover on touch screens, so the one-liner and tags sit in the card there. */}
             {item.oneLiner && (
-              <span className="mt-[2px] block text-[13px] leading-[20px] text-foreground/60 md:hidden">
+              <span className="mt-[10px] block text-[15px] leading-[22px] text-foreground/80 md:hidden">
                 {item.oneLiner}
+              </span>
+            )}
+            {item.tags.length > 0 && (
+              <span className="mt-[12px] flex flex-wrap gap-[6px] md:hidden">
+                {item.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-sm border border-foreground/15 px-[8px] py-[2px] text-[11px] text-foreground/70"
+                  >
+                    {tag}
+                  </span>
+                ))}
               </span>
             )}
           </Link>

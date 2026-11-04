@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef, useState, type MouseEvent } from "react";
 import {
   DEFAULT_CATEGORY,
   INSPIRATION_HREF,
@@ -11,162 +11,158 @@ import {
   isProjectCategory,
   type ProjectCategory,
 } from "@/lib/projects";
-import { projectNavDisplayTitle, type ProjectNavItem } from "./nav";
+import { subLinkBarClass, type ProjectNavItem } from "./nav";
 
-function MobileSublinksInner({
-  projectNavItems,
-  activeCategory,
-}: {
-  projectNavItems?: ProjectNavItem[];
-  activeCategory?: ProjectCategory;
-}) {
-  const router = useRouter();
-  const pathname     = usePathname();
+/**
+ * Phone version of the green section bar under the desktop nav: the same links, always in view
+ * at the top of the page. Projects aren't listed here; the page itself lists them.
+ */
+function MobileSublinksInner({ activeCategory }: { activeCategory?: ProjectCategory }) {
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const barRef = useRef<HTMLDivElement>(null);
   const activeSection = searchParams.get("section") ?? "";
-  const activeProject = Number(searchParams.get("project"));
-  const isHome      = pathname === "/";
+  const isHome = pathname === "/";
   const isCreations = pathname.startsWith("/creations-and-explorations");
   const isInspiration = pathname === INSPIRATION_HREF;
+  // On the phone home page every section is on one long page; this is the one in view.
+  const [inView, setInView] = useState(activeSection || "intro");
+  useHomeScrollSpy(isHome, activeSection, setInView);
 
-  useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [menuOpen]);
-
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname, searchParams]);
-
-  type Item = { href: string; label: string; active: boolean };
+  type Item = { href: string; label: string; active: boolean; section?: string };
   let items: Item[] = [];
 
   if (isHome) {
     items = [
-      { href: "/",                    label: "Intro",      active: activeSection === "" },
-      { href: "/?section=statement",  label: "Statement",  active: activeSection === "statement" },
-      { href: "/?section=biography",  label: "Biography",  active: activeSection === "biography" },
-      { href: "/?section=experience", label: "Experience", active: activeSection === "experience" },
-    ];
+      { section: "intro", href: "/", label: "Intro" },
+      { section: "statement", href: "/?section=statement", label: "Statement" },
+      { section: "biography", href: "/?section=biography", label: "Biography" },
+      { section: "experience", href: "/?section=experience", label: "Experience" },
+    ].map((item) => ({ ...item, active: item.section === inView }));
   } else if (isCreations) {
-    // The categories and Inspiration, then the projects in the current category.
-    const navItems = isInspiration ? [] : (projectNavItems ?? []);
+    // A project page passes its own category; otherwise the URL decides.
     const categoryParam = searchParams.get("category");
     const currentCategory: ProjectCategory =
       activeCategory ?? (isProjectCategory(categoryParam) ? categoryParam : DEFAULT_CATEGORY);
-    const onProject = navItems.some(({ order }) => order === activeProject);
     items = [
       ...PROJECT_CATEGORIES.map(({ value, label }) => ({
         href: categoryHref(value),
         label,
-        active: !isInspiration && !onProject && value === currentCategory,
+        active: !isInspiration && value === currentCategory,
       })),
       { href: INSPIRATION_HREF, label: "Inspiration", active: isInspiration },
-      ...navItems.map(({ order, title }) => ({
-        href:   `/creations-and-explorations?project=${order}`,
-        label:  projectNavDisplayTitle(title),
-        active: activeProject === order,
-      })),
     ];
   }
 
+  // On narrow phones the bar can scroll sideways: keep the current link in view.
+  useEffect(() => {
+    barRef.current?.querySelector<HTMLElement>("[aria-current=page]")?.scrollIntoView({ inline: "nearest", block: "nearest" });
+  }, [pathname, searchParams, inView]);
+
   if (!items.length) return null;
-  const activeIndex = Math.max(0, items.findIndex((item) => item.active));
-  const activeItem = items[activeIndex];
-  const goPrev = () => {
-    const prevIndex = (activeIndex - 1 + items.length) % items.length;
-    router.push(items[prevIndex].href);
-  };
-  const goNext = () => {
-    const nextIndex = (activeIndex + 1) % items.length;
-    router.push(items[nextIndex].href);
-  };
 
   return (
-    <>
+    <div className="sticky top-0 z-30 bg-background px-[24px] pb-[10px] pt-[calc(12px+env(safe-area-inset-top))] md:hidden">
       <div
-        className={`fixed inset-0 z-40 flex flex-col bg-background p-[24px] transition-opacity duration-200 md:hidden ${
-          menuOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
-        }`}
+        ref={barRef}
+        className={`${subLinkBarClass} overflow-x-auto text-[12px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
       >
-        <div className="flex items-center justify-between">
-          <p
-            className="leading-none text-foreground"
-            style={{ fontFamily: "\"IntraNet\", sans-serif", fontWeight: 500, fontSize: 16 }}
+        {items.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={item.section ? (e) => scrollToSection(e, item.section!) : undefined}
+            aria-current={item.active ? "page" : undefined}
+            // Grows to share the bar like desktop, but never squeezes below its text.
+            className={`flex min-h-[36px] shrink-0 grow basis-auto items-center justify-center whitespace-nowrap px-[12px] transition-colors ${
+              item.active ? "text-primary" : "text-foreground/65"
+            }`}
           >
-            Sublinks
-          </p>
-          <button
-            type="button"
-            onClick={() => setMenuOpen(false)}
-            aria-label="Close sublinks menu"
-            className="text-[28px] leading-none text-foreground transition-opacity hover:opacity-80"
-          >
-            ×
-          </button>
-        </div>
-        <div className="flex flex-1 flex-col items-center justify-center gap-[28px] text-center">
-          {items.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setMenuOpen(false)}
-              className={`lowercase leading-none transition-opacity hover:opacity-80 ${item.active ? "text-foreground" : "text-foreground/70"}`}
-              style={{ fontFamily: "\"IntraNet\", sans-serif", fontWeight: 500, fontSize: 18 }}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
+            {item.label}
+          </Link>
+        ))}
       </div>
-
-      <div className="sticky top-0 z-30 h-[calc(56px+env(safe-area-inset-top))] bg-background pt-[env(safe-area-inset-top)] text-foreground md:hidden">
-        <div className="flex h-[56px] items-center">
-          <div className="flex min-w-0 flex-1 items-center justify-start px-[20px]">
-            <button
-              type="button"
-              onClick={() => setMenuOpen(true)}
-              className="truncate text-left lowercase leading-none opacity-100"
-              style={{ fontFamily: "\"IntraNet\", sans-serif", fontWeight: 500, fontSize: 12 }}
-            >
-              {activeItem.label}
-            </button>
-          </div>
-          <div className="flex h-full shrink-0 border-l border-foreground/20">
-            <button
-              onClick={goPrev}
-              aria-label="Previous sublink"
-              className="flex h-full w-[56px] flex-col items-center justify-center border-r border-foreground/20 leading-none transition-opacity hover:opacity-80"
-            >
-              <span className="text-[18px]">←</span>
-              <span className="mt-[2px] text-[9px] uppercase tracking-[0.08em] opacity-80">back</span>
-            </button>
-            <button
-              onClick={goNext}
-              aria-label="Next sublink"
-              className="flex h-full w-[56px] flex-col items-center justify-center leading-none transition-opacity hover:opacity-80"
-            >
-              <span className="text-[18px]">→</span>
-              <span className="mt-[2px] text-[9px] uppercase tracking-[0.08em] opacity-80">next</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </>
+    </div>
   );
 }
 
+const sectionEl = (id: string) => document.querySelector<HTMLElement>(`[data-home-section="${id}"]`);
+
+/** Glide to a section on the phone home page instead of loading it as its own page. */
+function scrollToSection(e: MouseEvent, id: string) {
+  const el = sectionEl(id);
+  if (!el) return; // not the one-page layout (desktop): follow the link as usual
+  e.preventDefault();
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+/**
+ * Tracks which home section is under the orb frame as the page scrolls, and keeps the
+ * URL (?section=…) in step so a reload or shared link opens at the same place.
+ */
+function useHomeScrollSpy(isHome: boolean, initialSection: string, setInView: (id: string) => void) {
+  useEffect(() => {
+    // Phones only: on desktop the one-page layout is in the page but hidden, and must not drive anything.
+    const phone = window.matchMedia("(max-width: 767px)");
+    if (!isHome || !sectionEl("intro")) return;
+    const ids = ["intro", "statement", "biography", "experience"];
+
+    let current = "";
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      if (!phone.matches) return;
+      // The line just below the fixed orb frame: the last section whose top has passed it is in view.
+      const line = (document.querySelector("[data-home-frame]")?.getBoundingClientRect().bottom ?? 0) + 40;
+      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+      let id = ids[0];
+      for (const candidate of ids) {
+        const el = sectionEl(candidate);
+        if (el && el.getBoundingClientRect().top <= line) id = candidate;
+      }
+      if (atBottom) id = ids[ids.length - 1];
+      if (id === current) return;
+      current = id;
+      setInView(id);
+      const url = new URL(window.location.href);
+      if (id === "intro") url.searchParams.delete("section");
+      else url.searchParams.set("section", id);
+      window.history.replaceState(window.history.state, "", url);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    // Opened at a section (?section=…): start there. Waits two frames so it lands after
+    // Next has scrolled the new page to the top; until then nothing is tracked.
+    let start = requestAnimationFrame(() => {
+      start = requestAnimationFrame(() => {
+        if (phone.matches && initialSection && initialSection !== "intro") sectionEl(initialSection)?.scrollIntoView({ block: "start" });
+        update();
+        window.addEventListener("scroll", onScroll, { passive: true });
+        window.addEventListener("resize", onScroll);
+      });
+    });
+    return () => {
+      cancelAnimationFrame(start);
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+    // Set up once per visit to the home page; later URL changes come from this hook itself.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHome]);
+}
+
 export function MobileSublinks({
-  projectNavItems,
   activeCategory,
 }: {
+  /** Kept for the shell's call site; projects are no longer listed in this bar. */
   projectNavItems?: ProjectNavItem[];
   activeCategory?: ProjectCategory;
 }) {
   return (
     <Suspense fallback={null}>
-      <MobileSublinksInner projectNavItems={projectNavItems} activeCategory={activeCategory} />
+      <MobileSublinksInner activeCategory={activeCategory} />
     </Suspense>
   );
 }

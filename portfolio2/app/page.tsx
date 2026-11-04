@@ -3,6 +3,7 @@ import { LandingSwitch } from "@/components/landing-switch";
 import { DEFAULT_CATEGORY, isProjectCategory, type ProjectCategory } from "@/lib/projects";
 import { Blobs } from "@/components/blobs";
 import { SiteShell } from "@/components/layout/site-shell";
+import { MobileOnly } from "@/components/layout/mobile-only";
 
 type HomeProps = {
   searchParams: Promise<{ section?: string; view?: string }>;
@@ -87,6 +88,137 @@ function Cta({ href, children }: { href: string; children: React.ReactNode }) {
   );
 }
 
+// Experience: work and education (left), tools, practices and recognition (right).
+const experienceWork = (
+    <div className="space-y-[24px]">
+      {/* Work Experience */}
+      <div className="space-y-[16px]">
+        <p className="text-[11px] uppercase tracking-[0.1em] text-foreground/40">Work Experience</p>
+
+        <div className="space-y-[4px]">
+          <div className="flex items-baseline justify-between gap-[8px]">
+            <p className="text-[13px] font-semibold leading-[18px]">Innovation Lab — Concordia University</p>
+            <p className="shrink-0 text-[11px] text-foreground/40">Feb – May 2026</p>
+          </div>
+          <p className="text-[12px] italic text-foreground/60">Software Developer · Montreal</p>
+          <ul className="mt-[6px] space-y-[3px]">
+            <li className="text-[12px] leading-[18px] text-foreground/70">Developed a PHP module extending FarmOS to interface with agricultural sensors.</li>
+            <li className="text-[12px] leading-[18px] text-foreground/70">Built and shipped a Flutter mobile app for managing FarmOS dashboards remotely.</li>
+          </ul>
+        </div>
+
+        <div className="space-y-[4px]">
+          <div className="flex items-baseline justify-between gap-[8px]">
+            <p className="text-[13px] font-semibold leading-[18px]">hims &amp; hers</p>
+            <p className="shrink-0 text-[11px] text-foreground/40">Apr – Sep 2025</p>
+          </div>
+          <p className="text-[12px] italic text-foreground/60">Creative Intern · Montreal</p>
+          <ul className="mt-[6px] space-y-[3px]">
+            <li className="text-[12px] leading-[18px] text-foreground/70">Set up an email marketing campaign; increased customer acquisition by 5% within a month.</li>
+            <li className="text-[12px] leading-[18px] text-foreground/70">Created performance marketing ad creatives for Meta and Google.</li>
+            <li className="text-[12px] leading-[18px] text-foreground/70">Worked on organic strategy and brand identity.</li>
+          </ul>
+        </div>
+
+        <div className="space-y-[4px]">
+          <div className="flex items-baseline justify-between gap-[8px]">
+            <p className="text-[13px] font-semibold leading-[18px]">The Bhag Club</p>
+            <p className="shrink-0 text-[11px] text-foreground/40">2023 · Freelance</p>
+          </div>
+          <p className="text-[12px] italic text-foreground/60">Foundation Branding · New Delhi</p>
+          <ul className="mt-[6px] space-y-[3px]">
+            <li className="text-[12px] leading-[18px] text-foreground/70">Created a foundational design system, branding, and logo.</li>
+            <li className="text-[12px] leading-[18px] text-foreground/70">Brand scaled from 500 to 50k Instagram followers using the design system.</li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Education */}
+      <div className="space-y-[16px]">
+        <p className="text-[11px] uppercase tracking-[0.1em] text-foreground/40">Education</p>
+
+        <div className="space-y-[4px]">
+          <div className="flex items-baseline justify-between gap-[8px]">
+            <p className="text-[13px] font-semibold leading-[18px]">Concordia University</p>
+            <p className="shrink-0 text-[11px] text-foreground/40">2022 – 2026</p>
+          </div>
+          <p className="text-[12px] leading-[18px] text-foreground/60">BCompSci Joint Major — Computation Arts &amp; Computer Science · Montreal</p>
+        </div>
+
+        <div className="space-y-[4px]">
+          <div className="flex items-baseline justify-between gap-[8px]">
+            <p className="text-[13px] font-semibold leading-[18px]">Google · Coursera</p>
+            <p className="shrink-0 text-[11px] text-foreground/40">2023</p>
+          </div>
+          <p className="text-[12px] leading-[18px] text-foreground/60">Professional Certificate in UX Design</p>
+        </div>
+      </div>
+    </div>
+);
+
+const experienceSkills = (
+    <div className="space-y-[24px]">
+      {/* Tools */}
+      <div className="space-y-[12px]">
+        <p className="text-[11px] uppercase tracking-[0.1em] text-foreground/40">Tools</p>
+        <div className="flex flex-wrap gap-[6px]">
+          {["TouchDesigner", "Max/MSP", "Blender", "Unreal Engine", "Three.js / WebGL", "React / Next.js", "Python", "Java", "C", "Adobe Suite"].map((tool) => (
+            <span key={tool} className="rounded-sm border border-foreground/15 px-[8px] py-[3px] text-[11px] text-foreground/70">
+              {tool}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Practices */}
+      <div className="space-y-[12px]">
+        <p className="text-[11px] uppercase tracking-[0.1em] text-foreground/40">Practices</p>
+        <div className="flex flex-wrap gap-[6px]">
+          {["Creative Coding", "Live Visuals", "Environment Art", "UI/UX Design", "ML / Agentic AI", "Web Development", "Branding & Identity", "Art Direction", "Typography", "Motion Graphics"].map((practice) => (
+            <span key={practice} className="rounded-sm border border-foreground/15 px-[8px] py-[3px] text-[11px] text-foreground/70">
+              {practice}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Recognition */}
+      <div className="space-y-[12px]">
+        <p className="text-[11px] uppercase tracking-[0.1em] text-foreground/40">Recognition</p>
+        <div className="space-y-[8px]">
+          <div>
+            <p className="text-[12px] font-semibold leading-[18px]">Concordia International Tuition Entrance Scholarship</p>
+            <p className="text-[11px] text-foreground/50">Award · 2022</p>
+          </div>
+          <div>
+            <p className="text-[12px] font-semibold leading-[18px]">Live Visual — Droplets Collective</p>
+            <p className="text-[11px] text-foreground/50">Performance · 2026</p>
+          </div>
+          <div>
+            <p className="text-[12px] font-semibold leading-[18px]">Live Coding — JenniCam@30 at Milieux</p>
+            <p className="text-[11px] text-foreground/50">Performance · 2026</p>
+          </div>
+          <div>
+            <p className="text-[12px] font-semibold leading-[18px]">Realtime Audio Metamorphosis — Ludodrome 2026 at Parquette</p>
+            <p className="text-[11px] text-foreground/50">Exhibition · 2026</p>
+          </div>
+          <div>
+            <p className="text-[12px] font-semibold leading-[18px]">Realtime Audio Metamorphosis — Artefacts Exhibition at Concordia University</p>
+            <p className="text-[11px] text-foreground/50">Exhibition · 2026</p>
+          </div>
+          <div>
+            <p className="text-[12px] font-semibold leading-[18px]">Cyberskin — Artefacts Exhibition at Concordia University</p>
+            <p className="text-[11px] text-foreground/50">Exhibition · 2026</p>
+          </div>
+          <div>
+            <p className="text-[12px] font-semibold leading-[18px]">Computation Arts Student Society</p>
+            <p className="text-[11px] text-foreground/50">Outreach Officer · 2023 – 2024</p>
+          </div>
+        </div>
+      </div>
+    </div>
+);
+
 function LandingContent({ view }: { view: ProjectCategory }) {
   return (
     <div className="max-w-[560px]">
@@ -126,6 +258,48 @@ function LandingContent({ view }: { view: ProjectCategory }) {
   );
 }
 
+// Phones: one long page. The orb frame stays put under the section bar while every
+// section scrolls past beneath it; the bar follows along (see mobile-sublinks.tsx).
+function MobileHome({ view }: { view: ProjectCategory }) {
+  const sections = [
+    { id: "intro", content: <LandingContent view={view} /> },
+    { id: "statement", content: statementContent },
+    { id: "biography", content: biographyContent },
+    {
+      id: "experience",
+      content: (
+        <div className="space-y-[24px]">
+          {experienceWork}
+          {experienceSkills}
+        </div>
+      ),
+    },
+  ];
+  return (
+    <div className="pb-[calc(56px+env(safe-area-inset-bottom))]">
+      <div data-home-frame className="sticky top-[calc(58px+env(safe-area-inset-top))] z-20 bg-background px-[24px] pb-[16px]">
+        <div className="h-[55vw] overflow-hidden bg-black">
+          <MobileOnly>
+            <Blobs className="h-full w-full" />
+          </MobileOnly>
+        </div>
+      </div>
+      <div className="space-y-[72px] px-[24px] pt-[8px]">
+        {sections.map(({ id, content }) => (
+          <section
+            key={id}
+            id={`home-${id}`}
+            data-home-section={id}
+            className="scroll-mt-[calc(58px+55vw+16px+env(safe-area-inset-top))]"
+          >
+            {content}
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default async function Home({ searchParams }: HomeProps) {
   const { section, view } = await searchParams;
   const landingView: ProjectCategory = isProjectCategory(view) ? view : DEFAULT_CATEGORY;
@@ -141,134 +315,9 @@ export default async function Home({ searchParams }: HomeProps) {
         bottomRightClassName="overflow-y-auto"
         mobileSwapColumns
         topRight={blobs}
-        bottomLeft={
-          <div className="space-y-[24px]">
-            {/* Work Experience */}
-            <div className="space-y-[16px]">
-              <p className="text-[11px] uppercase tracking-[0.1em] text-foreground/40">Work Experience</p>
-
-              <div className="space-y-[4px]">
-                <div className="flex items-baseline justify-between gap-[8px]">
-                  <p className="text-[13px] font-semibold leading-[18px]">Innovation Lab — Concordia University</p>
-                  <p className="shrink-0 text-[11px] text-foreground/40">Feb – May 2026</p>
-                </div>
-                <p className="text-[12px] italic text-foreground/60">Software Developer · Montreal</p>
-                <ul className="mt-[6px] space-y-[3px]">
-                  <li className="text-[12px] leading-[18px] text-foreground/70">Developed a PHP module extending FarmOS to interface with agricultural sensors.</li>
-                  <li className="text-[12px] leading-[18px] text-foreground/70">Built and shipped a Flutter mobile app for managing FarmOS dashboards remotely.</li>
-                </ul>
-              </div>
-
-              <div className="space-y-[4px]">
-                <div className="flex items-baseline justify-between gap-[8px]">
-                  <p className="text-[13px] font-semibold leading-[18px]">hims &amp; hers</p>
-                  <p className="shrink-0 text-[11px] text-foreground/40">Apr – Sep 2025</p>
-                </div>
-                <p className="text-[12px] italic text-foreground/60">Creative Intern · Montreal</p>
-                <ul className="mt-[6px] space-y-[3px]">
-                  <li className="text-[12px] leading-[18px] text-foreground/70">Set up an email marketing campaign; increased customer acquisition by 5% within a month.</li>
-                  <li className="text-[12px] leading-[18px] text-foreground/70">Created performance marketing ad creatives for Meta and Google.</li>
-                  <li className="text-[12px] leading-[18px] text-foreground/70">Worked on organic strategy and brand identity.</li>
-                </ul>
-              </div>
-
-              <div className="space-y-[4px]">
-                <div className="flex items-baseline justify-between gap-[8px]">
-                  <p className="text-[13px] font-semibold leading-[18px]">The Bhag Club</p>
-                  <p className="shrink-0 text-[11px] text-foreground/40">2023 · Freelance</p>
-                </div>
-                <p className="text-[12px] italic text-foreground/60">Foundation Branding · New Delhi</p>
-                <ul className="mt-[6px] space-y-[3px]">
-                  <li className="text-[12px] leading-[18px] text-foreground/70">Created a foundational design system, branding, and logo.</li>
-                  <li className="text-[12px] leading-[18px] text-foreground/70">Brand scaled from 500 to 50k Instagram followers using the design system.</li>
-                </ul>
-              </div>
-            </div>
-
-            {/* Education */}
-            <div className="space-y-[16px]">
-              <p className="text-[11px] uppercase tracking-[0.1em] text-foreground/40">Education</p>
-
-              <div className="space-y-[4px]">
-                <div className="flex items-baseline justify-between gap-[8px]">
-                  <p className="text-[13px] font-semibold leading-[18px]">Concordia University</p>
-                  <p className="shrink-0 text-[11px] text-foreground/40">2022 – 2026</p>
-                </div>
-                <p className="text-[12px] leading-[18px] text-foreground/60">BCompSci Joint Major — Computation Arts &amp; Computer Science · Montreal</p>
-              </div>
-
-              <div className="space-y-[4px]">
-                <div className="flex items-baseline justify-between gap-[8px]">
-                  <p className="text-[13px] font-semibold leading-[18px]">Google · Coursera</p>
-                  <p className="shrink-0 text-[11px] text-foreground/40">2023</p>
-                </div>
-                <p className="text-[12px] leading-[18px] text-foreground/60">Professional Certificate in UX Design</p>
-              </div>
-            </div>
-          </div>
-        }
-        bottomRight={
-          <div className="space-y-[24px]">
-            {/* Tools */}
-            <div className="space-y-[12px]">
-              <p className="text-[11px] uppercase tracking-[0.1em] text-foreground/40">Tools</p>
-              <div className="flex flex-wrap gap-[6px]">
-                {["TouchDesigner", "Max/MSP", "Blender", "Unreal Engine", "Three.js / WebGL", "React / Next.js", "Python", "Java", "C", "Adobe Suite"].map((tool) => (
-                  <span key={tool} className="rounded-sm border border-foreground/15 px-[8px] py-[3px] text-[11px] text-foreground/70">
-                    {tool}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Practices */}
-            <div className="space-y-[12px]">
-              <p className="text-[11px] uppercase tracking-[0.1em] text-foreground/40">Practices</p>
-              <div className="flex flex-wrap gap-[6px]">
-                {["Creative Coding", "Live Visuals", "Environment Art", "UI/UX Design", "ML / Agentic AI", "Web Development", "Branding & Identity", "Art Direction", "Typography", "Motion Graphics"].map((practice) => (
-                  <span key={practice} className="rounded-sm border border-foreground/15 px-[8px] py-[3px] text-[11px] text-foreground/70">
-                    {practice}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Recognition */}
-            <div className="space-y-[12px]">
-              <p className="text-[11px] uppercase tracking-[0.1em] text-foreground/40">Recognition</p>
-              <div className="space-y-[8px]">
-                <div>
-                  <p className="text-[12px] font-semibold leading-[18px]">Concordia International Tuition Entrance Scholarship</p>
-                  <p className="text-[11px] text-foreground/50">Award · 2022</p>
-                </div>
-                <div>
-                  <p className="text-[12px] font-semibold leading-[18px]">Live Visual — Droplets Collective</p>
-                  <p className="text-[11px] text-foreground/50">Performance · 2026</p>
-                </div>
-                <div>
-                  <p className="text-[12px] font-semibold leading-[18px]">Live Coding — JenniCam@30 at Milieux</p>
-                  <p className="text-[11px] text-foreground/50">Performance · 2026</p>
-                </div>
-                <div>
-                  <p className="text-[12px] font-semibold leading-[18px]">Realtime Audio Metamorphosis — Ludodrome 2026 at Parquette</p>
-                  <p className="text-[11px] text-foreground/50">Exhibition · 2026</p>
-                </div>
-                <div>
-                  <p className="text-[12px] font-semibold leading-[18px]">Realtime Audio Metamorphosis — Artefacts Exhibition at Concordia University</p>
-                  <p className="text-[11px] text-foreground/50">Exhibition · 2026</p>
-                </div>
-                <div>
-                  <p className="text-[12px] font-semibold leading-[18px]">Cyberskin — Artefacts Exhibition at Concordia University</p>
-                  <p className="text-[11px] text-foreground/50">Exhibition · 2026</p>
-                </div>
-                <div>
-                  <p className="text-[12px] font-semibold leading-[18px]">Computation Arts Student Society</p>
-                  <p className="text-[11px] text-foreground/50">Outreach Officer · 2023 – 2024</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        }
+        bottomLeft={experienceWork}
+        bottomRight={experienceSkills}
+        mobileBody={<MobileHome view={landingView} />}
       />
     );
   }
@@ -281,6 +330,7 @@ export default async function Home({ searchParams }: HomeProps) {
       bottomLeftClassName="overflow-y-auto"
       mobileSwapColumns
       right={blobs}
+      mobileBody={<MobileHome view={landingView} />}
       bottomLeft={
         // Vertically centered on desktop. Taller text still starts at the top and scrolls.
         <div className="md:flex md:min-h-full md:flex-col md:justify-center">
