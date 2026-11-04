@@ -50,10 +50,14 @@ type Layer = { key: number; text: string };
 
 /**
  * Text that melts into its new value whenever `text` changes. With `appear`, it also melts in
- * when it first shows. A ref gives `peek` for hover and click wobbles.
+ * when it first shows. A ref gives `peek` for hover and click wobbles. `strength` scales how
+ * blurry the melt gets (1 = like the homepage headline; lower keeps big text more readable).
  */
-export const MeltText = forwardRef<MeltTextHandle, { text: string; appear?: boolean; className?: string }>(
-  function MeltText({ text, appear = false, className }, ref) {
+export const MeltText = forwardRef<
+  MeltTextHandle,
+  { text: string; appear?: boolean; strength?: number; className?: string }
+>(
+  function MeltText({ text, appear = false, strength = 1, className }, ref) {
     const filterId = `melt-${useId().replace(/[^a-zA-Z0-9-]/g, "")}`;
     const [layers, setLayers] = useState<Layer[]>(() => [{ key: 0, text }]);
     const boxRef = useRef<HTMLSpanElement>(null);
@@ -63,7 +67,11 @@ export const MeltText = forwardRef<MeltTextHandle, { text: string; appear?: bool
     const morphing = useRef(false);
     const mix = useRef(0); // how far a peek has melted the text
 
-    const em = () => (boxRef.current ? parseFloat(getComputedStyle(boxRef.current).fontSize) : 16);
+    const strengthRef = useRef(strength);
+    strengthRef.current = strength;
+    // Every blur is sized in em, so scaling the em scales the whole melt.
+    const em = () =>
+      (boxRef.current ? parseFloat(getComputedStyle(boxRef.current).fontSize) : 16) * strengthRef.current;
     const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // A new text: keep the one showing now as the layer melting away.
