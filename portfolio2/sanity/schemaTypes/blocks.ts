@@ -1,6 +1,6 @@
 // Layout blocks for a project's Story (description). Each one shows up under
 // "Insert" in the Studio's text editor, and each is drawn by
-// components/creations/project-description.tsx on the site.
+// components/works/project-description.tsx on the site.
 import { defineArrayMember, defineField, defineType } from "sanity";
 import {
   AudioLines,

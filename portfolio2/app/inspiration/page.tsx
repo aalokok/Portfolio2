@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { client, isSanityConfigured } from "@/sanity/lib/client";
 import { inspirationBoardsQuery } from "@/sanity/lib/queries";
 import { SiteShell } from "@/components/layout/site-shell";
-import { Lightbox } from "@/components/creations/lightbox";
+import { Lightbox } from "@/components/works/lightbox";
 import { getArenaBoard, arenaSlug, type ArenaBlock } from "@/lib/arena";
 
 // Re-check Sanity for added or reordered boards every 10 minutes.

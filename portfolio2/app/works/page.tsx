@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
 import { client, isSanityConfigured } from "@/sanity/lib/client";
 import { allProjectsQuery, projectSeoQuery } from "@/sanity/lib/queries";
-import { Lightbox } from "@/components/creations/lightbox";
+import { Lightbox } from "@/components/works/lightbox";
 import { SiteShell } from "@/components/layout/site-shell";
-import { ProjectGallery } from "@/components/creations/project-images";
-import { ProjectDescription } from "@/components/creations/project-description";
+import { ProjectGallery } from "@/components/works/project-images";
+import { ProjectDescription } from "@/components/works/project-description";
 import {
   ProjectIndexProvider,
   ProjectList,
   ProjectPreview,
   ProjectSummary,
   type ProjectIndexItem,
-} from "@/components/creations/project-index";
-import { ProjectSpecs } from "@/components/creations/project-specs";
-import { ZineFlipbook } from "@/components/creations/zine-flipbook";
+} from "@/components/works/project-index";
+import { ProjectSpecs } from "@/components/works/project-specs";
+import { ZineFlipbook } from "@/components/works/zine-flipbook";
 import {
   DEFAULT_CATEGORY,
   categoryHref,
@@ -42,7 +42,7 @@ type ProjectSeo = {
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const { project: projectParam } = await searchParams;
   const order = Number(projectParam);
-  if (!isSanityConfigured || !order) return { title: "Creations and Explorations — Aalok Sud" };
+  if (!isSanityConfigured || !order) return { title: "Works — Aalok Sud" };
 
   const seo: ProjectSeo = await client.fetch(projectSeoQuery, { order });
   if (!seo) return {};
@@ -77,7 +77,7 @@ function toIndexItem(project: Project): ProjectIndexItem {
   };
 }
 
-export default async function CreationsAndExplorationsPage({ searchParams }: PageProps) {
+export default async function WorksPage({ searchParams }: PageProps) {
   const { project: projectParam, category: categoryParam } = await searchParams;
 
   const projects: Project[] = isSanityConfigured ? await client.fetch(allProjectsQuery) : [];

@@ -14,7 +14,7 @@ type SiteShellBase = {
   leftRatio?: [number, number];
   rightRatio?: [number, number];
   projectNavItems?: ProjectNavItem[];
-  /** Which Creations and Explorations tab is highlighted in the sub-nav (project pages pass their own). */
+  /** Which works tab is highlighted in the sub-nav (project pages pass their own). */
   activeCategory?: ProjectCategory;
   /** On mobile, render the right column (visual content) above the left column (text). */
   mobileSwapColumns?: boolean;

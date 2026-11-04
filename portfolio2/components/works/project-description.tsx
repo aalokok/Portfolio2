@@ -53,7 +53,7 @@ const marks: PortableTextComponents["marks"] = {
   projectLink: ({ children, value }) =>
     value?.order ? (
       <Link
-        href={`/creations-and-explorations?project=${value.order}`}
+        href={`/works?project=${value.order}`}
         className="text-primary underline-offset-2 hover:underline"
       >
         {children}

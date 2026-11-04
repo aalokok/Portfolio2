@@ -14,9 +14,9 @@ import {
 
 const links = [
   { href: "/", label: "Aalok Sud" },
-  { href: "/creations-and-explorations", label: "Works" },
+  { href: "/works", label: "Works" },
   { href: INSPIRATION_HREF, label: "Inspiration" },
-  { href: "/contact-me", label: "Reach Out" },
+  { href: "/reach-out", label: "Reach Out" },
 ];
 
 // "" is the landing page itself, which has no section in its URL.
@@ -50,8 +50,7 @@ function NavInner({ activeCategory }: { activeCategory?: ProjectCategory }) {
   const searchParams = useSearchParams();
   const activeSection = searchParams.get("section") ?? "";
   const isHome      = pathname === "/";
-  const isCreations   = pathname.startsWith("/creations-and-explorations");
-  const isInspiration = pathname === INSPIRATION_HREF;
+  const isWorks   = pathname.startsWith("/works");
   // A project page passes its own category; otherwise the URL decides.
   const categoryParam = searchParams.get("category");
   const currentCategory: ProjectCategory =
@@ -62,12 +61,7 @@ function NavInner({ activeCategory }: { activeCategory?: ProjectCategory }) {
       <nav className="@container flex h-[clamp(2.75rem,2.35rem+1.1vw,3.5rem)] w-full flex-none items-stretch justify-between bg-primary lowercase px-0.5 text-[clamp(0.6875rem,0.58rem+0.32vw,0.9375rem)] leading-[clamp(1.125rem,1rem+0.35vw,1.5rem)] md:px-1">
         {links.map(({ href, label }) => {
           const isName = href === "/";
-          // Inspiration lives under the works URL but is its own link.
-          const active = isName
-            ? pathname === href
-            : href === INSPIRATION_HREF
-              ? isInspiration
-              : pathname.startsWith(href) && !isInspiration;
+          const active = isName ? pathname === href : pathname.startsWith(href);
 
           const linkClasses = [
             "flex h-full min-w-0 items-center whitespace-nowrap px-1 transition-colors lg:px-2 xl:px-3 2xl:px-4",
@@ -105,7 +99,7 @@ function NavInner({ activeCategory }: { activeCategory?: ProjectCategory }) {
         </div>
       )}
 
-      {isCreations && !isInspiration && (
+      {isWorks && (
         <div className="animate-fade-in pt-[clamp(0.875rem,0.65rem+0.65vw,1.5rem)]">
           <div className={subLinkBarClass}>
             {PROJECT_CATEGORIES.map(({ value, label }) => {
