@@ -14,7 +14,7 @@ import {
 
 const links = [
   { href: "/", label: "Aalok Sud" },
-  { href: "/creations-and-explorations", label: "Creations and Explorations" },
+  { href: "/creations-and-explorations", label: "Works" },
   { href: "/contact-me", label: "Reach Out" },
 ];
 
@@ -58,7 +58,7 @@ function NavInner({ activeCategory }: { activeCategory?: ProjectCategory }) {
 
   return (
     <div className="flex w-full flex-col items-stretch">
-      <nav className="flex h-[clamp(2.75rem,2.35rem+1.1vw,3.5rem)] w-full flex-none items-stretch justify-between bg-primary lowercase px-0.5 text-[clamp(0.6875rem,0.58rem+0.32vw,0.9375rem)] leading-[clamp(1.125rem,1rem+0.35vw,1.5rem)] md:px-1">
+      <nav className="@container flex h-[clamp(2.75rem,2.35rem+1.1vw,3.5rem)] w-full flex-none items-stretch justify-between bg-primary lowercase px-0.5 text-[clamp(0.6875rem,0.58rem+0.32vw,0.9375rem)] leading-[clamp(1.125rem,1rem+0.35vw,1.5rem)] md:px-1">
         {links.map(({ href, label }) => {
           const isName = href === "/";
           const active = isName ? pathname === href : pathname.startsWith(href);
@@ -66,7 +66,7 @@ function NavInner({ activeCategory }: { activeCategory?: ProjectCategory }) {
           const linkClasses = [
             "flex h-full min-w-0 items-center whitespace-nowrap px-2 transition-colors md:px-3 lg:px-4",
             isName
-              ? `font-bold italic lowercase leading-none tracking-[-0.06em] text-[clamp(1.125rem,0.82rem+1.05vw,1.875rem)] ${active ? "text-accent" : "text-white/75 hover:text-white"}`
+              ? `font-medium normal-case leading-none text-[clamp(14px,calc(13cqw-26px),30px)] [font-family:IntraNet,sans-serif] ${active ? "text-accent" : "text-white/75 hover:text-white"}`
               : active
                 ? "text-accent"
                 : "text-white/75 hover:text-white",
@@ -89,6 +89,7 @@ function NavInner({ activeCategory }: { activeCategory?: ProjectCategory }) {
               <Link
                 key={label}
                 href={section ? `/?section=${section}` : "/"}
+                aria-current={activeSection === section ? "page" : undefined}
                 className={subLinkItemClass(activeSection === section)}
               >
                 {label}

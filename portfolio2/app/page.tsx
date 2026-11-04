@@ -258,10 +258,9 @@ function LandingContent({ view }: { view: ProjectCategory }) {
   );
 }
 
-// Phones: one long page. The orb frame stays put under the section bar while every
-// section scrolls past beneath it; the bar follows along (see mobile-sublinks.tsx).
-function MobileHome({ view }: { view: ProjectCategory }) {
-  const sections = [
+// Every section, in order. Both layouts show them as one long page.
+function homeSections(view: ProjectCategory) {
+  return [
     { id: "intro", content: <LandingContent view={view} /> },
     { id: "statement", content: statementContent },
     { id: "biography", content: biographyContent },
@@ -275,8 +274,13 @@ function MobileHome({ view }: { view: ProjectCategory }) {
       ),
     },
   ];
+}
+
+// Phones: the orb frame stays put under the section bar while every section scrolls
+// past beneath it; the bar follows along (see home-scroll.ts).
+function MobileHome({ view }: { view: ProjectCategory }) {
   return (
-    <div className="pb-[calc(56px+env(safe-area-inset-bottom))]">
+    <div data-home-root="phone" className="pb-[calc(56px+env(safe-area-inset-bottom))]">
       <div data-home-frame className="sticky top-[calc(58px+env(safe-area-inset-top))] z-20 bg-background px-[24px] pb-[16px]">
         <div className="h-[55vw] overflow-hidden bg-black">
           <MobileOnly>
@@ -285,7 +289,7 @@ function MobileHome({ view }: { view: ProjectCategory }) {
         </div>
       </div>
       <div className="space-y-[72px] px-[24px] pt-[8px]">
-        {sections.map(({ id, content }) => (
+        {homeSections(view).map(({ id, content }) => (
           <section
             key={id}
             id={`home-${id}`}
@@ -304,42 +308,21 @@ export default async function Home({ searchParams }: HomeProps) {
   const { section, view } = await searchParams;
   const landingView: ProjectCategory = isProjectCategory(view) ? view : DEFAULT_CATEGORY;
 
-  const blobs = <Blobs className="h-full w-full" />;
+  // Desktop shows one section at a time in the left column, centered, with the orbs on the right.
+  const content = homeSections(landingView).find(({ id }) => id === section)?.content
+    ?? <LandingContent view={landingView} />;
 
-  if (section === "experience") {
-    return (
-      <SiteShell
-        leftRatio={[4, 6]}
-        rightRatio={[5, 5]}
-        bottomLeftClassName="overflow-y-auto"
-        bottomRightClassName="overflow-y-auto"
-        mobileSwapColumns
-        topRight={blobs}
-        bottomLeft={experienceWork}
-        bottomRight={experienceSkills}
-        mobileBody={<MobileHome view={landingView} />}
-      />
-    );
-  }
-
-  // Default (no section) and biography: blobs span full right column
   return (
     <SiteShell
       leftRatio={[4, 6]}
       compactNav
       bottomLeftClassName="overflow-y-auto"
       mobileSwapColumns
-      right={blobs}
+      right={<Blobs className="h-full w-full" />}
       mobileBody={<MobileHome view={landingView} />}
       bottomLeft={
-        // Vertically centered on desktop. Taller text still starts at the top and scrolls.
-        <div className="md:flex md:min-h-full md:flex-col md:justify-center">
-          {section === "statement"
-            ? statementContent
-            : section === "biography"
-              ? biographyContent
-              : <LandingContent view={landingView} />}
-        </div>
+        // Vertically centered on desktop. Taller text, like experience, starts at the top and scrolls.
+        <div className="md:flex md:min-h-full md:flex-col md:justify-center">{content}</div>
       }
     />
   );
