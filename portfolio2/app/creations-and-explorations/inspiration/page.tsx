@@ -119,7 +119,7 @@ export default async function InspirationPage() {
       mobileAutoHeight
       bottomLeft={
         <div className="max-w-[560px] space-y-[16px]">
-          <h1 className={heading}>Inspiration</h1>
+          <h1 className={heading}>inspiration</h1>
           <p className={body}>Images, references and ideas I collect on Are.na.</p>
           {boards.length > 1 && (
             <ul className="space-y-[4px]">
