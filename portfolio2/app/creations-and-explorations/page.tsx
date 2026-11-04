@@ -99,7 +99,7 @@ export default async function CreationsAndExplorationsPage({ searchParams }: Pag
           projectNavItems={projectNavItems}
           activeCategory={navCategory}
           leftRatio={[3, 7]}
-          bottomLeftClassName="overflow-y-auto"
+          bottomLeftClassName="md:overflow-y-auto"
           hideRightOnMobile
           right={<ProjectPreview />}
           bottomLeft={
@@ -122,7 +122,7 @@ export default async function CreationsAndExplorationsPage({ searchParams }: Pag
       projectNavItems={projectNavItems}
       activeCategory={navCategory}
       leftRatio={[3, 7]}
-      bottomLeftClassName="overflow-y-auto"
+      bottomLeftClassName="md:overflow-y-auto"
       mobileAutoHeight
       bottomLeft={
         <ProjectSummary
