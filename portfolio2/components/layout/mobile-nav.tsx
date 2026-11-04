@@ -80,7 +80,7 @@ function MobileNavInner() {
         <div className="flex w-full items-center justify-between">
           <Link
             href="/"
-            className={`${pill} inline-flex h-[30px] items-center rounded-[6px] px-[12px] text-[17px] font-medium leading-none text-foreground [font-family:IntraNet,sans-serif] transition-transform active:scale-95`}
+            className={`${pill} inline-flex h-[30px] items-center rounded-[6px] px-[12px] text-[17px] font-medium leading-none text-primary [font-family:IntraNet,sans-serif] transition-transform active:scale-95`}
           >
             {/* Trimmed to the capitals, so the name sits dead center in the pill. */}
             <span className="block [text-box:trim-both_cap_alphabetic]">Aalok Sud</span>
@@ -91,7 +91,8 @@ function MobileNavInner() {
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             aria-controls="mobile-menu"
-            className={`${pill} inline-flex h-[24px] items-center rounded-[6px] px-[10px] text-[11px] leading-none text-foreground/80 transition-transform active:scale-95`}
+            // Brand blue, like the desktop nav bar.
+            className="inline-flex h-[30px] items-center rounded-[6px] border border-primary bg-primary px-[12px] text-[15px] leading-none text-white transition-transform active:scale-95"
           >
             {open ? "close" : "menu"}
           </button>
