@@ -155,14 +155,6 @@ export function ProjectList({ items }: { items: ProjectIndexItem[] }) {
   );
 }
 
-// The hover galleries dissolve at their sides and at the edge away from the text, so they read
-// as a glimpse of the project rather than the whole thing.
-const sideFade = "linear-gradient(to right, transparent, #000 14%, #000 86%, transparent)";
-const dissolve = (towards: "top" | "bottom"): React.CSSProperties => {
-  const mask = `${sideFade}, linear-gradient(to ${towards === "top" ? "bottom" : "top"}, transparent, #000 60%)`;
-  return { maskImage: mask, WebkitMaskImage: mask, maskComposite: "intersect", WebkitMaskComposite: "source-in" };
-};
-
 /** The hovered project: gallery, text, then the same gallery drifting the other way. The whole pane opens it. */
 export function ProjectPreview() {
   const { previewed } = useContext(IndexContext);
@@ -171,14 +163,14 @@ export function ProjectPreview() {
   return (
     <Link
       href={`/works?project=${previewed.order}`}
-      className="group flex h-full flex-col justify-center gap-[28px] outline-none focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-primary"
+      className="group flex h-full flex-col justify-between gap-[28px] outline-none focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-primary"
     >
       {/* The galleries swap per project; the text stays put so the name can melt from one to the next. */}
-      <div key={`top-${previewed.order}`} className={gallery} style={dissolve("top")}>
+      <div key={`top-${previewed.order}`} className={gallery}>
         <ProjectImages images={previewed.previewImages} title={previewed.title} />
       </div>
       <ProjectSummary item={previewed} hideTags />
-      <div key={`bottom-${previewed.order}`} className={gallery} style={dissolve("bottom")}>
+      <div key={`bottom-${previewed.order}`} className={gallery}>
         <ProjectImages images={previewed.previewImages} title={previewed.title} reverse />
       </div>
     </Link>
