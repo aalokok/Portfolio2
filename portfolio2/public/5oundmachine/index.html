@@ -47,7 +47,8 @@
   .sl span { color: var(--dim); }
   .sl output { text-align: right; font-variant-numeric: tabular-nums; }
   .rows { display: flex; flex-direction: column; gap: 2px; }
-  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 18px; margin: 0; background: transparent; cursor: pointer; }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 18px; margin: 0; background: transparent; cursor: pointer; touch-action: none; }
+  @media (pointer: coarse) { input[type=range] { height: 28px; } }
   input[type=range]::-webkit-slider-runnable-track { height: 1px; background: var(--line); }
   input[type=range]::-moz-range-track { height: 1px; background: var(--line); }
   input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 9px; height: 9px; margin-top: -4px; border-radius: 50%; background: var(--fg); border: 0; }
@@ -64,6 +65,8 @@
   /* While stopped: a green play triangle in the middle. Everything around it stays usable.
      It melts away when pressed and back when stopped, with the same melt as the site's text. */
   #start { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: rgba(245, 245, 245, .55); pointer-events: none; transition: background-color .45s; }
+  /* Phones: the instrument is taller than the screen, so the triangle sits over the sequencer instead of mid-page. */
+  @media (max-width: 619px) { #start { justify-content: flex-start; padding-top: 30px; } }
   #start.hidden { background-color: rgba(245, 245, 245, 0); }
   #start.hidden #startBtn { pointer-events: none; }
   .meltbox { padding: 40px; }
@@ -187,6 +190,22 @@ document.querySelectorAll("input[data-param]").forEach(inp => {
   inp.min = p.min; inp.max = p.max; inp.step = STEP[id] ?? (p.max - p.min) / 500;
   const out = inp.parentElement.querySelector("output");
   inp.addEventListener("input", () => setParam(id, +inp.value));
+  // Fingers: drag anywhere along the line. (Touch browsers otherwise only take a tap, or need you to hit the thumb.)
+  const fromTouch = e => {
+    const r = inp.getBoundingClientRect(), k = clamp((e.clientX - r.left - 4.5) / (r.width - 9), 0, 1);
+    inp.value = p.min + k * (p.max - p.min);
+    setParam(id, +inp.value);
+  };
+  let finger = null;
+  inp.addEventListener("pointerdown", e => {
+    if (e.pointerType === "mouse") return;
+    e.preventDefault(); finger = e.pointerId;
+    try { inp.setPointerCapture(e.pointerId); } catch {}
+    fromTouch(e);
+  });
+  inp.addEventListener("pointermove", e => { if (e.pointerId === finger) { e.preventDefault(); fromTouch(e); } });
+  const lift = e => { if (e.pointerId === finger) finger = null; };
+  inp.addEventListener("pointerup", lift); inp.addEventListener("pointercancel", lift);
   onParam(id, v => { if (+inp.value !== v) inp.value = v; out.textContent = fmt(id, v); });
 });
 
