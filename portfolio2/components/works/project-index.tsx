@@ -205,7 +205,7 @@ export function ProjectSummary({
 }) {
   return (
     <div className="@container flex animate-fade-in-fast flex-col gap-[18px]">
-      <h2 data-project-title className="py-[0.2em] text-[length:min(6cqw,64px)] font-medium leading-[1.1] text-foreground font-display-outline [overflow-wrap:anywhere]">
+      <h2 data-project-title className={`py-[0.2em] ${backLink ? "text-[length:min(6cqw,64px)]" : "text-[length:min(4.5cqw,46px)]"} font-medium leading-[1.1] text-foreground font-display-outline [overflow-wrap:anywhere]`}>
         {/* Melts from project to project in the hover view; plain on a project page. */}
         {backLink ? projectNavDisplayTitle(item.title) : <MeltText text={projectNavDisplayTitle(item.title)} strength={0.4} />}
       </h2>

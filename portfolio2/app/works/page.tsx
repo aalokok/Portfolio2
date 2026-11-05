@@ -24,6 +24,8 @@ import {
   type ProjectCategory,
 } from "@/lib/projects";
 import { getZine } from "@/lib/zines";
+import { LiveEmbed } from "@/components/works/live-embed";
+import { getLiveEmbed } from "@/lib/live-embeds";
 
 type PageProps = {
   searchParams: Promise<{ project?: string; category?: string }>;
@@ -116,6 +118,7 @@ export default async function WorksPage({ searchParams }: PageProps) {
 
   // Project: the right column merges into one scrollable documentation pane.
   const zine = getZine(project.slug?.current, project.title);
+  const live = getLiveEmbed(project.slug?.current);
   const backLabel = "all projects";
 
   return (
@@ -151,6 +154,7 @@ export default async function WorksPage({ searchParams }: PageProps) {
         >
           {/* Click any image in the story or gallery to view it full screen. */}
           <Lightbox>
+            {live && <LiveEmbed {...live} />}
             <ProjectDescription
               title={project.title}
               description={project.description ?? null}

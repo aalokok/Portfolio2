@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5oundmachine — Aalok</title>
+<style>
+  /* Site brand: ABC Areal, lowercase, the portfolio's greys with its green for anything on. */
+  @font-face { font-family: "Areal"; src: url("fonts/ABCAreal-Regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: "Areal"; src: url("fonts/ABCAreal-Medium.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+  :root {
+    --bg: #f5f5f5; --fg: #191919; --accent: #bcffa4;
+    --line: rgba(25, 25, 25, 0.15); --soft: rgba(25, 25, 25, 0.07); --dim: rgba(25, 25, 25, 0.55);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: "Areal", Arial, sans-serif; font-size: 13px; line-height: 20px; text-transform: lowercase; }
+  button { font: inherit; color: inherit; text-transform: inherit; cursor: pointer; }
+
+  main { display: flex; flex-direction: column; gap: 28px; padding: 4px 2px 12px; }
+  h2 { margin: 0 0 8px; font-size: 13px; font-weight: 400; color: var(--dim); }
+  .cols { display: grid; grid-template-columns: 1fr; gap: 28px; }
+  @media (min-width: 620px) { .cols { grid-template-columns: 1fr 1fr; gap: 40px; } }
+  .stack { display: flex; flex-direction: column; gap: 28px; }
+
+  /* text buttons, like the site's links and tags */
+  .btn { border: 1px solid var(--line); border-radius: 3px; background: none; padding: 1px 9px; line-height: 20px; transition: background .15s, color .15s, border-color .15s; }
+  .btn:hover { border-color: var(--fg); }
+  .btn.on { background: var(--accent); border-color: var(--accent); color: var(--fg); }
+  .link { border: 0; background: none; padding: 0; color: var(--dim); }
+  .link:hover { color: var(--fg); }
+  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .bar .push { margin-left: auto; }
+
+  /* sequencer */
+  .grid { display: grid; grid-template-columns: 52px repeat(16, 1fr); gap: 3px; align-items: center; }
+  .grid .label { color: var(--dim); }
+  .cell { aspect-ratio: 1; width: 100%; max-width: 30px; justify-self: center; padding: 0; border: 0; border-radius: 50%; background: var(--soft); }
+  .cell:nth-child(17n + 6), .cell:nth-child(17n + 10), .cell:nth-child(17n + 14) { margin-left: 5px; }
+  .cell:hover { background: rgba(25, 25, 25, 0.16); }
+  .cell.active { background: var(--fg); }
+  .cell.head { background: var(--accent); }
+  .cell.active.head { background: var(--accent); box-shadow: inset 0 0 0 2px var(--fg); }
+  .grid.random .cell { opacity: .35; }
+
+  /* sliders: label, line, value */
+  .sl { display: grid; grid-template-columns: 64px 1fr 58px; align-items: center; gap: 10px; }
+  .sl span { color: var(--dim); }
+  .sl output { text-align: right; font-variant-numeric: tabular-nums; }
+  .rows { display: flex; flex-direction: column; gap: 2px; }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 18px; margin: 0; background: transparent; cursor: pointer; }
+  input[type=range]::-webkit-slider-runnable-track { height: 1px; background: var(--line); }
+  input[type=range]::-moz-range-track { height: 1px; background: var(--line); }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 9px; height: 9px; margin-top: -4px; border-radius: 50%; background: var(--fg); border: 0; }
+  input[type=range]::-moz-range-thumb { width: 9px; height: 9px; border-radius: 50%; background: var(--fg); border: 0; }
+  input[type=range]:hover::-webkit-slider-thumb, input[type=range]:focus-visible::-webkit-slider-thumb { background: var(--accent); box-shadow: 0 0 0 1px var(--fg); }
+  input[type=range]:hover::-moz-range-thumb, input[type=range]:focus-visible::-moz-range-thumb { background: var(--accent); box-shadow: 0 0 0 1px var(--fg); }
+  input[type=range]:focus-visible { outline: none; }
+
+  .sechead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .fname { color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  canvas { width: 100%; height: 36px; display: block; margin: 2px 0 6px; cursor: crosshair; }
+  input[type=file] { display: none; }
+
+  /* While stopped: a green play triangle in the middle. Everything around it stays usable.
+     It melts away when pressed and back when stopped, with the same melt as the site's text. */
+  #start { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: rgba(245, 245, 245, .55); pointer-events: none; transition: background-color .45s; }
+  #start.hidden { background-color: rgba(245, 245, 245, 0); }
+  #start.hidden #startBtn { pointer-events: none; }
+  .meltbox { padding: 40px; }
+  #startBtn { pointer-events: auto; display: block; width: 0; height: 0; padding: 0; border: 0; background: none; border-style: solid; border-width: 34px 0 34px 58px; border-color: transparent transparent transparent var(--accent); }
+  #startBtn.loading { animation: pulse .9s ease-in-out infinite alternate; pointer-events: none; }
+  @keyframes pulse { to { opacity: .45; } }
+  #status { margin: 0; color: #ff0000; }
+</style>
+</head>
+<body>
+<script>if (window.self !== window.top) document.documentElement.classList.add("embedded");</script>
+
+<div id="start">
+  <svg aria-hidden="true" width="0" height="0" style="position:absolute"><defs>
+    <filter id="melt" x="-100%" y="-100%" width="300%" height="300%"><feColorMatrix id="meltMatrix" in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 255 -60"/></filter>
+  </defs></svg>
+  <div class="meltbox" id="meltbox"><button id="startBtn" aria-label="Play"></button></div>
+  <p id="status"></p>
+</div>
+
+<main>
+  <section>
+    <div class="bar" style="margin-bottom:12px">
+      <button class="btn on" id="play" style="visibility:hidden">stop</button>
+      <button class="btn" id="random">random</button>
+      <button class="link" id="clear" style="margin-left:6px">clear</button>
+      <button class="btn push" id="rec">record</button>
+    </div>
+    <div class="grid" id="grid"></div>
+    <label class="sl" style="margin-top:10px"><span>step</span><input type="range" data-param="steptime"><output></output></label>
+  </section>
+
+  <div class="cols">
+    <div class="stack">
+      <section>
+        <h2>space</h2>
+        <div class="bar" id="envs" style="margin-bottom:8px"></div>
+        <label class="sl"><span>amount</span><input type="range" data-param="space"><output></output></label>
+      </section>
+      <section>
+        <h2>mix</h2>
+        <div class="rows">
+          <label class="sl"><span>kick</span><input type="range" data-param="g_kick"><output></output></label>
+          <label class="sl"><span>hihat</span><input type="range" data-param="g_hat"><output></output></label>
+          <label class="sl"><span>808</span><input type="range" data-param="g_808"><output></output></label>
+          <label class="sl"><span>snare</span><input type="range" data-param="g_snare"><output></output></label>
+          <label class="sl"><span>grain</span><input type="range" data-param="g_grain"><output></output></label>
+          <label class="sl"><span>ambient</span><input type="range" data-param="g_ambient"><output></output></label>
+          <label class="sl"><span>master</span><input type="range" data-param="master"><output></output></label>
+        </div>
+      </section>
+    </div>
+    <div class="stack">
+      <section>
+        <h2>pitch</h2>
+        <div class="rows">
+          <label class="sl"><span>kick</span><input type="range" data-param="kickpitch"><output></output></label>
+          <label class="sl"><span>808</span><input type="range" data-param="bass808"><output></output></label>
+          <label class="sl"><span>grain</span><input type="range" data-param="grainpitch"><output></output></label>
+        </div>
+      </section>
+      <section>
+        <div class="sechead"><h2>grain voice <span class="fname" id="grainName"></span></h2><button class="link" onclick="document.getElementById('grainFile').click()">replace</button></div>
+        <canvas id="grainWave" width="800" height="72" title="click to set where grains start"></canvas>
+        <div class="rows">
+          <label class="sl"><span>length</span><input type="range" data-param="grainlen"><output></output></label>
+          <label class="sl"><span>spread</span><input type="range" data-param="grainjitter"><output></output></label>
+        </div>
+        <input type="file" id="grainFile" accept="audio/*">
+      </section>
+      <section>
+        <div class="sechead"><h2>ambient <span class="fname" id="ambName"></span></h2>
+          <span><button class="link" id="ambon">on</button> · <button class="link" onclick="document.getElementById('ambFile').click()">replace</button></span></div>
+        <div class="rows">
+          <label class="sl"><span>rate</span><input type="range" data-param="ambrate"><output></output></label>
+          <label class="sl"><span>slice</span><input type="range" data-param="ambslice"><output></output></label>
+          <label class="sl"><span>tone</span><input type="range" data-param="ambtone"><output></output></label>
+        </div>
+        <input type="file" id="ambFile" accept="audio/*">
+      </section>
+    </div>
+  </div>
+</main>
+
+<script>
+const PARAMS = [{"id":"playing","default":0,"min":0,"max":1},{"id":"steptime","default":180,"min":90,"max":400},{"id":"randomdrums","default":0,"min":0,"max":1},{"id":"env","default":0,"min":0,"max":4},{"id":"space","default":0.8,"min":0,"max":1.5},{"id":"kickpitch","default":121,"min":100,"max":200},{"id":"bass808","default":105,"min":85,"max":150},{"id":"grainpitch","default":0.65,"min":0.1,"max":4},{"id":"grainlen","default":250,"min":100,"max":500},{"id":"grainstart","default":0.3,"min":0,"max":1},{"id":"grainjitter","default":0.02,"min":0,"max":0.2},{"id":"g_kick","default":0.9,"min":0,"max":1.5},{"id":"g_hat","default":0.35,"min":0,"max":1.5},{"id":"g_808","default":0.7,"min":0,"max":1.5},{"id":"g_snare","default":0.45,"min":0,"max":1.5},{"id":"g_grain","default":1.0,"min":0,"max":1.5},{"id":"g_ambient","default":0.5,"min":0,"max":1.5},{"id":"ambon","default":1,"min":0,"max":1},{"id":"ambrate","default":0.5,"min":0.25,"max":2},{"id":"ambslice","default":5000,"min":180,"max":8000},{"id":"ambtone","default":700,"min":100,"max":5000},{"id":"master","default":0.8,"min":0,"max":1.2}];
+const P = Object.fromEntries(PARAMS.map(p => [p.id, p]));
+const STEP = { steptime: 1, kickpitch: 1, bass808: 1, grainlen: 1, ambslice: 10, ambtone: 1 };
+const ROWS = ["kick", "hihat", "808", "snare", "grain"];
+// Pattern C from the original patch, so it plays something straight away.
+const START_PATTERN = ["1001001001001011","0010101111100000","1000000001000000","0100010010010110","1010100101101100"];
+// env ids: 0 none, 1 sunken ship, 2 cathedral, 3 rainforest, 4 bathroom party
+const ENVS = [[0, "none"], [1, "sunken ship"], [2, "cathedral"], [3, "rainforest"], [4, "bathroom party"]];
+
+let ctx, device, outGain, recorder, recChunks = [];
+let pattern = START_PATTERN.map(r => r.split("").map(Number));
+const values = Object.fromEntries(PARAMS.map(p => [p.id, p.default]));
+const listeners = {};
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
+function setParam(id, v) {
+  v = clamp(v, P[id].min, P[id].max);
+  values[id] = v;
+  const p = device && device.parametersById.get(id);
+  if (p) p.value = v;
+  (listeners[id] || []).forEach(fn => fn(v));
+}
+function onParam(id, fn) { (listeners[id] ||= []).push(fn); fn(values[id]); }
+
+const fmt = (id, v) => {
+  if (id.startsWith("g_") || id === "master" || id === "space") return `${Math.round(v * 100)}%`;
+  if (["steptime", "grainlen", "ambslice"].includes(id)) return `${Math.round(v)} ms`;
+  if (["kickpitch", "bass808", "ambtone"].includes(id)) return `${Math.round(v)} hz`;
+  if (id === "grainjitter") return (+v).toFixed(2);
+  return `${(+v).toFixed(2)}×`;
+};
+
+// ---------- sliders ----------
+document.querySelectorAll("input[data-param]").forEach(inp => {
+  const id = inp.dataset.param, p = P[id];
+  inp.min = p.min; inp.max = p.max; inp.step = STEP[id] ?? (p.max - p.min) / 500;
+  const out = inp.parentElement.querySelector("output");
+  inp.addEventListener("input", () => setParam(id, +inp.value));
+  onParam(id, v => { if (+inp.value !== v) inp.value = v; out.textContent = fmt(id, v); });
+});
+
+// ---------- spaces ----------
+const envsEl = document.getElementById("envs");
+ENVS.forEach(([i, name]) => {
+  const b = document.createElement("button"); b.className = "btn"; b.textContent = name;
+  b.onclick = () => setParam("env", i);
+  envsEl.append(b);
+  onParam("env", v => b.classList.toggle("on", v === i));
+});
+
+// ---------- sequencer ----------
+const gridEl = document.getElementById("grid");
+const cells = [];
+ROWS.forEach((name, r) => {
+  const l = document.createElement("span"); l.className = "label"; l.textContent = name; gridEl.append(l);
+  cells[r] = [];
+  for (let c = 0; c < 16; c++) {
+    const b = document.createElement("button"); b.className = "cell"; b.setAttribute("aria-label", `${name} step ${c + 1}`);
+    b.onclick = () => { pattern[r][c] ^= 1; drawGrid(); sendPattern(); };
+    gridEl.append(b); cells[r][c] = b;
+  }
+});
+function drawGrid() {
+  pattern.forEach((row, r) => row.forEach((v, c) => { cells[r][c].classList.toggle("active", !!v); cells[r][c].setAttribute("aria-pressed", !!v); }));
+}
+let lastHead = -1;
+function setHead(s) {
+  if (s === lastHead) return;
+  cells.forEach(row => { if (lastHead >= 0) row[lastHead].classList.remove("head"); if (s >= 0) row[s].classList.add("head"); });
+  lastHead = s;
+}
+async function sendPattern() {
+  if (!device) return;
+  const buf = ctx.createBuffer(1, 80, ctx.sampleRate);
+  buf.copyToChannel(Float32Array.from(pattern.flat()), 0);
+  await device.setDataBuffer("pattern", buf);
+}
+document.getElementById("clear").onclick = () => { pattern = ROWS.map(() => Array(16).fill(0)); drawGrid(); sendPattern(); };
+drawGrid();
+
+// ---------- transport ----------
+const playBtn = document.getElementById("play");
+const startEl = document.getElementById("start");
+
+// The site's melt (components/melt-text.tsx): the shape blurs and fades under a threshold
+// filter, so it turns gooey as it goes, then the filter eases off once it has settled.
+const MELT = { blur: 0.09, max: 0.75, rest: 0.02, threshold: 60 / 255, ms: 450, settle: 450, em: 44 };
+const meltBtn = document.getElementById("startBtn"), meltBox = document.getElementById("meltbox"), meltMatrix = document.getElementById("meltMatrix");
+let meltFrame = 0, shown = 1;
+const easeInOut = t => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+function meltStyle(p) {
+  if (p >= 1 || p <= 0) { meltBtn.style.filter = ""; meltBtn.style.opacity = p >= 1 ? "1" : "0"; return; }
+  const b = MELT.blur * MELT.em;
+  meltBtn.style.filter = `blur(${Math.min(b / p - b, MELT.max * MELT.em)}px)`;
+  meltBtn.style.opacity = `${Math.pow(p, 0.4) * 100}%`;
+}
+function meltAmount(a) {
+  const slope = Math.pow(255, a), offset = -(slope - 1) * MELT.threshold;
+  meltMatrix.setAttribute("values", `1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 ${slope.toFixed(3)} ${offset.toFixed(3)}`);
+  meltBox.style.filter = a <= 0 ? "none" : `url(#melt) blur(${(MELT.rest * MELT.em * a).toFixed(3)}px)`;
+}
+function meltTo(target) {
+  cancelAnimationFrame(meltFrame);
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { shown = target; meltStyle(target); meltAmount(0); return; }
+  const from = shown; let t0 = -1;
+  const tick = now => {
+    if (t0 < 0) t0 = now;
+    const t = now - t0, k = Math.min(t / MELT.ms, 1);
+    shown = from + (target - from) * k;
+    meltStyle(shown);
+    const settle = Math.min(Math.max((t - MELT.ms) / MELT.settle, 0), 1);
+    meltAmount(1 - easeInOut(settle));
+    if (settle < 1) meltFrame = requestAnimationFrame(tick);
+  };
+  meltFrame = requestAnimationFrame(tick);
+}
+
+function setPlaying(on) {
+  setParam("playing", on ? 1 : 0);
+  playBtn.style.visibility = on ? "visible" : "hidden";
+  startEl.classList.toggle("hidden", on);
+  meltTo(on ? 0 : 1);
+  if (on && ctx) { clock = { step: 0, acc: 0, last: ctx.currentTime }; lastHead = -1; setHead(0); requestAnimationFrame(tickHead); }
+  else setHead(-1);
+}
+playBtn.onclick = () => setPlaying(false);
+// The playhead follows the audio clock with the same rule as the gen~ sequencer.
+let clock = null;
+function tickHead() {
+  if (!values.playing || !clock) return;
+  const now = ctx.currentTime;
+  clock.acc += (now - clock.last) * 1000; clock.last = now;
+  while (clock.acc >= values.steptime) { clock.acc -= values.steptime; clock.step = (clock.step + 1) % 16; }
+  setHead(clock.step);
+  requestAnimationFrame(tickHead);
+}
+const randBtn = document.getElementById("random");
+randBtn.onclick = () => { const on = values.randomdrums ? 0 : 1; setParam("randomdrums", on); randBtn.classList.toggle("on", !!on); gridEl.classList.toggle("random", !!on); };
+const ambBtn = document.getElementById("ambon");
+ambBtn.onclick = () => { const on = values.ambon ? 0 : 1; setParam("ambon", on); ambBtn.textContent = on ? "on" : "off"; };
+
+// ---------- audio files ----------
+const buffers = {};
+function toMono(audio) {
+  const mono = ctx.createBuffer(1, audio.length, audio.sampleRate);
+  const m = mono.getChannelData(0);
+  for (let c = 0; c < audio.numberOfChannels; c++) { const d = audio.getChannelData(c); for (let i = 0; i < d.length; i++) m[i] += d[i] / audio.numberOfChannels; }
+  return mono;
+}
+async function loadInto(id, arrayBuffer) {
+  const audio = toMono(await ctx.decodeAudioData(arrayBuffer));
+  buffers[id] = audio;
+  await device.setDataBuffer(id, audio);
+  if (id === "grainsrc") drawWave();
+}
+const NAME_EL = { grainsrc: "grainName", ambient: "ambName" };
+const shortName = name => name.replace(/\.[^.]+$/, "");
+async function loadURL(id, url) {
+  try {
+    const r = await fetch(url); if (!r.ok) throw new Error(r.status);
+    await loadInto(id, await r.arrayBuffer());
+    if (NAME_EL[id]) document.getElementById(NAME_EL[id]).textContent = shortName(url.split("/").pop());
+  } catch (e) { console.info(`No ${url} (${e.message}); ${id} stays empty or uses its synthesized fallback.`); }
+}
+function wireUpload(inputId, bufId, nameId) {
+  document.getElementById(inputId).onchange = async e => {
+    const f = e.target.files[0]; if (!f || !device) return;
+    document.getElementById(nameId).textContent = shortName(f.name);
+    await loadInto(bufId, await f.arrayBuffer());
+  };
+}
+wireUpload("grainFile", "grainsrc", "grainName");
+wireUpload("ambFile", "ambient", "ambName");
+
+// Waveform of the grain voice track; click it to set where grains start.
+const wave = document.getElementById("grainWave");
+function drawWave() {
+  const g = wave.getContext("2d"), W = wave.width, H = wave.height;
+  g.clearRect(0, 0, W, H);
+  const buf = buffers.grainsrc;
+  if (!buf) { g.fillStyle = "rgba(25,25,25,.12)"; g.fillRect(0, H / 2, W, 2); return; }
+  const d = buf.getChannelData(0), step = Math.max(1, Math.floor(d.length / W));
+  g.fillStyle = "rgba(25,25,25,.28)";
+  for (let x = 0; x < W; x++) {
+    let mn = 1, mx = -1;
+    for (let i = x * step; i < (x + 1) * step && i < d.length; i += 4) { mn = Math.min(mn, d[i]); mx = Math.max(mx, d[i]); }
+    g.fillRect(x, (1 - mx) * H / 2, 1, Math.max(1, (mx - mn) * H / 2));
+  }
+  const x = values.grainstart * W, w = Math.max(3, (values.grainlen / 1000) * values.grainpitch * buf.sampleRate / d.length * W);
+  g.fillStyle = "rgba(188,255,164,.75)"; g.fillRect(x, 0, w, H);
+  g.fillStyle = "#191919"; g.fillRect(x, 0, 2, H);
+}
+wave.onclick = e => { const r = wave.getBoundingClientRect(); setParam("grainstart", clamp((e.clientX - r.left) / r.width, 0, 1)); };
+["grainstart", "grainlen", "grainpitch"].forEach(id => onParam(id, () => drawWave()));
+
+// ---------- record (replaces sfrecord~): saves a file when you stop ----------
+const recBtn = document.getElementById("rec");
+recBtn.onclick = () => {
+  if (!ctx) return;
+  if (recorder && recorder.state === "recording") { recorder.stop(); return; }
+  const dest = ctx.createMediaStreamDestination(); outGain.connect(dest);
+  recorder = new MediaRecorder(dest.stream); recChunks = [];
+  recorder.ondataavailable = e => recChunks.push(e.data);
+  recorder.onstop = () => {
+    outGain.disconnect(dest); recBtn.classList.remove("on"); recBtn.textContent = "record";
+    const take = new Blob(recChunks, { type: recorder.mimeType });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(take);
+    a.download = `5oundmachine-${Date.now()}.${take.type.includes("ogg") ? "ogg" : "webm"}`; a.click();
+  };
+  recorder.start(); recBtn.classList.add("on"); recBtn.textContent = "stop & save";
+};
+
+// ---------- boot RNBO ----------
+function loadRNBOScript(version) {
+  return new Promise((resolve, reject) => {
+    if (/^\d+\.\d+\.\d+-dev$/.test(version)) return reject(new Error("Patcher exported with a Debug Version of RNBO. Export with a release version."));
+    const el = document.createElement("script");
+    el.src = `https://c74-public.nyc3.digitaloceanspaces.com/rnbo/${encodeURIComponent(version)}/rnbo.min.js`;
+    el.onload = resolve; el.onerror = () => reject(new Error(`Failed to load rnbo.js v${version}`));
+    document.body.append(el);
+  });
+}
+drawWave();
+document.getElementById("startBtn").onclick = async () => {
+  const status = document.getElementById("status"), startBtn = document.getElementById("startBtn");
+  if (device) { await ctx.resume(); setPlaying(true); return; }
+  try {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    await ctx.resume();
+    outGain = ctx.createGain(); outGain.connect(ctx.destination);
+    startBtn.classList.add("loading");
+    const res = await fetch("export/patch.export.json");
+    if (!res.ok) throw new Error("export/patch.export.json not found.");
+    const patcher = await res.json();
+    if (!window.RNBO) await loadRNBOScript(patcher.desc.meta.rnboversion);
+    device = await RNBO.createDevice({ context: ctx, patcher });
+    device.node.connect(outGain);
+    for (const [id, v] of Object.entries(values)) setParam(id, v);
+    await sendPattern();
+    await Promise.all([
+      loadURL("grainsrc", "media/PS1.mp3"), loadURL("ambient", "media/sample1.wav"),
+      loadURL("voices", "media/peopletalking.wav"), loadURL("thunder", "media/thunder.mp3"),
+    ]);
+    startBtn.classList.remove("loading");
+    setPlaying(true);
+  } catch (e) { console.error(e); startBtn.classList.remove("loading"); status.textContent = e.message; }
+};
+</script>
+</body>
+</html>
