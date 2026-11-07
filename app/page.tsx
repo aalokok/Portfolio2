@@ -219,6 +219,18 @@ const experienceSkills = (
           </div>
         </div>
       </div>
+
+      {/* Resume: same link as on the reach out page */}
+      <div className="space-y-[4px]">
+        <p className="text-[11px] italic tracking-[0.1em] lowercase text-foreground/40">Resume</p>
+        <a
+          href="/Aalok_Resume_v10.pdf"
+          download="Aalok_Resume_v10.pdf"
+          className="text-[13px] leading-[20px] text-foreground/80 underline-offset-2 transition-colors hover:text-primary hover:underline"
+        >
+          download pdf
+        </a>
+      </div>
     </div>
 );
 

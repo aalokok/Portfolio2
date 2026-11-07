@@ -2,7 +2,7 @@ import { SiteShell } from "@/components/layout/site-shell";
 import { ReachOutForm } from "@/components/reach-out-form";
 
 const socials = [
-  { label: "Resume", href: "/Aalok_Resume_v10.pdf", display: "Download PDF", download: true },
+  { label: "Resume", href: "/Aalok_Resume_v10.pdf", display: "download pdf", download: true },
   { label: "Email", href: "mailto:alksud@gmail.com", display: "alksud@gmail.com" },
   { label: "Instagram", href: "https://instagram.com/aalok.wh", display: "@aalok.wh" },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/aalok-sud-0a35561a9/", display: "aaloksud" },

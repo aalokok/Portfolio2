@@ -197,6 +197,15 @@ export function ProjectSummary({
 }) {
   return (
     <div className="@container flex animate-fade-in-fast flex-col gap-[18px]">
+      {/* Desktop only, above the name: phones pin it under the top bar instead (see mobile-sublinks.tsx). */}
+      {backLink && (
+        <Link
+          href={backHref}
+          className="hidden w-fit text-[13px] leading-[20px] text-primary transition-opacity hover:opacity-70 md:block"
+        >
+          {backLabel}
+        </Link>
+      )}
       <h2 data-project-title className={`py-[0.2em] ${backLink ? "text-[length:min(6cqw,64px)]" : "text-[length:min(4.5cqw,46px)]"} font-medium leading-[1.1] text-foreground font-display-outline [overflow-wrap:anywhere]`}>
         {/* Melts from project to project in the hover view; plain on a project page. */}
         {backLink ? projectNavDisplayTitle(item.title) : <MeltText text={projectNavDisplayTitle(item.title)} strength={0.4} />}
@@ -224,15 +233,6 @@ export function ProjectSummary({
         </div>
       )}
       {children && <div className="mt-[12px]">{children}</div>}
-      {/* Desktop only: phones pin it under the top bar instead (see mobile-sublinks.tsx). */}
-      {backLink && (
-        <Link
-          href={backHref}
-          className="mt-[4px] hidden w-fit text-[13px] leading-[20px] text-foreground/80 transition-opacity hover:opacity-70 md:block"
-        >
-          {backLabel}
-        </Link>
-      )}
     </div>
   );
 }

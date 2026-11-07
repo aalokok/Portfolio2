@@ -15,9 +15,9 @@ export function ReachOutForm() {
   if (state.status === "sent") {
     return (
       <div className="flex h-full flex-col justify-center gap-[8px]">
-        <p className="text-[20px] font-medium leading-[28px]">Message sent.</p>
+        <p className="text-[20px] font-medium leading-[28px]">message sent.</p>
         <p className="text-[13px] leading-[20px] text-foreground/60">
-          Thanks for reaching out — I&apos;ll get back to you soon.
+          thanks for reaching out — i&apos;ll get back to you soon.
         </p>
       </div>
     );
@@ -26,16 +26,16 @@ export function ReachOutForm() {
   return (
     <form action={action} className="flex h-full flex-col gap-[20px]">
       <div className="space-y-[4px]">
-        <h1 className="text-[18px] font-areal italic leading-[28px]">Lets Talk</h1>
+        <h1 className="text-[18px] font-areal italic leading-[28px]">let&apos;s talk</h1>
         <p className="text-[13px] leading-[20px] text-foreground/60">
-          Got a project, collaboration, or idea? Drop me a message.{" "}
+          got a project, collaboration, or idea? drop me a message.{" "}
           <a
             href="https://calendly.com/alksud/30min"
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary underline-offset-2 hover:underline"
           >
-            Or book a 30-min meeting.
+            or book a 30-min meeting.
           </a>
         </p>
       </div>
@@ -43,11 +43,11 @@ export function ReachOutForm() {
       <div className="flex flex-1 flex-col gap-[16px]">
         <div className="grid gap-[16px] sm:grid-cols-2">
           <div className="flex flex-col gap-[6px]">
-            <Label htmlFor="name">Name</Label>
-            <Input id="name" name="name" placeholder="Your name" required />
+            <Label htmlFor="name">name</Label>
+            <Input id="name" name="name" placeholder="your name" required />
           </div>
           <div className="flex flex-col gap-[6px]">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">email</Label>
             <Input
               id="email"
               name="email"
@@ -59,16 +59,16 @@ export function ReachOutForm() {
         </div>
 
         <div className="flex flex-col gap-[6px]">
-          <Label htmlFor="subject">Subject</Label>
-          <Input id="subject" name="subject" placeholder="What's this about?" />
+          <Label htmlFor="subject">subject</Label>
+          <Input id="subject" name="subject" placeholder="what's this about?" />
         </div>
 
         <div className="flex flex-1 flex-col gap-[6px]">
-          <Label htmlFor="message">Message</Label>
+          <Label htmlFor="message">message</Label>
           <Textarea
             id="message"
             name="message"
-            placeholder="Tell me more…"
+            placeholder="tell me more…"
             required
             className="flex-1"
             style={{ minHeight: 120 }}
@@ -87,7 +87,7 @@ export function ReachOutForm() {
           size="sm"
           className="bg-primary text-background hover:bg-primary-dark"
         >
-          {isPending ? "Sending…" : "Send message"}
+          {isPending ? "sending…" : "send message"}
         </Button>
       </div>
     </form>

@@ -14,7 +14,7 @@ type Props = {
 function SpecItem({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-[2px]">
-      <p className="text-[11px] uppercase tracking-[0.08em] text-foreground/40">{label}</p>
+      <p className="text-[11px] lowercase text-foreground/40">{label}</p>
       <div className="text-[13px] leading-[20px] text-foreground/80">{children}</div>
     </div>
   );
