@@ -19,7 +19,7 @@ export async function sendEmail(
   const message = formData.get("message")?.toString().trim() ?? "";
 
   if (!name || !email || !message) {
-    return { status: "error", message: "Please fill in all required fields." };
+    return { status: "error", message: "please fill in all required fields." };
   }
 
   const { error } = await resend.emails.send({
