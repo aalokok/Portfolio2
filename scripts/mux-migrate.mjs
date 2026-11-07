@@ -135,7 +135,7 @@ async function linkMuxAsset(job, assetId) {
 
 async function main() {
   if (!projectId || !dataset) {
-    console.error("Run this from the portfolio2 folder: NEXT_PUBLIC_SANITY_PROJECT_ID and NEXT_PUBLIC_SANITY_DATASET come from .env.local.");
+    console.error("Run this from the repo root: NEXT_PUBLIC_SANITY_PROJECT_ID and NEXT_PUBLIC_SANITY_DATASET come from .env.local.");
     process.exitCode = 1;
     return;
   }
