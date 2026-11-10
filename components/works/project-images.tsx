@@ -252,7 +252,7 @@ function ScrollView({ images, title, reverse = false }: Props & { reverse?: bool
         return (
         <div
           key={item.url}
-          className="relative h-[42vw] max-h-[220px] flex-shrink-0 overflow-hidden bg-foreground/5 transition-[filter] duration-300 md:h-full md:max-h-none md:grayscale md:hover:grayscale-0"
+          className="relative h-[42vw] max-h-[220px] flex-shrink-0 overflow-hidden bg-foreground/5 md:h-full md:max-h-none"
           style={{ aspectRatio: item.dimensions ? `${item.dimensions.width}/${item.dimensions.height}` : isVideo(item) ? "1/1" : "4/3" }}
         >
           <MediaItem

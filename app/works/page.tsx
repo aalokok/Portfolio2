@@ -3,7 +3,6 @@ import { client, isSanityConfigured } from "@/sanity/lib/client";
 import { allProjectsQuery, projectSeoQuery } from "@/sanity/lib/queries";
 import { Lightbox } from "@/components/works/lightbox";
 import { SiteShell } from "@/components/layout/site-shell";
-import { ProjectGallery } from "@/components/works/project-images";
 import { ProjectDescription } from "@/components/works/project-description";
 import {
   ProjectIndexProvider,
@@ -159,16 +158,11 @@ export default async function WorksPage({ searchParams }: PageProps) {
               title={project.title}
               description={project.description ?? null}
             />
-            {zine ? (
+            {/* The gallery isn't repeated here: it already shows in the works carousels. Zines keep their flipbook. */}
+            {zine && (
               <div className="h-[110vw] flex-none md:h-[80vh]">
                 <ZineFlipbook {...zine} title={project.title} />
               </div>
-            ) : (
-              <ProjectGallery
-                images={project.images ?? []}
-                title={project.title}
-                columns={project.galleryColumns}
-              />
             )}
           </Lightbox>
         </article>

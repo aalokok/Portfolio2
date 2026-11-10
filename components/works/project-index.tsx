@@ -159,7 +159,7 @@ export function ProjectList({ items }: { items: ProjectIndexItem[] }) {
 export function ProjectPreview() {
   const { previewed } = useContext(IndexContext);
   if (!previewed) return null;
-  const gallery = "h-[clamp(120px,24vh,240px)] flex-none animate-fade-in-fast opacity-80 transition-opacity duration-300 group-hover:opacity-100";
+  const gallery = "h-[clamp(120px,calc(50vh-120px),420px)] flex-none animate-fade-in-fast opacity-80 transition-opacity duration-300 group-hover:opacity-100";
   return (
     <Link
       href={`/works?project=${previewed.order}`}
