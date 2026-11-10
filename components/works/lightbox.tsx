@@ -3,12 +3,14 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, ArrowRight, X } from "lucide-react";
+import { isSanityImage, sanityImageUrl } from "@/lib/sanity-image";
 
 type Item = { src: string; alt: string; caption: string };
 
 // Ask Sanity's image CDN for a large, compressed version; leave other URLs alone.
+// (Sets the size settings rather than appending them: the links usually carry them already.)
 function largeSrc(src: string) {
-  return src.includes("cdn.sanity.io/images/") ? `${src}?w=2400&fit=max&auto=format&q=85` : src;
+  return isSanityImage(src) ? sanityImageUrl(src, 2400, 85) : src;
 }
 
 /**
