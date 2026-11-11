@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { LandingSwitch } from "@/components/landing-switch";
-import { DEFAULT_CATEGORY, isProjectCategory, type ProjectCategory } from "@/lib/projects";
+import { DEFAULT_CATEGORY, PROJECT_CATEGORIES, isProjectCategory, projectCategory, type ProjectCategory, type ProjectMedia } from "@/lib/projects";
 import { Blobs } from "@/components/blobs";
+import { FeaturedPanel, type FeaturedItem } from "@/components/home/featured-panel";
+import { client, isSanityConfigured } from "@/sanity/lib/client";
+import { featuredProjectsQuery } from "@/sanity/lib/queries";
 import { SiteShell } from "@/components/layout/site-shell";
 import { HomeFrameFit } from "@/components/layout/home-frame-fit";
 import { MobileOnly } from "@/components/layout/mobile-only";
@@ -331,9 +334,51 @@ function MobileHome({ view }: { view: ProjectCategory }) {
   );
 }
 
+type FeaturedRow = {
+  order: number;
+  title: string;
+  year?: number | null;
+  summary?: string | null;
+  category?: string | null;
+  tags?: string[] | null;
+  featured?: boolean | null;
+  firstText?: string | null;
+  images?: ProjectMedia[] | null;
+};
+
+// About how many images the featured grid shows per side, shared out evenly between that
+// side's projects (at least 2 each). The grid sizes itself to fit them all.
+const GRID_IMAGES = 30;
+
+/** Every project on each side, with its share of images. Projects ticked as featured come first. */
+async function getFeatured(): Promise<Record<ProjectCategory, FeaturedItem[]>> {
+  const rows: FeaturedRow[] = isSanityConfigured ? await client.fetch(featuredProjectsQuery) : [];
+  const toItem = (p: FeaturedRow): FeaturedItem => {
+    // One sentence: the summary, or else the story, cut at its first full stop.
+    const text = (p.summary?.trim() || p.firstText?.trim()) ?? "";
+    return {
+      order: p.order,
+      title: p.title,
+      year: p.year,
+      oneLiner: text ? (text.match(/^.+?[.!?](?=\s|$)/)?.[0] ?? text) : null,
+      tags: p.tags ?? [],
+      images: p.images ?? [],
+    };
+  };
+  const bySide = {} as Record<ProjectCategory, FeaturedItem[]>;
+  for (const { value } of PROJECT_CATEGORIES) {
+    const side = rows.filter((p) => projectCategory(p) === value);
+    const ordered = [...side.filter((p) => p.featured), ...side.filter((p) => !p.featured)];
+    const each = Math.max(2, Math.floor(GRID_IMAGES / Math.max(ordered.length, 1)));
+    bySide[value] = ordered.map((p) => ({ ...toItem(p), images: (p.images ?? []).slice(0, each) }));
+  }
+  return bySide;
+}
+
 export default async function Home({ searchParams }: HomeProps) {
   const { section, view } = await searchParams;
   const landingView: ProjectCategory = isProjectCategory(view) ? view : DEFAULT_CATEGORY;
+  const featured = await getFeatured();
 
   // Desktop shows one section at a time in the left column, centered, with the orbs on the right.
   const content = homeSections(landingView).find(({ id }) => id === section)?.content
@@ -345,7 +390,7 @@ export default async function Home({ searchParams }: HomeProps) {
       compactNav
       bottomLeftClassName="overflow-y-auto"
       mobileSwapColumns
-      right={<Blobs className="h-full w-full" />}
+      right={<FeaturedPanel initialView={landingView} featured={featured} />}
       mobileBody={<MobileHome view={landingView} />}
       bottomLeft={
         // Vertically centered on desktop. Taller text, like experience, starts at the top and scrolls.

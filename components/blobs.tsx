@@ -19,6 +19,21 @@ export type Ps2BlobsProps = {
   trailFade?: number;   // 0–1, higher = longer trails (default 0.8)
   hueShift?: number;    // 0–360 degrees, rotates the brand-blue glow color
   interactive?: boolean; // false = no mouse attraction / drag (default true)
+  /** Where a held orb is (page coordinates) while it is dragged, then null when it is let go. */
+  onDrag?: (point: { x: number; y: number } | null) => void;
+  /** Glow color (0–1 RGB). The orbs ease into a new one rather than snapping. Default: brand blue. */
+  color?: [number, number, number];
+  /** Color of each orb's hot center (0–1 RGB). Eases like color. Default: white. */
+  coreColor?: [number, number, number];
+  /** Frame color behind the orbs (0–1 RGB). Eases like color. Default: black. */
+  background?: [number, number, number];
+  /** The color a held orb turns (0–1 RGB). Default: brand green. */
+  accent?: [number, number, number];
+  /** How far the held (or parked) orb has turned to the accent, 0–1. */
+  heldGlow?: number;
+  /** Park the held orb at this page point: it stays there, and it is the only orb that can be
+   *  picked up until parking ends. Let go of it nearby and it settles back. */
+  park?: { x: number; y: number } | null;
 };
 
 // ── Hue rotation ───────────────────────────────────────────────────────────────
@@ -187,12 +202,33 @@ export function Blobs({
   trailFade = 0.8,
   hueShift = 0,
   interactive = true,
+  onDrag,
+  color,
+  coreColor,
+  background,
+  accent,
+  heldGlow = 0,
+  park = null,
 }: Ps2BlobsProps) {
   const hostRef       = useRef<HTMLDivElement>(null);
   const hueShiftRef   = useRef(hueShift);
   hueShiftRef.current = hueShift;
   const interactiveRef = useRef(interactive);
   interactiveRef.current = interactive;
+  const onDragRef = useRef(onDrag);
+  onDragRef.current = onDrag;
+  const colorRef = useRef(color);
+  colorRef.current = color;
+  const coreRef = useRef(coreColor);
+  coreRef.current = coreColor;
+  const backgroundRef = useRef(background);
+  backgroundRef.current = background;
+  const accentRef = useRef(accent);
+  accentRef.current = accent;
+  const heldGlowRef = useRef(heldGlow);
+  heldGlowRef.current = heldGlow;
+  const parkRef = useRef(park);
+  parkRef.current = park;
 
   useEffect(() => {
     const host = hostRef.current;
@@ -228,6 +264,9 @@ export function Blobs({
       bpos:    gl.getUniformLocation(blobProg, "bpos[0]")!,
       primary: gl.getUniformLocation(blobProg, "u_primary")!,
       bg:      gl.getUniformLocation(blobProg, "u_bg")!,
+      core:    gl.getUniformLocation(blobProg, "u_core")!,
+      accent:  gl.getUniformLocation(blobProg, "u_accent")!,
+      bmix:    gl.getUniformLocation(blobProg, "bmix[0]")!,
     };
     gl.useProgram(blobProg);
     gl.uniform1f(BU.glow, glow);
@@ -294,6 +333,10 @@ export function Blobs({
     let mouseSmX:  number | null = null, mouseSmY:  number | null = null;
     let dragIdx: number | null = null;
     let dragX = 0, dragY = 0, dragVx = 0, dragVy = 0;
+    let lastHeld: number | null = null; // the orb picked up most recently
+    let parkedIdx: number | null = null; // the orb sitting at the park point, if any
+    // While parked, only the parked orb can be picked up.
+    const grabbable = (i: number) => parkedIdx === null || i === parkedIdx;
 
     const toUV = (e: MouseEvent) => {
       const r = canvas.getBoundingClientRect();
@@ -304,13 +347,15 @@ export function Blobs({
     };
 
     const onMouseMove = (e: MouseEvent) => {
+      if (!interactiveRef.current) { mouseRawX = null; mouseRawY = null; mouseSmX = null; mouseSmY = null; return; }
       const { x, y } = toUV(e);
       mouseRawX = x; mouseRawY = y;
       if (mouseSmX === null) { mouseSmX = x; mouseSmY = y; }
+      if (dragIdx !== null) onDragRef.current?.({ x: e.clientX, y: e.clientY });
       if (dragIdx === null) {
-        const near = blobs.some(b => {
+        const near = blobs.some((b, i) => {
           const dx = b.x - x, dy = b.y - y;
-          return Math.sqrt(dx*dx + dy*dy) < GRAB_R;
+          return grabbable(i) && Math.sqrt(dx*dx + dy*dy) < GRAB_R;
         });
         document.body.style.cursor = near ? "grab" : "";
       }
@@ -320,17 +365,19 @@ export function Blobs({
       if (dragIdx === null) document.body.style.cursor = "";
     };
     const onMouseDown = (e: MouseEvent) => {
-      if (e.button !== 0) return;
+      if (e.button !== 0 || !interactiveRef.current) return;
       const { x, y } = toUV(e);
       let best = -1, bestD = Infinity;
       for (let i = 0; i < N; i++) {
         const dx = blobs[i].x - x, dy = blobs[i].y - y;
         const d = Math.sqrt(dx*dx + dy*dy);
-        if (d < GRAB_R && d < bestD) { best = i; bestD = d; }
+        if (grabbable(i) && d < GRAB_R && d < bestD) { best = i; bestD = d; }
       }
       if (best !== -1) {
         dragIdx = best; dragX = x; dragY = y; dragVx = 0; dragVy = 0;
+        lastHeld = best;
         document.body.style.cursor = "grabbing";
+        onDragRef.current?.({ x: e.clientX, y: e.clientY });
         e.preventDefault();
       }
     };
@@ -339,6 +386,7 @@ export function Blobs({
         blobs[dragIdx].vx = dragVx * 0.25;
         blobs[dragIdx].vy = dragVy * 0.25;
         dragIdx = null;
+        onDragRef.current?.(null);
         document.body.style.cursor = mouseRawX !== null ? "grab" : "";
       }
     };
@@ -356,6 +404,10 @@ export function Blobs({
     let t0: number | null = null, lastTs: number | null = null, elapsed = 0;
 
     const draw = new Float32Array(N * 2);
+    const glowColor = [...(colorRef.current ?? rotateHue(PRIMARY_RGB, hueShiftRef.current))];
+    const coreGlow = [...(coreRef.current ?? [1, 1, 1])];
+    const bgColor = [...(backgroundRef.current ?? BACKGROUND_RGB)];
+    const mixes = new Float32Array(N); // per orb, how far it has turned to the accent
 
     const frame = (ts: number) => {
       if (cancelled) return;
@@ -363,6 +415,9 @@ export function Blobs({
       const dt = Math.min((lastTs === null ? 0 : ts - lastTs) / 1000, 0.033);
       lastTs = ts; elapsed += dt;
       const time = (ts - t0) / 1000;
+
+      // Switched off mid-drag (say the panel changed): let the orb go.
+      if (!interactiveRef.current && dragIdx !== null) releaseDrag();
 
       if (mouseRawX !== null && mouseSmX !== null) {
         mouseSmX += (mouseRawX - mouseSmX) * 0.04;
@@ -377,8 +432,30 @@ export function Blobs({
         blobs[dragIdx].vx = 0;    blobs[dragIdx].vy = 0;
       }
 
+      // Parking: the held orb settles at the park point and stays there.
+      const parkAt = parkRef.current;
+      if (parkAt) {
+        if (parkedIdx === null) {
+          parkedIdx = dragIdx ?? lastHeld ?? 0;
+          if (dragIdx !== null) releaseDrag(); // it is parked now, not in the hand
+        }
+        if (dragIdx !== parkedIdx) {
+          const r = canvas.getBoundingClientRect();
+          const px = ((parkAt.x - r.left) - r.width * 0.5) / r.height;
+          const py = -((parkAt.y - r.top) - r.height * 0.5) / r.height;
+          const pb = blobs[parkedIdx];
+          pb.x += (px - pb.x) * 0.12; pb.y += (py - pb.y) * 0.12;
+          pb.vx = 0; pb.vy = 0;
+        }
+      } else {
+        parkedIdx = null;
+      }
+
       const { x: bx, y: by } = uvBounds();
-      stepBlobs(blobs, dt, elapsed, mouseSmX, mouseSmY, bx, by, dragIdx);
+      // While parked the other orbs ignore the mouse; the parked one is held in place.
+      const still = dragIdx ?? parkedIdx;
+      const follow = parkedIdx === null;
+      stepBlobs(blobs, dt, elapsed, follow ? mouseSmX : null, follow ? mouseSmY : null, bx, by, still);
       for (let i = 0; i < N; i++) { draw[i*2] = blobs[i].x; draw[i*2+1] = blobs[i].y; }
 
       const w = canvas.width, h = canvas.height;
@@ -389,6 +466,9 @@ export function Blobs({
       gl.viewport(0, 0, w, h);
       gl.disable(gl.BLEND);
       gl.useProgram(blitProg);
+      const bgTarget = backgroundRef.current ?? BACKGROUND_RGB;
+      for (let c = 0; c < 3; c++) bgColor[c] += (bgTarget[c] - bgColor[c]) * 0.07;
+      gl.uniform3f(LU.bg, bgColor[0], bgColor[1], bgColor[2]);
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, fbos[ping].tex);
       gl.uniform2f(LU.res, w, h);
@@ -396,8 +476,21 @@ export function Blobs({
 
       // ── Pass 2: draw blobs on top (SRC_ALPHA blend, empty space transparent)
       gl.useProgram(blobProg);
-      const [pr, pg, pb] = rotateHue(PRIMARY_RGB, hueShiftRef.current);
-      gl.uniform3f(BU.primary, pr, pg, pb);
+      const target = colorRef.current ?? rotateHue(PRIMARY_RGB, hueShiftRef.current);
+      for (let c = 0; c < 3; c++) glowColor[c] += (target[c] - glowColor[c]) * 0.07;
+      gl.uniform3f(BU.primary, glowColor[0], glowColor[1], glowColor[2]);
+      const coreTarget = coreRef.current ?? [1, 1, 1];
+      for (let c = 0; c < 3; c++) coreGlow[c] += (coreTarget[c] - coreGlow[c]) * 0.07;
+      gl.uniform3f(BU.core, coreGlow[0], coreGlow[1], coreGlow[2]);
+      gl.uniform3f(BU.bg, bgColor[0], bgColor[1], bgColor[2]);
+      const acc = accentRef.current ?? [188 / 255, 1, 164 / 255];
+      gl.uniform3f(BU.accent, acc[0], acc[1], acc[2]);
+      const accIdx = dragIdx ?? parkedIdx ?? lastHeld;
+      for (let i = 0; i < N; i++) {
+        const want = i === accIdx ? heldGlowRef.current : 0;
+        mixes[i] += (want - mixes[i]) * 0.1;
+      }
+      gl.uniform1fv(BU.bmix, mixes);
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
       gl.uniform1f(BU.t, time);

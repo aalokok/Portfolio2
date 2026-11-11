@@ -9,7 +9,14 @@ export type Zine = {
   pageHeight: number;
   /** Optional full PDF for download. */
   pdf?: string;
+  /** Pages (1-based) to show in the works previews. Defaults to the first six. Skip blank pages here. */
+  previewPages?: number[];
 };
+
+/** The page images the works previews show. */
+export function zinePreview(zine: Zine) {
+  return zine.previewPages ? zine.previewPages.map((n) => zine.pages[n - 1]).filter(Boolean) : zine.pages.slice(0, 6);
+}
 
 function pageRange(slug: string, count: number, ext = "webp") {
   return Array.from(
@@ -24,6 +31,7 @@ const zines: Record<string, Zine> = {
     pageWidth: 846,
     pageHeight: 1200,
     pdf: "/zines/horsevision.pdf",
+    previewPages: [1, 3, 4, 5, 6, 7], // page 2 is blank
   },
 };
 

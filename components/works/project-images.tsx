@@ -23,7 +23,7 @@ function isGif(item: ProjectMedia) {
   return item.mimeType === "image/gif" || item.url.toLowerCase().endsWith(".gif");
 }
 
-function isVideo(item: ProjectMedia) {
+export function isVideo(item: ProjectMedia) {
   return (
     !!item.playbackId ||
     item.mimeType?.startsWith("video/") ||
@@ -31,7 +31,7 @@ function isVideo(item: ProjectMedia) {
   );
 }
 
-function LazyVideo({
+export function LazyVideo({
   src,
   playbackId,
   className,

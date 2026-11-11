@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import type { ProjectCategory } from "@/lib/projects";
+import { setHomeView } from "@/lib/home-view";
 
 const WORDS: Record<ProjectCategory, string> = {
   "creative-technology": "technologist",
@@ -199,6 +200,7 @@ export function LandingSwitch({
     interacted.current = true;
     const next: ProjectCategory = view === "design" ? "creative-technology" : "design";
     setView(next);
+    setHomeView(next); // the featured work panel follows
     setSeen((s) => (s.includes(next) ? s : [...s, next]));
     const url = new URL(window.location.href);
     url.searchParams.set("view", next);

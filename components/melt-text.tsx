@@ -155,7 +155,9 @@ export const MeltText = forwardRef<
       <span ref={boxRef} className={`relative inline-grid ${className ?? ""}`} style={{ filter: "none" }}>
         <svg aria-hidden className="absolute h-0 w-0">
           <defs>
-            <filter id={filterId}>
+            {/* Room to draw around the text: blurred letters spread well past its box, and the default
+                (10% extra) cut them off in hard edges mid-melt. */}
+            <filter id={filterId} x="-25%" y="-60%" width="150%" height="220%">
               <feColorMatrix
                 ref={matrixRef}
                 in="SourceGraphic"
