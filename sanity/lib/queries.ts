@@ -18,6 +18,21 @@ const markDefs = `markDefs[] { ..., _type == "projectLink" => { "order": project
 
 const simpleText = `text[] { ..., ${markDefs} }`;
 
+/** What the home page's featured work needs: every project, lightly, with its first few images. */
+export const featuredProjectsQuery = defineQuery(`
+  *[${visible}] | order(order asc) {
+    order,
+    title,
+    year,
+    summary,
+    category,
+    tags,
+    featured,
+    "firstText": pt::text(description[_type == "block"][0]),
+    "images": images[0...8] { alt, ${media} },
+  }
+`);
+
 export const projectNavQuery = defineQuery(`
   *[${visible}] | order(order asc) {
     order,

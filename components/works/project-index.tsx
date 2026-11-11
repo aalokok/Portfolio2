@@ -6,7 +6,7 @@ import { projectNavDisplayTitle } from "@/components/layout/nav";
 import { MeltText, type MeltTextHandle } from "@/components/melt-text";
 import type { ProjectMedia } from "@/lib/projects";
 import { isSanityImage, sanityImageUrl } from "@/lib/sanity-image";
-import { ProjectImages } from "./project-images";
+import { isVideo, LazyVideo, ProjectImages } from "./project-images";
 
 export type ProjectIndexItem = {
   order: number;
@@ -44,25 +44,36 @@ export function ProjectIndexProvider({
   );
 }
 
-/** A small still for a phone tile: the image itself, or a frame of a streamed video. */
+/** A small still: the image itself, or a frame of a streamed video. */
 function stillUrl(media: ProjectMedia) {
   if (media.playbackId) return `https://image.mux.com/${media.playbackId}/thumbnail.webp?width=300&time=0`;
   if (isSanityImage(media.url)) return sanityImageUrl(media.url, 300);
-  return null; // a video with no streaming copy: no cheap still to show
+  // A video with no streaming copy has no cheap still to show.
+  if (media.mimeType?.startsWith("video/") || /\.(mp4|webm|ogg|mov)$/i.test(media.url)) return null;
+  return media.url; // an image hosted on the site itself, like a zine's pages
 }
 
-/** Phone preview: up to six of the project's pieces in a grid of three, since there is no hover there. */
-function MobileGrid({ item }: { item: ProjectIndexItem }) {
-  const stills = item.previewImages.map(stillUrl).filter((src): src is string => !!src);
-  // Whole rows only, so the grid never ends with a gap.
-  const shown = stills.slice(0, stills.length >= 6 ? 6 : stills.length >= 3 ? 3 : stills.length);
-  if (!shown.length) return null;
+/** Phones: three of the project's pieces in a row, under its name in the table. */
+function RowGallery({ item }: { item: ProjectIndexItem }) {
+  // Videos play as silent loops (streamed from Mux, started once on screen); images show as stills.
+  const pieces = item.previewImages
+    .map((media) => ({ media, still: stillUrl(media) }))
+    .filter(({ media, still }) => isVideo(media) || !!still)
+    .slice(0, 3);
+  if (!pieces.length) return null;
+  const tile = "block aspect-square w-full bg-foreground/5 object-cover";
   return (
-    <span className="mb-[16px] grid grid-cols-3 gap-[8px] md:hidden">
-      {shown.map((src, i) => (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img key={i} src={src} alt="" loading="lazy" className="block aspect-square w-full bg-foreground/5 object-cover grayscale" />
-      ))}
+    <span className="grid grid-cols-3 gap-[6px]">
+      {pieces.map(({ media, still }, i) =>
+        isVideo(media) ? (
+          <span key={i} className="relative block aspect-square overflow-hidden bg-foreground/5">
+            <LazyVideo src={media.url} playbackId={media.playbackId} className="absolute inset-0 h-full w-full object-cover" />
+          </span>
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img key={i} src={still!} alt="" loading="lazy" className={tile} />
+        ),
+      )}
     </span>
   );
 }
@@ -84,74 +95,64 @@ export function ProjectList({ items }: { items: ProjectIndexItem[] }) {
   const cancelPreview = () => window.clearTimeout(hoverTimer.current);
   useEffect(() => cancelPreview, []);
 
+  // A quiet table (number, project, tags, year), one hairline per row, at every size.
+  const cols =
+    "grid grid-cols-[22px_minmax(0,1fr)_minmax(0,1.1fr)_34px] items-baseline gap-x-[10px] md:grid-cols-[28px_minmax(0,1.1fr)_minmax(0,1.5fr)_40px] md:gap-x-[14px]";
+
   return (
-    <ul className="flex flex-col">
-      {items.map((item) => (
-        <li key={item.order}>
-          <Link
-            href={`/works?project=${item.order}`}
-            onMouseEnter={() => previewSoon(item)}
-            onMouseLeave={cancelPreview}
-            onFocus={() => setPreviewed(item)}
-            onPointerEnter={(e) => e.pointerType === "mouse" && peek(item.order, 0.12, 250)}
-            onPointerLeave={(e) => e.pointerType === "mouse" && peek(item.order, 0, 300)}
-            onClick={() => peek(item.order, 0.6, 300)}
-            title={projectNavDisplayTitle(item.title) !== item.title ? item.title : undefined}
-            className={`block pb-[120px] transition-colors [overflow-wrap:anywhere] md:py-[10px] ${
-              item.order === previewed?.order ? "md:text-primary" : "md:text-foreground/65 md:hover:text-foreground"
-            }`}
-          >
-            {/* Phones get a card: a grid of the work first, since there is no hover preview there. */}
-            <MobileGrid item={item} />
-            <span className="flex items-baseline gap-[8px]">
-              <span className="text-[22px] font-medium leading-[1] text-foreground font-display-outline md:text-[16px] md:font-normal md:lowercase md:leading-[22px] md:text-inherit md:[font-family:inherit]">
-                <MeltText
-                  ref={(handle) => {
-                    if (handle) melts.current.set(item.order, handle);
-                    else melts.current.delete(item.order);
-                  }}
-                  text={projectNavDisplayTitle(item.title)}
-                />
-              </span>
-              {item.year && <span className="text-[11px] opacity-60">{item.year}</span>}
-              {/* One clipped line, so showing tags never moves the rows under the cursor. */}
-              <span
-                className={`ml-[8px] hidden h-[22px] min-w-0 flex-1 flex-wrap justify-end gap-[6px] overflow-hidden transition-opacity duration-200 md:flex ${
-                  item.order === previewed?.order ? "opacity-100" : "opacity-0"
+    <div>
+      <div className={`border-b border-foreground/10 pb-[6px] text-[11px] leading-[16px] text-foreground/40 ${cols}`}>
+        <span>#</span>
+        <span>project</span>
+        <span>tags</span>
+        <span className="text-right">year</span>
+      </div>
+      <ul className="flex flex-col">
+        {items.map((item, i) => {
+          const on = item.order === previewed?.order;
+          return (
+            <li key={item.order}>
+              <Link
+                href={`/works?project=${item.order}`}
+                onMouseEnter={() => previewSoon(item)}
+                onMouseLeave={cancelPreview}
+                onFocus={() => setPreviewed(item)}
+                onPointerEnter={(e) => e.pointerType === "mouse" && peek(item.order, 0.12, 250)}
+                onPointerLeave={(e) => e.pointerType === "mouse" && peek(item.order, 0, 300)}
+                onClick={() => peek(item.order, 0.6, 300)}
+                title={projectNavDisplayTitle(item.title) !== item.title ? item.title : undefined}
+                className={`border-b border-foreground/10 py-[9px] text-[13px] leading-[20px] transition-colors md:py-[7px] ${cols} ${
+                  on ? "md:bg-foreground/[0.035]" : "md:hover:bg-foreground/[0.025]"
                 }`}
               >
-                {item.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="h-[22px] whitespace-nowrap rounded-sm border border-foreground/15 px-[8px] text-[11px] leading-[20px] text-foreground/70"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </span>
-            </span>
-            {/* No hover on touch screens, so the one-liner and tags sit in the card there. */}
-            {item.oneLiner && (
-              <span className="mt-[10px] block text-[13px] leading-[20px] text-foreground/80 md:hidden">
-                {item.oneLiner}
-              </span>
-            )}
-            {item.tags.length > 0 && (
-              <span className="mt-[12px] flex flex-wrap gap-[6px] md:hidden">
-                {item.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-sm border border-foreground/15 px-[8px] py-[2px] text-[11px] text-foreground/70"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </span>
-            )}
-          </Link>
-        </li>
-      ))}
-    </ul>
+                <span className={`tabular-nums text-foreground/40 transition-colors ${on ? "md:text-primary" : ""}`}>
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span className={`truncate lowercase text-foreground transition-colors ${on ? "md:text-primary" : ""}`}>
+                  <MeltText
+                    ref={(handle) => {
+                      if (handle) melts.current.set(item.order, handle);
+                      else melts.current.delete(item.order);
+                    }}
+                    text={projectNavDisplayTitle(item.title)}
+                  />
+                </span>
+                <span className="truncate lowercase text-foreground/70">{item.tags.slice(0, 2).join(", ")}</span>
+                <span className="text-right tabular-nums text-foreground/70">{item.year ?? ""}</span>
+                {/* Phones have no preview pane: the tagline, then a glimpse of the work, sit in the row,
+                    under the project name, keeping to the table's columns. */}
+                <span className="col-span-3 col-start-2 mt-[8px] flex flex-col gap-[8px] md:hidden">
+                  {item.oneLiner && (
+                    <span className="line-clamp-2 text-[12px] leading-[18px] text-foreground/60">{item.oneLiner}</span>
+                  )}
+                  <RowGallery item={item} />
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 
@@ -206,9 +207,9 @@ export function ProjectSummary({
           {backLabel}
         </Link>
       )}
-      <h2 data-project-title className={`py-[0.2em] ${backLink ? "text-[length:min(6cqw,64px)]" : "text-[length:min(4.5cqw,46px)]"} font-medium leading-[1.1] text-foreground font-display-outline [overflow-wrap:anywhere]`}>
+      <h2 data-project-title className={`py-[0.2em] ${backLink ? "text-[length:min(6cqw,64px)]" : "text-[length:min(4.5cqw,46px)]"} font-medium leading-[1.1] text-foreground font-display-filled [overflow-wrap:anywhere]`}>
         {/* Melts from project to project in the hover view; plain on a project page. */}
-        {backLink ? projectNavDisplayTitle(item.title) : <MeltText text={projectNavDisplayTitle(item.title)} strength={0.4} />}
+        {backLink ? projectNavDisplayTitle(item.title) : <MeltText text={projectNavDisplayTitle(item.title)} strength={1} />}
       </h2>
       {/* Two lines reserved in the hover view, so gallery size holds steady between projects. */}
       <div className={`flex items-baseline justify-between gap-[16px] ${hideTags ? "min-h-[40px]" : ""}`}>

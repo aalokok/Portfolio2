@@ -22,7 +22,7 @@ import {
   type Project,
   type ProjectCategory,
 } from "@/lib/projects";
-import { getZine } from "@/lib/zines";
+import { getZine, zinePreview } from "@/lib/zines";
 import { LiveEmbed } from "@/components/works/live-embed";
 import { getLiveEmbed } from "@/lib/live-embeds";
 
@@ -70,7 +70,7 @@ function toIndexItem(project: Project): ProjectIndexItem {
     oneLiner: projectOneLiner(project),
     tags: project.tags ?? [],
     previewImages: zine
-      ? zine.pages.slice(0, 6).map((url) => ({
+      ? zinePreview(zine).map((url) => ({
           url,
           dimensions: { width: zine.pageWidth, height: zine.pageHeight },
         }))

@@ -69,7 +69,7 @@ function TuckedTitle({ title, shown }: { title: string; shown: boolean }) {
     <span
       ref={ref}
       aria-hidden
-      className={`min-w-0 flex-1 overflow-hidden whitespace-nowrap text-right font-display-outline leading-[20px] text-foreground transition-[opacity,transform] duration-300 ease-out ${
+      className={`min-w-0 flex-1 overflow-hidden whitespace-nowrap text-right font-display-filled leading-[20px] text-foreground transition-[opacity,transform] duration-300 ease-out ${
         shown ? "translate-x-0 opacity-100" : "pointer-events-none -translate-x-[24px] opacity-0"
       }`}
     >

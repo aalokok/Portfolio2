@@ -70,6 +70,15 @@ export const projectType = defineType({
       },
     }),
     defineField({
+      name: "featured",
+      title: "Featured on the home page",
+      type: "boolean",
+      group: "basics",
+      description:
+        "Puts the project first in the home page's featured work grid, for its category.",
+      initialValue: false,
+    }),
+    defineField({
       name: "hidden",
       title: "Hide from the website",
       type: "boolean",
