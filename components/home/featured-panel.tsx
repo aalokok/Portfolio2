@@ -305,10 +305,12 @@ function fitRowHeight(ratios: number[], width: number, height: number) {
 }
 
 /**
- * Every image from the featured projects, at its own shape, in rows of one height sized so the
- * whole set fits the panel. A small running number sits under each, and each image opens its project.
+ * Every image from the featured projects, at its own shape, in rows of one height. By default the
+ * height is sized so the whole set fits its box (the desktop panel); with `rowHeight` the rows are
+ * that tall and the grid simply runs as long as it needs (phones). A small running number sits
+ * under each, and each image opens its project.
  */
-function FeaturedGrid({ items }: { items: FeaturedItem[] }) {
+function FeaturedGrid({ items, rowHeight, limit = 40 }: { items: FeaturedItem[]; rowHeight?: number; limit?: number }) {
   const tiles: Tile[] = items
     .flatMap((item) =>
       item.images.map((m) => {
@@ -320,7 +322,7 @@ function FeaturedGrid({ items }: { items: FeaturedItem[] }) {
       }),
     )
     .filter((t): t is Tile => !!t)
-    .slice(0, 40);
+    .slice(0, limit);
 
   const boxRef = useRef<HTMLDivElement>(null);
   const [box, setBox] = useState<{ w: number; h: number } | null>(null);
@@ -331,10 +333,10 @@ function FeaturedGrid({ items }: { items: FeaturedItem[] }) {
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  const rowH = box ? fitRowHeight(tiles.map((t) => t.ratio), box.w, box.h) : 0;
+  const rowH = rowHeight ?? (box ? fitRowHeight(tiles.map((t) => t.ratio), box.w, box.h) : 0);
 
   return (
-    <div ref={boxRef} className="h-full w-full overflow-hidden">
+    <div ref={boxRef} className={rowHeight ? "w-full" : "h-full w-full overflow-hidden"}>
       {rowH > 0 && (
         <div className="flex flex-wrap content-start" style={{ columnGap: GAP_X, rowGap: GAP_Y }}>
           {tiles.map((t, i) => {
@@ -362,6 +364,35 @@ function FeaturedGrid({ items }: { items: FeaturedItem[] }) {
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * Phones: the same wall of featured images, without the orbs. Follows the headline's side
+ * (technologist or designer); rows are a set height and the page just scrolls past them.
+ */
+export function FeaturedGallery({
+  initialView,
+  featured,
+  rowHeight = 64,
+  limit = 12,
+}: {
+  initialView: ProjectCategory;
+  featured: Record<ProjectCategory, FeaturedItem[]>;
+  rowHeight?: number;
+  limit?: number;
+}) {
+  const view = useHomeView(initialView);
+  const all = featured[view] ?? [];
+  if (!all.length) return null;
+  // Share the images out so every project on the side shows up, not just the first few.
+  const each = Math.max(2, Math.floor(limit / all.length));
+  const items = all.map((item) => ({ ...item, images: item.images.slice(0, each) }));
+  // Keyed by side, so switching the headline fades the new set in.
+  return (
+    <div key={view} className="animate-fade-in">
+      <FeaturedGrid items={items} rowHeight={rowHeight} />
     </div>
   );
 }

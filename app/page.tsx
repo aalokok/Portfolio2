@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { Fragment } from "react";
 import { LandingSwitch } from "@/components/landing-switch";
 import { DEFAULT_CATEGORY, PROJECT_CATEGORIES, isProjectCategory, projectCategory, type ProjectCategory, type ProjectMedia } from "@/lib/projects";
 import { Blobs } from "@/components/blobs";
-import { FeaturedPanel, type FeaturedItem } from "@/components/home/featured-panel";
+import { FeaturedGallery, FeaturedPanel, type FeaturedItem } from "@/components/home/featured-panel";
 import { client, isSanityConfigured } from "@/sanity/lib/client";
 import { featuredProjectsQuery } from "@/sanity/lib/queries";
 import { SiteShell } from "@/components/layout/site-shell";
@@ -301,7 +302,7 @@ function homeSections(view: ProjectCategory) {
 const phoneFrameHeight =
   "clamp(150px, calc(100svh - var(--home-intro-h, 350px) - 144px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 46vw)";
 
-function MobileHome({ view }: { view: ProjectCategory }) {
+function MobileHome({ view, featured }: { view: ProjectCategory; featured: Record<ProjectCategory, FeaturedItem[]> }) {
   return (
     <div data-home-root="phone" className="pb-[calc(56px+env(safe-area-inset-bottom))]">
       <HomeFrameFit />
@@ -314,8 +315,8 @@ function MobileHome({ view }: { view: ProjectCategory }) {
       </div>
       <div className="space-y-[72px] px-[24px] pt-[8px]">
         {homeSections(view).map(({ id, content }) => (
+          <Fragment key={id}>
           <section
-            key={id}
             id={`home-${id}`}
             data-home-section={id}
             // The intro sits centered in the space between the orbs and the bottom pills.
@@ -328,6 +329,13 @@ function MobileHome({ view }: { view: ProjectCategory }) {
           >
             {content}
           </section>
+          {/* Right after the intro: the featured work, as the same image wall as desktop (no orbs). */}
+          {id === "intro" && (
+            <section aria-label="Featured work">
+              <FeaturedGallery initialView={view} featured={featured} />
+            </section>
+          )}
+          </Fragment>
         ))}
       </div>
     </div>
@@ -391,7 +399,7 @@ export default async function Home({ searchParams }: HomeProps) {
       bottomLeftClassName="overflow-y-auto"
       mobileSwapColumns
       right={<FeaturedPanel initialView={landingView} featured={featured} />}
-      mobileBody={<MobileHome view={landingView} />}
+      mobileBody={<MobileHome view={landingView} featured={featured} />}
       bottomLeft={
         // Vertically centered on desktop. Taller text, like experience, starts at the top and scrolls.
         <div className="md:flex md:min-h-full md:flex-col md:justify-center">{content}</div>
