@@ -73,7 +73,7 @@
   #startBtn { pointer-events: auto; display: block; width: 0; height: 0; padding: 0; border: 0; background: none; border-style: solid; border-width: 34px 0 34px 58px; border-color: transparent transparent transparent var(--accent); }
   #startBtn.loading { animation: pulse .9s ease-in-out infinite alternate; pointer-events: none; }
   @keyframes pulse { to { opacity: .45; } }
-  #status { margin: 0; color: #ff0000; }
+  #status { margin: 0; max-width: 260px; text-align: center; color: var(--dim); pointer-events: none; }
 </style>
 </head>
 <body>
@@ -381,39 +381,77 @@ recBtn.onclick = () => {
 };
 
 // ---------- boot RNBO ----------
-function loadRNBOScript(version) {
+// The RNBO engine: our own copy (rnbo/rnbo.min.js, v1.3.4, matching the export) first, and
+// Cycling '74's server only as a fallback. Some ad blockers and school or office networks block theirs.
+function loadScript(src) {
   return new Promise((resolve, reject) => {
-    if (/^\d+\.\d+\.\d+-dev$/.test(version)) return reject(new Error("Patcher exported with a Debug Version of RNBO. Export with a release version."));
     const el = document.createElement("script");
-    el.src = `https://c74-public.nyc3.digitaloceanspaces.com/rnbo/${encodeURIComponent(version)}/rnbo.min.js`;
-    el.onload = resolve; el.onerror = () => reject(new Error(`Failed to load rnbo.js v${version}`));
+    el.src = src; el.onload = resolve; el.onerror = reject;
     document.body.append(el);
   });
+}
+async function loadRNBOScript(version) {
+  if (/^\d+\.\d+\.\d+-dev$/.test(version)) throw new Error("Patcher exported with a Debug Version of RNBO. Export with a release version.");
+  try { await loadScript("rnbo/rnbo.min.js"); if (window.RNBO) return; } catch {}
+  try { await loadScript(`https://c74-public.nyc3.digitaloceanspaces.com/rnbo/${encodeURIComponent(version)}/rnbo.min.js`); }
+  catch { throw new Error("couldn't load the sound engine — check your connection and try again"); }
+}
+
+// Start fetching the patch as soon as the page opens, so pressing play has less to wait for.
+const patcherReady = fetch("export/patch.export.json").then((r) => {
+  if (!r.ok) throw new Error("export/patch.export.json not found.");
+  return r.json();
+});
+patcherReady.catch(() => {});
+
+// iPhones mute web audio while the ring/silent switch is on silent, with no error. Asking for
+// "playback" audio (Safari 16.4+), and playing a moment of silence through a media element
+// inside the tap (older iOS), makes it play like music does, switch or not.
+const SILENCE = "data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA=="; // 0.1 s of silence
+function unlockAudioSession() {
+  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch {}
+  try {
+    const a = new Audio(SILENCE);
+    a.setAttribute("playsinline", ""); a.loop = true; a.volume = 0;
+    const p = a.play(); if (p) p.catch(() => {});
+    window.__silence = a; // keep it alive
+  } catch {}
 }
 drawWave();
 document.getElementById("startBtn").onclick = async () => {
   const status = document.getElementById("status"), startBtn = document.getElementById("startBtn");
+  status.textContent = "";
+  unlockAudioSession();
   if (device) { await ctx.resume(); setPlaying(true); return; }
   try {
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
-    await ctx.resume();
+    // Made and resumed right inside the tap: browsers only allow sound to start from one.
+    ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+    ctx.resume();
     outGain = ctx.createGain(); outGain.connect(ctx.destination);
     startBtn.classList.add("loading");
-    const res = await fetch("export/patch.export.json");
-    if (!res.ok) throw new Error("export/patch.export.json not found.");
-    const patcher = await res.json();
+    const patcher = await patcherReady;
     if (!window.RNBO) await loadRNBOScript(patcher.desc.meta.rnboversion);
     device = await RNBO.createDevice({ context: ctx, patcher });
     device.node.connect(outGain);
     for (const [id, v] of Object.entries(values)) setParam(id, v);
     await sendPattern();
-    await Promise.all([
-      loadURL("grainsrc", "media/PS1.mp3"), loadURL("ambient", "media/sample1.wav"),
-      loadURL("voices", "media/peopletalking.wav"), loadURL("thunder", "media/thunder.mp3"),
-    ]);
+    await ctx.resume();
     startBtn.classList.remove("loading");
-    setPlaying(true);
-  } catch (e) { console.error(e); startBtn.classList.remove("loading"); status.textContent = e.message; }
+    setPlaying(true); // the drums are synthesized, so the beat can start now
+    // The recorded tracks join as they arrive.
+    loadURL("grainsrc", "media/PS1.mp3"); loadURL("ambient", "media/sample1.wav");
+    loadURL("voices", "media/peopletalking.wav"); loadURL("thunder", "media/thunder.mp3");
+    // Still silent? The browser held the sound back: bring the play button back with a hint,
+    // since a second tap almost always releases it.
+    setTimeout(() => {
+      if (ctx.state !== "running") { setPlaying(false); status.textContent = "tap play again to start the sound"; }
+    }, 1500);
+  } catch (e) {
+    console.error(e);
+    startBtn.classList.remove("loading");
+    status.textContent = e.message || "something went wrong — try again";
+    device = null;
+  }
 };
 </script>
 </body>
