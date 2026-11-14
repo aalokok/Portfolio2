@@ -99,14 +99,25 @@ const position = {
   full: { className: "my-[18px]", fill: false, sizes: "(max-width: 768px) 100vw, 640px" },
   wide: { className: "clear-both my-[18px] w-full", fill: true, sizes: "(max-width: 768px) 100vw, 70vw" },
   left: {
-    className: "my-[18px] md:float-left md:mb-[10px] md:mr-[24px] md:mt-[4px] md:w-[45%]",
+    className: "my-[18px] md:float-left md:mb-[24px] md:mr-[24px] md:mt-0 md:w-[45%]",
     fill: true,
     sizes: "(max-width: 768px) 100vw, 360px",
   },
   right: {
-    className: "my-[18px] md:float-right md:mb-[10px] md:ml-[24px] md:mt-[4px] md:w-[45%]",
+    className: "my-[18px] md:float-right md:mb-[24px] md:ml-[24px] md:mt-0 md:w-[45%]",
     fill: true,
     sizes: "(max-width: 768px) 100vw, 360px",
+  },
+  // To one side, on its own line: nothing wraps around it.
+  leftAlone: {
+    className: "clear-both my-[24px] w-full md:w-[50%]",
+    fill: true,
+    sizes: "(max-width: 768px) 100vw, 35vw",
+  },
+  rightAlone: {
+    className: "clear-both my-[24px] w-full md:ml-auto md:w-[50%]",
+    fill: true,
+    sizes: "(max-width: 768px) 100vw, 35vw",
   },
   center: {
     className: "clear-both mx-auto my-[18px] w-full md:w-[55%] md:items-center",
@@ -114,6 +125,33 @@ const position = {
     sizes: "(max-width: 768px) 100vw, 420px",
   },
 } as const;
+
+// Size, when chosen in Sanity: a share of the story column on desktop (phones stay full width).
+// Images beside the text (left/right) take smaller shares, so the text keeps room to wrap.
+const sizeShare = {
+  small: { block: "md:w-[40%]", beside: "md:w-[30%]", vw: 28 },
+  medium: { block: "md:w-[60%]", beside: "md:w-[45%]", vw: 42 },
+  large: { block: "md:w-[80%]", beside: "md:w-[60%]", vw: 56 },
+  full: { block: "md:w-full", beside: "md:w-full", vw: 70 },
+} as const;
+
+/** Where a story image goes and how big it is, from its Position and (optional) Size. */
+function placement(value: DescriptionMedia) {
+  const key = value.position ?? "full";
+  const pos = position[key] ?? position.full;
+  const share = value.size ? sizeShare[value.size] : null;
+  if (!share) return pos;
+  if (key === "left" || key === "right") {
+    return { ...pos, className: pos.className.replace("md:w-[45%]", share.beside), sizes: `(max-width: 768px) 100vw, ${share.vw}vw` };
+  }
+  return {
+    className: `clear-both w-full ${share.block} ${
+      key === "center" ? "my-[18px] mx-auto md:items-center" : key === "rightAlone" ? "my-[24px] md:ml-auto" : key === "leftAlone" ? "my-[24px]" : "my-[18px]"
+    }`,
+    fill: true,
+    sizes: `(max-width: 768px) 100vw, ${share.vw}vw`,
+  };
+}
 
 const gridCols: Record<number, string> = {
   1: "grid-cols-1",
@@ -130,10 +168,12 @@ const embedAspect = {
   phone: "aspect-[9/16] w-full max-w-[360px]",
 } as const;
 
-const calloutTone = {
-  neutral: "bg-foreground/5",
-  blue: "bg-tertiary-2",
-  green: "bg-accent/50",
+// Callouts read like the site's spec sheets: a hairline, a small grey label beside the text,
+// no fill. The colour, if chosen, is a small dot before the label.
+const calloutDot = {
+  neutral: null,
+  blue: "bg-primary",
+  green: "bg-accent",
 } as const;
 
 // Column templates for Image + text, written for each side so the image keeps its chosen width.
@@ -145,7 +185,7 @@ const mediaTextCols = {
 function components(title: string): PortableTextComponents {
   const media = ({ value }: { value: DescriptionMedia }) => {
     if (!value?.url) return null;
-    const pos = position[value.position ?? "full"] ?? position.full;
+    const pos = placement(value);
     return (
       <MediaFigure
         item={value}
@@ -259,12 +299,22 @@ function components(title: string): PortableTextComponents {
     );
   };
 
-  const callout = ({ value }: { value: DescriptionCallout }) => (
-    <aside className={`${block} flex flex-col gap-[8px] p-[18px] ${calloutTone[value?.tone ?? "neutral"] ?? calloutTone.neutral}`}>
-      {value?.label && <p className={label}>{value.label}</p>}
-      <SimpleTextBlock value={value?.text} />
-    </aside>
-  );
+  const callout = ({ value }: { value: DescriptionCallout }) => {
+    const dot = calloutDot[value?.tone ?? "neutral"] ?? null;
+    return (
+      // Back-to-back callouts close up into one list, each row with its own hairline and one more
+      // under the last, like the works table.
+      <aside
+        className={`${block} grid grid-cols-1 gap-y-[2px] border-t border-foreground/10 pt-[10px] md:grid-cols-[140px_minmax(0,1fr)] md:gap-x-[24px] [aside+&]:-mt-[8px] [&:not(:has(+aside))]:border-b [&:not(:has(+aside))]:pb-[10px]`}
+      >
+        <p className={`flex items-center gap-[6px] text-[12px] leading-[20px] text-foreground/45`}>
+          {dot && <span aria-hidden className={`h-[6px] w-[6px] shrink-0 rounded-full ${dot}`} />}
+          {value?.label}
+        </p>
+        <SimpleTextBlock value={value?.text} />
+      </aside>
+    );
+  };
 
   const stats = ({ value }: { value: DescriptionStats }) => {
     const items = (value?.items ?? []).filter((i) => i.value);

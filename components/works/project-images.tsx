@@ -317,7 +317,7 @@ export function MediaFigure({
     ? `${aspectClass[aspect]} h-auto w-full object-cover`
     : fill
       ? "h-auto w-full object-contain"
-      : "h-auto max-h-[70vh] w-auto max-w-full object-contain md:max-w-[640px]";
+      : "h-auto max-h-[70vh] w-auto max-w-full object-contain md:max-w-[min(100%,640px)]";
   const media = (
     <MediaItem
       item={item}

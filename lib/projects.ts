@@ -15,7 +15,9 @@ export type ProjectMedia = {
 export type DescriptionMedia = ProjectMedia & {
   _type: "image" | "file";
   _key: string;
-  position?: "full" | "wide" | "left" | "right" | "center" | null;
+  position?: "full" | "wide" | "left" | "right" | "leftAlone" | "rightAlone" | "center" | null;
+  /** Share of the story's width on desktop; unset keeps the position's usual size. */
+  size?: "small" | "medium" | "large" | "full" | null;
   /** Videos only. */
   playback?: "ambient" | "player" | null;
 };

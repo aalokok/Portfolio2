@@ -41,7 +41,8 @@ const positionField = defineField({
   name: "position",
   title: "Position",
   type: "string",
-  description: "Left and Right sit beside the text so it wraps around (desktop only; phones always show full width).",
+  description:
+    "\"Text wraps\" sits beside the text so it flows around. \"No wrap\" sits to that side on its own line, with nothing beside it. Desktop only; phones always show full width.",
   initialValue: "full",
   options: {
     list: [
@@ -49,7 +50,27 @@ const positionField = defineField({
       { title: "Wide", value: "wide" },
       { title: "Left, text wraps", value: "left" },
       { title: "Right, text wraps", value: "right" },
+      { title: "Left, no wrap", value: "leftAlone" },
+      { title: "Right, no wrap", value: "rightAlone" },
       { title: "Small, centred", value: "center" },
+    ],
+    layout: "radio",
+    direction: "horizontal",
+  },
+});
+
+const sizeField = defineField({
+  name: "size",
+  title: "Size",
+  type: "string",
+  description:
+    "How much of the story's width it takes on desktop. Leave empty for the position's usual size. Phones always show it full width.",
+  options: {
+    list: [
+      { title: "Small", value: "small" },
+      { title: "Medium", value: "medium" },
+      { title: "Large", value: "large" },
+      { title: "Full width", value: "full" },
     ],
     layout: "radio",
     direction: "horizontal",
@@ -145,7 +166,7 @@ export const storyImage = defineArrayMember({
   type: "image",
   title: "Image",
   options: { hotspot: true },
-  fields: [altField, captionField, positionField],
+  fields: [altField, captionField, positionField, sizeField],
 });
 
 export const storyVideo = defineArrayMember({
@@ -158,6 +179,7 @@ export const storyVideo = defineArrayMember({
     altField,
     captionField,
     positionField,
+    sizeField,
     defineField({
       name: "playback",
       title: "Playback",
@@ -396,7 +418,8 @@ export const calloutType = defineType({
     defineField({ name: "text", title: "Text", type: "simpleText" }),
     defineField({
       name: "tone",
-      title: "Colour",
+      title: "Dot colour",
+      description: "A small dot before the label. Neutral shows none.",
       type: "string",
       initialValue: "neutral",
       options: {
