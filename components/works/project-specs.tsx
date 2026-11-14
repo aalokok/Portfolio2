@@ -4,6 +4,8 @@ type Spec = { label: string; value: string };
 type Collaborator = { name?: string | null; role?: string | null; link?: string | null };
 
 type Props = {
+  tags?: string[] | null;
+  year?: number | null;
   link?: string | null;
   linkLabel?: string | null;
   liveLink?: string | null;
@@ -11,76 +13,67 @@ type Props = {
   specs?: Spec[] | null;
 };
 
-function SpecItem({ label, children }: { label: string; children: ReactNode }) {
+/** One row: a small grey label beside its value, with a hairline above (like the works table). */
+function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-[2px]">
-      <p className="text-[11px] lowercase text-foreground/40">{label}</p>
-      <div className="text-[13px] leading-[20px] text-foreground/80">{children}</div>
+    <div className="grid grid-cols-[88px_minmax(0,1fr)] gap-x-[16px] border-t border-foreground/10 py-[8px] text-[13px] leading-[20px]">
+      <dt className="lowercase text-foreground/45">{label}</dt>
+      <dd className="min-w-0 text-foreground/80">{children}</dd>
     </div>
   );
 }
 
-export function ProjectSpecs({ link, linkLabel, liveLink, collaborators, specs }: Props) {
+const linkClass = "w-fit underline-offset-2 hover:underline";
+
+/** A project's details under its name, as a quiet hairline table: tags, year, extras, people, links. */
+export function ProjectSpecs({ tags, year, link, linkLabel, liveLink, collaborators, specs }: Props) {
+  const people = (collaborators ?? []).filter((c) => c.name);
   return (
-    <div className="grid grid-cols-2 gap-x-[24px] gap-y-[16px] content-start">
+    <dl className="border-b border-foreground/10">
+      {tags && tags.length > 0 && <Row label="tags">{tags.join(", ").toLowerCase()}</Row>}
+      {year && <Row label="year">{year}</Row>}
+
       {specs?.map(({ label, value }) => (
-        <SpecItem key={label} label={label}>
+        <Row key={label} label={label}>
           {value}
-        </SpecItem>
+        </Row>
       ))}
 
-      {collaborators && collaborators.length > 0 && (
-        <SpecItem label="Collaborators">
-          <div className="flex flex-col gap-[4px]">
-            {collaborators.map((c, i) => (
-              <div key={i} className="flex items-baseline gap-[6px]">
+      {people.length > 0 && (
+        <Row label="with">
+          <span className="flex flex-col">
+            {people.map((c, i) => (
+              <span key={i} className="flex items-baseline gap-[6px]">
                 {c.link ? (
-                  <a
-                    href={c.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline-offset-2 hover:underline"
-                  >
+                  <a href={c.link} target="_blank" rel="noopener noreferrer" className={linkClass}>
                     {c.name}
                   </a>
                 ) : (
                   <span>{c.name}</span>
                 )}
-                {c.role && (
-                  <span className="text-[11px] text-foreground/40">{c.role}</span>
-                )}
-              </div>
+                {c.role && <span className="text-[11px] text-foreground/45">{c.role}</span>}
+              </span>
             ))}
-          </div>
-        </SpecItem>
+          </span>
+        </Row>
       )}
 
       {(link || liveLink) && (
-        <SpecItem label="Links">
-          <div className="flex flex-col gap-[6px]">
+        <Row label="links">
+          <span className="flex flex-wrap gap-x-[14px]">
             {link && (
-              <a
-                href={link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-fit text-foreground/60 underline-offset-2 hover:underline"
-              >
-                {linkLabel ?? "View project"}
+              <a href={link} target="_blank" rel="noopener noreferrer" className={linkClass}>
+                {(linkLabel ?? "view project").toLowerCase()}
               </a>
             )}
             {liveLink && (
-              <a
-                href={liveLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-fit text-primary underline-offset-2 hover:underline"
-              >
-                Live
+              <a href={liveLink} target="_blank" rel="noopener noreferrer" className={`${linkClass} text-primary`}>
+                live
               </a>
             )}
-          </div>
-        </SpecItem>
+          </span>
+        </Row>
       )}
-    </div>
+    </dl>
   );
 }
