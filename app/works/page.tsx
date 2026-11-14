@@ -168,6 +168,12 @@ export default async function WorksPage({ searchParams }: PageProps) {
         >
           {/* Click any image in the story or gallery to view it full screen. */}
           <Lightbox>
+            {/* A zine's flipbook comes first, above the story. The gallery isn't repeated here: it already shows in the works carousels. */}
+            {zine && (
+              <div className="h-[110vw] flex-none md:h-[80vh]">
+                <ZineFlipbook {...zine} title={project.title} />
+              </div>
+            )}
             {/* A live piece sits under the story's opening paragraph, so visitors read what it is first. */}
             {live && introBlocks.length > 0 && (
               <ProjectDescription title={project.title} description={introBlocks} />
@@ -177,12 +183,6 @@ export default async function WorksPage({ searchParams }: PageProps) {
               title={project.title}
               description={live ? restBlocks : (project.description ?? null)}
             />
-            {/* The gallery isn't repeated here: it already shows in the works carousels. Zines keep their flipbook. */}
-            {zine && (
-              <div className="h-[110vw] flex-none md:h-[80vh]">
-                <ZineFlipbook {...zine} title={project.title} />
-              </div>
-            )}
           </Lightbox>
         </article>
       }
