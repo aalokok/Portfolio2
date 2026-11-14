@@ -26,7 +26,7 @@ type Props = {
 };
 
 const text = "text-[13px] leading-[20px] text-foreground/80";
-const label = "text-[11px] uppercase tracking-[0.08em] text-foreground/50";
+const label = "text-[12px] text-foreground/50";
 const caption = "text-[11px] leading-[16px] text-foreground/50";
 // Full-width blocks start below any image floated left or right.
 const block = "clear-both my-[18px]";
