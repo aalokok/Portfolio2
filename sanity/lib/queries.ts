@@ -53,6 +53,7 @@ export const allProjectsQuery = defineQuery(`
     link,
     linkLabel,
     liveLink,
+    "moreLinks": moreLinks[] { _key, label, url },
     collaborators,
     "images": images[] {
       alt,

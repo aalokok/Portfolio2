@@ -143,6 +143,7 @@ export default async function WorksPage({ searchParams }: PageProps) {
             link={project.link}
             linkLabel={project.linkLabel}
             liveLink={project.liveLink}
+            moreLinks={project.moreLinks}
             collaborators={project.collaborators}
             specs={project.specs}
           />
