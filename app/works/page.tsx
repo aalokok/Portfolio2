@@ -135,8 +135,11 @@ export default async function WorksPage({ searchParams }: PageProps) {
           backLink
           backHref={categoryHref(projectCategory(project))}
           backLabel={backLabel}
+          titleHref={project.liveLink}
         >
           <ProjectSpecs
+            tags={project.tags}
+            year={project.year}
             link={project.link}
             linkLabel={project.linkLabel}
             liveLink={project.liveLink}

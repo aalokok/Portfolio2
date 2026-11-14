@@ -184,6 +184,7 @@ export function ProjectSummary({
   backLink = false,
   backHref = "/works",
   backLabel = "all projects",
+  titleHref = null,
   hideTags = false,
   children,
 }: {
@@ -191,6 +192,8 @@ export function ProjectSummary({
   backLink?: boolean;
   backHref?: string;
   backLabel?: string;
+  /** Makes the title a link (the project's live site), opening in a new tab. */
+  titleHref?: string | null;
   /** For the hover view, where the list shows the tags instead. */
   hideTags?: boolean;
   /** Extra details shown under the tags. */
@@ -209,27 +212,35 @@ export function ProjectSummary({
       )}
       <h2 data-project-title className={`py-[0.2em] ${backLink ? "text-[length:min(6cqw,64px)]" : "text-[length:min(4.5cqw,46px)]"} font-medium leading-[1.1] text-foreground font-display-filled [overflow-wrap:anywhere]`}>
         {/* Melts from project to project in the hover view; plain on a project page. */}
-        {backLink ? projectNavDisplayTitle(item.title) : <MeltText text={projectNavDisplayTitle(item.title)} strength={1} />}
-      </h2>
-      {/* Two lines reserved in the hover view, so gallery size holds steady between projects. */}
-      <div className={`flex items-baseline justify-between gap-[16px] ${hideTags ? "min-h-[40px]" : ""}`}>
-        {item.oneLiner && (
-          <p className="text-[13px] leading-[20px] text-foreground/80">{item.oneLiner}</p>
+        {!backLink ? (
+          <MeltText text={projectNavDisplayTitle(item.title)} strength={1} />
+        ) : titleHref ? (
+          // A project with a live site: the title opens it.
+          <a
+            href={titleHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Open the live site"
+            className="transition-colors hover:text-primary"
+          >
+            {projectNavDisplayTitle(item.title)}
+          </a>
+        ) : (
+          projectNavDisplayTitle(item.title)
         )}
-        {hideTags && item.year && <span className="text-[13px] text-foreground/60">{item.year}</span>}
-      </div>
-      {!hideTags && (
+      </h2>
+      {/* Hover view only: the one-liner, with two lines reserved so gallery size holds steady
+          between projects. A project page leaves it out; its story says it. */}
+      {!backLink && (
+        <div className={`flex items-baseline justify-between gap-[16px] ${hideTags ? "min-h-[40px]" : ""}`}>
+          {item.oneLiner && <p className="text-[13px] leading-[20px] text-foreground/80">{item.oneLiner}</p>}
+          {hideTags && item.year && <span className="text-[13px] text-foreground/60">{item.year}</span>}
+        </div>
+      )}
+      {/* A project page shows tags and year in its details table instead (see project-specs.tsx). */}
+      {!hideTags && !backLink && (
         <div className="flex items-start justify-between gap-[16px]">
-          <div className="flex flex-wrap gap-[6px]">
-            {item.tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-sm border border-foreground/15 px-[8px] py-[2px] text-[11px] text-foreground/70"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
+          <p className="text-[13px] lowercase leading-[20px] text-foreground/60">{item.tags.join(", ")}</p>
           {item.year && <span className="text-[13px] text-foreground/60">{item.year}</span>}
         </div>
       )}
