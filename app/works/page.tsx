@@ -118,11 +118,12 @@ export default async function WorksPage({ searchParams }: PageProps) {
   // Project: the right column merges into one scrollable documentation pane.
   const zine = getZine(project.slug?.current, project.title);
   const live = getLiveEmbed(project.slug?.current);
-  // With a live piece, the first text block of the story (the intro) is shown above it.
+  // With a live piece or a zine, the first text block of the story (the intro) is shown above it.
   const story = project.description ?? [];
   const firstIsText = story.length > 0 && (story[0] as { _type?: string })._type === "block";
-  const introBlocks = live && firstIsText ? story.slice(0, 1) : [];
-  const restBlocks = live && firstIsText ? story.slice(1) : story;
+  const split = (live || zine) && firstIsText;
+  const introBlocks = split ? story.slice(0, 1) : [];
+  const restBlocks = split ? story.slice(1) : story;
   const backLabel = "all projects";
 
   return (
@@ -168,21 +169,20 @@ export default async function WorksPage({ searchParams }: PageProps) {
         >
           {/* Click any image in the story or gallery to view it full screen. */}
           <Lightbox>
-            {/* A zine's flipbook comes first, above the story. The gallery isn't repeated here: it already shows in the works carousels. */}
+            {/* A live piece or a zine's flipbook sits under the story's opening paragraph, so visitors read what it is first.
+                The gallery isn't repeated here: it already shows in the works carousels. */}
+            {introBlocks.length > 0 && (
+              <ProjectDescription title={project.title} description={introBlocks} />
+            )}
             {zine && (
               <div className="h-[110vw] flex-none md:h-[80vh]">
                 <ZineFlipbook {...zine} title={project.title} />
               </div>
             )}
-            {/* A live piece sits under the story's opening paragraph, so visitors read what it is first. */}
-            {live && introBlocks.length > 0 && (
-              <ProjectDescription title={project.title} description={introBlocks} />
-            )}
             {live && <LiveEmbed {...live} />}
-            <ProjectDescription
-              title={project.title}
-              description={live ? restBlocks : (project.description ?? null)}
-            />
+            {(!split || restBlocks.length > 0) && (
+              <ProjectDescription title={project.title} description={restBlocks} />
+            )}
           </Lightbox>
         </article>
       }
