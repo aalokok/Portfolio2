@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    // Finer steps than the default (… 256, 384, then 640), so images arrive close to the size
+    // they are shown at and the browser hardly has to shrink them: its quick shrink turns fine
+    // dot and line work into speckle. All below the smallest device size (640).
+    imageSizes: [16, 32, 48, 64, 96, 128, 160, 200, 240, 280, 320, 360, 420, 480, 560],
     remotePatterns: [
       {
         protocol: "https",

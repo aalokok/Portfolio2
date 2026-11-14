@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Blobs } from "@/components/blobs";
 import { isVideo, LazyVideo } from "@/components/works/project-images";
 import { PRIMARY_RGB } from "@/lib/blobs-shader";
@@ -271,6 +271,8 @@ function FillText({ text, fill }: { text: string; fill: number }) {
   );
 }
 
+const noSubscribe = () => () => {};
+
 type Tile = { item: FeaturedItem; media: ProjectMedia; src: string; ratio: number; alt: string };
 
 const GAP_X = 8; // px between images in a row
@@ -334,6 +336,17 @@ function FeaturedGrid({ items, rowHeight, limit = 40 }: { items: FeaturedItem[];
     return () => ro.disconnect();
   }, []);
   const rowH = rowHeight ?? (box ? fitRowHeight(tiles.map((t) => t.ratio), box.w, box.h) : 0);
+  // Ask for each image at the size it is shown (times the screen's pixel density), so the browser
+  // doesn't shrink a big copy itself: its quick shrink turns fine dot and line work into speckle.
+  const dpr = useSyncExternalStore(
+    noSubscribe,
+    () => Math.min(window.devicePixelRatio || 1, 3),
+    () => 2, // the server can't know the screen; assume a sharp one
+  );
+  const srcFor = (t: Tile) => {
+    const w = Math.ceil((t.ratio * rowH * dpr) / 40) * 40; // steps of 40px, so copies get reused
+    return still(t.media, Math.max(80, w)) ?? t.src;
+  };
 
   return (
     <div ref={boxRef} className={rowHeight ? "w-full" : "h-full w-full overflow-hidden"}>
@@ -354,7 +367,7 @@ function FeaturedGrid({ items, rowHeight, limit = 40 }: { items: FeaturedItem[];
                   </span>
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={t.src} alt={t.alt} loading="lazy" className="block w-full bg-foreground/5 object-cover" style={{ height: rowH }} />
+                  <img src={srcFor(t)} alt={t.alt} loading="lazy" className="block w-full bg-foreground/5 object-cover" style={{ height: rowH }} />
                 )}
                 <span className="mt-[3px] truncate text-[10px] leading-[12px] tabular-nums text-foreground/50">
                   {String(i + 1).padStart(4, "0")}

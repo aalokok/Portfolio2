@@ -260,7 +260,9 @@ function ScrollView({ images, title, reverse = false }: Props & { reverse?: bool
             alt={item.alt ?? `${title} ${i + 1}`}
             width={item.dimensions?.width ?? 1600}
             height={item.dimensions?.height ?? 1200}
-            sizes={`(max-width: 768px) ${Math.ceil(42 * ratio)}vw, ${Math.ceil(35 * ratio)}vh`}
+            // Tiles are as tall as the gallery strip (project-index.tsx), at the image's own shape.
+            // (Desktop only, so no phone-width clause: a vw hint makes Next drop the small sizes.)
+            sizes={`calc(clamp(120px, calc(50vh - 120px), 420px) * ${ratio.toFixed(3)})`}
             className="h-full w-full object-contain"
           />
         </div>
