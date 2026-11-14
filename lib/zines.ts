@@ -33,6 +33,12 @@ const zines: Record<string, Zine> = {
     pdf: "/zines/horsevision.pdf",
     previewPages: [1, 3, 4, 5, 6, 7], // page 2 is blank
   },
+  // Branding booklet, 2024. No PDF: the original has contact details, which are masked on the last page image.
+  "bhag-club": {
+    pages: pageRange("bhag-club", 11),
+    pageWidth: 846,
+    pageHeight: 1095,
+  },
 };
 
 /** Look a zine up by slug, falling back to the title squashed to lowercase ("HorseVision" → "horsevision"). */
