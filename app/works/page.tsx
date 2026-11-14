@@ -118,6 +118,11 @@ export default async function WorksPage({ searchParams }: PageProps) {
   // Project: the right column merges into one scrollable documentation pane.
   const zine = getZine(project.slug?.current, project.title);
   const live = getLiveEmbed(project.slug?.current);
+  // With a live piece, the first text block of the story (the intro) is shown above it.
+  const story = project.description ?? [];
+  const firstIsText = story.length > 0 && (story[0] as { _type?: string })._type === "block";
+  const introBlocks = live && firstIsText ? story.slice(0, 1) : [];
+  const restBlocks = live && firstIsText ? story.slice(1) : story;
   const backLabel = "all projects";
 
   return (
@@ -163,10 +168,14 @@ export default async function WorksPage({ searchParams }: PageProps) {
         >
           {/* Click any image in the story or gallery to view it full screen. */}
           <Lightbox>
+            {/* A live piece sits under the story's opening paragraph, so visitors read what it is first. */}
+            {live && introBlocks.length > 0 && (
+              <ProjectDescription title={project.title} description={introBlocks} />
+            )}
             {live && <LiveEmbed {...live} />}
             <ProjectDescription
               title={project.title}
-              description={project.description ?? null}
+              description={live ? restBlocks : (project.description ?? null)}
             />
             {/* The gallery isn't repeated here: it already shows in the works carousels. Zines keep their flipbook. */}
             {zine && (
