@@ -125,11 +125,16 @@ export default async function WorksPage({ searchParams }: PageProps) {
       projectNavItems={projectNavItems}
       activeCategory={navCategory}
       leftRatio={[3, 7]}
+      // The nav takes only its own height, so the details can centre in everything below it.
+      compactNav
       // On phones the pinned back link above already gives the info room, so it starts a little higher.
       bottomLeftClassName="-mt-[22px] md:mt-0 md:overflow-y-auto"
       mobileAutoHeight
       mobileBackLink={{ href: categoryHref(projectCategory(project)), label: backLabel, title: project.title }}
       bottomLeft={
+        // Desktop: centred in the space under the nav, lifted a little above true centre (which
+        // reads low), the same on any screen height. Long details still start at the top and scroll.
+        <div className="md:flex md:min-h-full md:flex-col md:justify-center md:pb-[16vh]">
         <ProjectSummary
           item={toIndexItem(project)}
           backLink
@@ -148,6 +153,7 @@ export default async function WorksPage({ searchParams }: PageProps) {
             specs={project.specs}
           />
         </ProjectSummary>
+        </div>
       }
       right={
         // Keyed so each project opens scrolled to the top.
