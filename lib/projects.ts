@@ -157,6 +157,7 @@ export type Project = {
   link?: string | null;
   linkLabel?: string | null;
   liveLink?: string | null;
+  moreLinks?: { _key: string; label?: string | null; url?: string | null }[] | null;
   collaborators?: { name?: string | null; role?: string | null; link?: string | null }[] | null;
   images?: ProjectMedia[] | null;
   galleryColumns?: number | null;

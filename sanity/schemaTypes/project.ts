@@ -231,6 +231,29 @@ export const projectType = defineType({
       type: "url",
       group: "details",
     }),
+    defineField({
+      name: "moreLinks",
+      title: "More links",
+      type: "array",
+      group: "details",
+      description: "Any other links for the project's links row, e.g. Case study, Video, Press. Shown after the two above.",
+      of: [
+        {
+          type: "object",
+          name: "moreLink",
+          fields: [
+            defineField({ name: "label", title: "Label", type: "string", validation: (r) => r.required() }),
+            defineField({
+              name: "url",
+              title: "Address",
+              type: "url",
+              validation: (r) => r.required().uri({ scheme: ["http", "https", "mailto"] }),
+            }),
+          ],
+          preview: { select: { title: "label", subtitle: "url" } },
+        },
+      ],
+    }),
 
     // ---------- Sharing ----------
     defineField({

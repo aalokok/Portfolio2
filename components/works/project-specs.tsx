@@ -9,6 +9,7 @@ type Props = {
   link?: string | null;
   linkLabel?: string | null;
   liveLink?: string | null;
+  moreLinks?: { _key: string; label?: string | null; url?: string | null }[] | null;
   collaborators?: Collaborator[] | null;
   specs?: Spec[] | null;
 };
@@ -26,8 +27,9 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
 const linkClass = "w-fit underline-offset-2 hover:underline";
 
 /** A project's details under its name, as a quiet hairline table: tags, year, extras, people, links. */
-export function ProjectSpecs({ tags, year, link, linkLabel, liveLink, collaborators, specs }: Props) {
+export function ProjectSpecs({ tags, year, link, linkLabel, liveLink, moreLinks, collaborators, specs }: Props) {
   const people = (collaborators ?? []).filter((c) => c.name);
+  const extra = (moreLinks ?? []).filter((l) => l.url && l.label);
   return (
     <dl className="border-b border-foreground/10">
       {tags && tags.length > 0 && <Row label="tags">{tags.join(", ").toLowerCase()}</Row>}
@@ -58,7 +60,7 @@ export function ProjectSpecs({ tags, year, link, linkLabel, liveLink, collaborat
         </Row>
       )}
 
-      {(link || liveLink) && (
+      {(link || liveLink || extra.length > 0) && (
         <Row label="links">
           <span className="flex flex-wrap gap-x-[14px]">
             {link && (
@@ -71,6 +73,11 @@ export function ProjectSpecs({ tags, year, link, linkLabel, liveLink, collaborat
                 live
               </a>
             )}
+            {extra.map((l) => (
+              <a key={l._key} href={l.url!} target="_blank" rel="noopener noreferrer" className={linkClass}>
+                {l.label!.toLowerCase()}
+              </a>
+            ))}
           </span>
         </Row>
       )}
