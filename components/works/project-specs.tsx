@@ -63,14 +63,14 @@ export function ProjectSpecs({ tags, year, link, linkLabel, liveLink, moreLinks,
       {(link || liveLink || extra.length > 0) && (
         <Row label="links">
           <span className="flex flex-wrap gap-x-[14px]">
-            {link && (
-              <a href={link} target="_blank" rel="noopener noreferrer" className={linkClass}>
-                {(linkLabel ?? "view project").toLowerCase()}
-              </a>
-            )}
             {liveLink && (
               <a href={liveLink} target="_blank" rel="noopener noreferrer" className={`${linkClass} text-primary`}>
                 live
+              </a>
+            )}
+            {link && (
+              <a href={link} target="_blank" rel="noopener noreferrer" className={linkClass}>
+                {(linkLabel ?? "view project").toLowerCase()}
               </a>
             )}
             {extra.map((l) => (
